@@ -1,0 +1,7 @@
+input {
+  @apply w-full;
+}
+
+input[type="search"] {
+  @apply p-2 border border-current outline-none;
+}

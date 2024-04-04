@@ -1,0 +1,29 @@
+.rc-drawer {
+  /* transition: width 0.5s ease; */
+  @apply fixed top-0 right-0 w-full h-full;
+
+  .rc-drawer-mask {
+    @apply absolute top-0 w-full h-full bg-black/60;
+  }
+
+  .rc-drawer-content-wrapper {
+    min-width: var(--min-width);
+
+    transition: width 0.5s ease;
+    @apply absolute right-0 h-full z-10 bg-white;
+
+    .rc-drawer-content {
+      @apply h-full;
+    }
+  }
+}
+.rc-drawer-right {
+  @apply justify-end;
+}
+.rc-drawer:not(.rc-drawer-open) {
+  width: 0;
+
+  .rc-drawer-content-wrapper {
+    width: 0 !important;
+  }
+}

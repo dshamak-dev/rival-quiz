@@ -1,0 +1,16 @@
+button,
+.button {
+  @apply py-2 px-12 border border-current;
+
+  &.primary {
+    @apply bg-black text-white border-current;
+  }
+}
+
+@media (hover: hover) {
+  button:not([disabled]):hover,
+  .button:not([disabled]):hover {
+    box-shadow: 0 4px 4px 0 black;
+    transform: translateY(-1px);
+  }
+}

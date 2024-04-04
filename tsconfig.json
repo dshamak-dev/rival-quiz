@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "dom"],
+    "typeRoots": ["node_modules/@types"],
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "Node",
+    "module": "CommonJS",
+    "pretty": true,
+    "sourceMap": false,
+    "declaration": false,
+    "outDir": "private",
+    "allowJs": true,
+    "jsx": "react",
+    "noEmit": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "importHelpers": true,
+    "baseUrl": "./",
+    "paths": {
+      "src/*": ["./client/src/*"]
+    }
+  },
+  "include": ["./server/**/*.ts", "./client/**/*.ts"],
+  "exclude": ["node_modules/**/*", "dist", "public", "private"],
+  "ts-node": { "require": ["tsconfig-paths/register"] }
+}
