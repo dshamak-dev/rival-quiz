@@ -1,8 +1,8 @@
 import { Router, json } from "express";
 import fetch from "node-fetch";
-import { parseCookies } from "server/controls/request.controls";
-import { parseSession } from "server/controls/session.controls";
-import { findUserByCreds } from "server/controls/user.control";
+import { parseCookies } from "../controls/request.controls";
+import { parseSession } from "../controls/session.controls";
+import { findUserByCreds } from "../controls/user.control";
 
 const rivalApi = process.env.RIVAL_API;
 const router = Router();
@@ -152,6 +152,13 @@ router.post("/api/games/:id/user/:action", async (req, res) => {
   const [error, user] = await findUserByCreds(req);
 
   res.status(200).json(parseSession(game, user));
+});
+
+router.get("/api/games/:id/broadcast", async (req, res) => {
+  const id = req.params.id;
+  res.header('cookie', req.headers.cookie);
+  res.header('Connection', "keep-alive");
+  res.redirect(`${rivalApi}/api/sessions/${id}/broadcast`);
 });
 
 export default router;

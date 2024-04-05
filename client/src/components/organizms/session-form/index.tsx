@@ -13,7 +13,7 @@ const sessionFormFields = [
     inputProps: {
       type: "select",
       options: [
-        { value: 1, text: "Bet" },
+        { value: 1, text: "Single Question" },
         { value: 3, text: "Quiz" },
       ],
     },
@@ -37,7 +37,7 @@ export const SessionForm = ({
 }) => {
   const { state } = useAppContext();
   const { targetSession } = state;
-  const isEditForm = useMemo(() => targetSession != null, [targetSession]);
+  const isEditForm = useMemo(() => targetSession?.id != null, [targetSession]);
 
   const handleSubmit = useCallback(
     (e, formFields) => {

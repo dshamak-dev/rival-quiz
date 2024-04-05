@@ -26,6 +26,10 @@ export const useSessions = ({ filter = null, preload = false, self = false }) =>
   );
   const clear = useCallback(() => {}, [dispatch]);
 
+  const set = useCallback((data) => {
+    dispatch({ type: "data", payload: data });
+  }, [dispatch]);
+
   useEffect(() => {
     if (preload) {
       load(filter);
@@ -38,6 +42,7 @@ export const useSessions = ({ filter = null, preload = false, self = false }) =>
     error: payload.error,
     load,
     clear,
+    set
   };
 };
 

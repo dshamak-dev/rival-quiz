@@ -9,7 +9,7 @@ import { Form } from "src/components/atoms/form";
 import Select from "src/components/atoms/input/select";
 import { Label } from "src/components/atoms/input/label";
 
-export const SessionAdminDrawer = () => {
+export const SessionAdminDrawer = ({ onData = null }) => {
   const { state, dispatch } = useAppContext();
 
   const handleClose = useCallback(() => {
@@ -19,6 +19,10 @@ export const SessionAdminDrawer = () => {
   }, [dispatch]);
 
   const handleEnd = (payload) => {
+    if (onData){
+      onData(payload);
+    }
+
     handleClose();
   };
 
@@ -39,7 +43,7 @@ export const SessionAdminDrawer = () => {
 };
 
 function SessionAdmin({ onProgress, onEnd }) {
-  const { state } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const { targetSession } = state;
 
   if (!targetSession) {
@@ -62,9 +66,13 @@ function SessionAdmin({ onProgress, onEnd }) {
       onProgress();
     }
 
-    POST_JSON(`/api/games/${targetSession.id}/user/start`, { body: {} }).then(
-      async (res) => onEnd(await res.json())
-    );
+    POST_JSON(`/api/games/${targetSession.id}/user/start`, { body: {} })
+      .then((res) => res.json())
+      .then(async (res) => {
+        dispatch((state) => {
+          return { ...state, targetSession: res };
+        });
+      });
   };
 
   const handleEnd = (e, formFields) => {
@@ -76,7 +84,13 @@ function SessionAdmin({ onProgress, onEnd }) {
 
     POST_JSON(`/api/games/${targetSession.id}/user/end`, {
       body: formFields,
-    }).then(async (res) => onEnd(await res.json()));
+    })
+      .then((res) => res.json())
+      .then(async (res) => {
+        dispatch((state) => {
+          return { ...state, targetSession: res };
+        });
+      });
   };
 
   const controls = useMemo(() => {

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { CheckList } from "src/components/atoms/input/CheckList";
 import { Form } from "src/components/atoms/form";
 import { Input } from "src/components/atoms/input";
@@ -11,6 +11,10 @@ import { Poll } from "src/components/molecules/poll";
 
 export default function BetView({ data }) {
   const [session, setSession] = useState(data);
+
+  useEffect(() => {
+    setSession(data);
+  }, [data]);
 
   switch (session.stage) {
     case SessionStageType.Draft:
@@ -31,6 +35,15 @@ export default function BetView({ data }) {
 
 function BetSelectionView({ data, dispatch }) {
   const { user, options = [], users = 0, state } = data;
+  const [error, setError] = useState(null);
+
+  const errorText = useMemo(() => {
+    if (!error) {
+      return null;
+    }
+
+    return error?.message || error;
+  }, [error]);
 
   const isLogged = useMemo(() => {
     return user?.email != null;
@@ -39,16 +52,26 @@ function BetSelectionView({ data, dispatch }) {
     return state?.option && state?.value;
   }, [state]);
 
-  const handleSubmit = (e, formFields) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+
+    const formData: any = new FormData(e.target);
+    const formFields = {};
+
+    for (let [key, value] of formData) {
+      formFields[key] = value;
+    }
 
     if (!isLogged) {
       return;
     }
 
-    POST_JSON(`/api/games/${data.id}/user/bet`, { body: formFields }).then(
-      async (res) => dispatch(await res.json())
-    );
+    setError(null);
+    POST_JSON(`/api/games/${data.id}/user/bet`, { body: formFields })
+      .then(async (res) => dispatch(await res.json()))
+      .catch((error) => {
+        setError(error);
+      });
   };
 
   const handleCancelBid = (e) => {
@@ -56,14 +79,17 @@ function BetSelectionView({ data, dispatch }) {
       return;
     }
 
-    POST_JSON(`/api/games/${data.id}/user/cancel`, { body: null }).then(
-      async (res) => dispatch(await res.json())
-    );
+    setError(null);
+    POST_JSON(`/api/games/${data.id}/user/cancel`, { body: null })
+      .then(async (res) => dispatch(await res.json()))
+      .catch((error) => {
+        setError(error);
+      });
   };
 
-  return options?.length ? (
+  return (
     <section className="flex flex-col items-center">
-      <Form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
         <div>
           <h3 className="text-left text-xs font-thin capitalize">
             {hasBid ? "Selected" : "Select option"}
@@ -87,7 +113,7 @@ function BetSelectionView({ data, dispatch }) {
           </div>
         </div>
         {isLogged ? (
-          <div className="flex flex-col items-center">
+          <div className="relative flex flex-col items-center">
             {hasBid ? (
               <strong className="text-center text-4xl">{state?.value}</strong>
             ) : (
@@ -103,6 +129,11 @@ function BetSelectionView({ data, dispatch }) {
             <Label className="capitalize text-center">
               {hasBid ? "your bid" : "input a bid"}
             </Label>
+            {errorText ? (
+              <p className="absolute -bottom-4 text-center text-xs text-rose-600">
+                {errorText}
+              </p>
+            ) : null}
           </div>
         ) : null}
         <div className="flex gap-6 justify-center items-center">
@@ -120,9 +151,9 @@ function BetSelectionView({ data, dispatch }) {
             </SignIn>
           )}
         </div>
-      </Form>
+      </form>
     </section>
-  ) : null;
+  );
 }
 
 function BetActiveView({ data }) {
@@ -162,11 +193,21 @@ function BetActiveView({ data }) {
 }
 
 function BetCloseView({ data }) {
-  const { options = [], state, result } = data;
+  const { options = [], user, state, result } = data;
 
+  const userId = useMemo(() => {
+    return user?._id || user?.id;
+  }, [user])
+  const reward = useMemo(() => {
+    if (!userId || !result?.winners){
+      return null;
+    }
+
+    return result.winners[userId]?.value;
+  }, [userId, result]);
   const hasReward = useMemo(() => {
-    return state?.reward;
-  }, [state]);
+    return !!reward;
+  }, [reward]);
 
   return options?.length ? (
     <section className="flex flex-col items-center">
@@ -182,8 +223,8 @@ function BetCloseView({ data }) {
         </div>
         {hasReward ? (
           <div>
-            <p className="text-center text-xl font-bold">
-              your reward is {state.reward}
+            <p className="text-center text-2xl font-thin">
+              your reward: <strong className="font-bold">{reward}</strong>
             </p>
           </div>
         ) : (

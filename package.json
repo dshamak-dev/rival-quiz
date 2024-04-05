@@ -5,9 +5,10 @@
   "main": "babel.config.js",
   "scripts": {
     "client": "webpack --watch --mode=development --env development",
+    "build-client": "webpack --mode=production --env production",
     "server": "nodemon",
-    "build": "tsc && tsc-alias",
-    "start": "npm install && production=true node private/server.js"
+    "build-server": "rm -rf private && tsc --project tsconfig.server.json && tsc-alias",
+    "start": "npm install && production=true node private/index.js"
   },
   "keywords": [],
   "author": "",

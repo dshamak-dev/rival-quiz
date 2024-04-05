@@ -19,7 +19,7 @@ module.exports = (env) => {
       asyncChunks: true,
       path: path.resolve(__dirname, buildFolder),
       clean: true,
-      publicPath: env.development ? "/" : "./",
+      publicPath: '/',
     },
     watchOptions: {
       ignored: /server/,

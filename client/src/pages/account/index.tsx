@@ -8,6 +8,8 @@ import { SessionList } from "src/components/organizms/session-list";
 import { SessionAdminDrawer } from "src/components/organizms/session-admin";
 import { useSessionForm } from "src/hooks/useSessionForm";
 import { useSessions } from "src/hooks/useSessions";
+import { SessionFormDrawer } from "src/components/organizms/session-form/session-form-drawer";
+import { SessionStageType } from "src/models/session.model";
 
 export const AccountPage = () => {
   const { loading, data, error, load } = useSessions({
@@ -33,6 +35,10 @@ export const AccountPage = () => {
     }
   }, [isLogged]);
 
+  const handleData = (data) => {
+    load();
+  };
+
   if (!state?.ready) {
     return null;
   }
@@ -54,7 +60,11 @@ export const AccountPage = () => {
       return null;
     }
 
-    const hasStarted = [2, 3, 4].includes(game.stage);
+    const hasStarted = ![
+      SessionStageType.Lobby,
+      SessionStageType.Draft,
+    ].includes(game.stage);
+    const isClosed = [SessionStageType.Close].includes(game.stage);
 
     return (
       <div className="flex items-center gap-4">
@@ -63,9 +73,11 @@ export const AccountPage = () => {
             <FontAwesomeIcon icon={faEdit} />
           </div>
         )}
-        <div className="cursor-pointer" onClick={() => handleShowAdmin(game)}>
-          <FontAwesomeIcon icon={faTools} />
-        </div>
+        {isClosed ? null : (
+          <div className="cursor-pointer" onClick={() => handleShowAdmin(game)}>
+            <FontAwesomeIcon icon={faTools} />
+          </div>
+        )}
       </div>
     );
   };
@@ -101,7 +113,8 @@ export const AccountPage = () => {
           />
         </section>
       </article>
-      <SessionAdminDrawer />
+      <SessionAdminDrawer onData={handleData} />
+      <SessionFormDrawer onData={handleData} />
     </>
   );
 };

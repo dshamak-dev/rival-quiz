@@ -4,7 +4,7 @@ import { Drawer } from "src/components/atoms/drawer";
 import { SessionForm } from ".";
 import { Button } from "src/components/atoms/button";
 
-export const SessionFormDrawer = ({ data = null } = {}) => {
+export const SessionFormDrawer = ({ data = null, onData = null } = {}) => {
   const { state, dispatch } = useAppContext();
 
   const handleClose = useCallback(() => {
@@ -14,7 +14,9 @@ export const SessionFormDrawer = ({ data = null } = {}) => {
   }, [dispatch]);
 
   const handleEnd = (payload) => {
-    console.log(payload);
+    if (onData){
+      onData(payload);
+    }
 
     handleClose();
   };

@@ -14,7 +14,8 @@ export const useGame = ({ tag, preload = false }) => {
     async (filter = null) => {
       dispatch({ type: "loading", payload: true });
 
-      await GET(`/api/game?tag=${tag}`, null, 500).then(res => res.json())
+      await GET(`/api/game?tag=${tag}`, null, 500)
+        .then((res) => res.json())
         .then((data: object) => {
           dispatch({ type: "data", payload: data });
         })
@@ -26,6 +27,13 @@ export const useGame = ({ tag, preload = false }) => {
   );
   const clear = useCallback(() => {}, [dispatch]);
 
+  const patch = useCallback(
+    ({ user, ...update }: any = {}) => {
+      dispatch({ type: "patch", payload: update });
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     if (preload) {
       load();
@@ -33,16 +41,15 @@ export const useGame = ({ tag, preload = false }) => {
   }, [preload]);
 
   return {
-    loading: payload.loading,
-    data: payload.data || [],
-    error: payload.error,
+    ...payload,
     load,
     clear,
+    patch,
   };
 };
 
 type ActionType = {
-  type: "loading" | "data" | "error";
+  type: "loading" | "data" | "patch" | "error";
   payload: boolean | string | object;
 };
 
@@ -55,6 +62,12 @@ function reducer(state, { type, payload }: ActionType) {
     case "data": {
       state.loading = false;
       state.data = payload;
+      state.error = null;
+      break;
+    }
+    case "patch": {
+      state.loading = false;
+      state.data = Object.assign({}, state.data, payload);
       state.error = null;
       break;
     }
