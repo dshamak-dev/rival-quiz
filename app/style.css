@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media (max-width:580px) {
+  .form-field:where(.css-dev-only-do-not-override-1uq9j6g).ant-form-item-vertical .ant-form-item-row {
+    flex-direction: unset;
+  }
+}
+
+.form-field .ant-form-item-control {
+  flex: 1;
+}
+
+.form-field .ant-form-item-label {
+  padding: 0;
+}

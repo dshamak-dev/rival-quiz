@@ -1,0 +1,14 @@
+.preview-container {
+	display: flex;
+	flex-direction: column;
+	gap: calc(1rem);
+
+	& h1 {
+		font-size: 1.25rem;
+	}
+
+	& a {
+		text-decoration: underline;
+		@apply text-sky-500;
+	}
+}
