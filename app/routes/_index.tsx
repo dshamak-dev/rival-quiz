@@ -3,20 +3,30 @@ import { Typography } from '@view/typography/typography';
 import logoImage from '@assets/logo.png';
 import { Image } from '@view/image/image';
 import { useAPI } from '@api/api.hook';
-import { WEB_API } from '@control/api.control';
 import { useEffect } from 'react';
+import { findSessions } from '@api/session.api';
+import { SessionList } from '@view/session/session.list';
 
 export default function LandingPage() {
-	const { data, loading, dispatch } = useAPI({ initialState: null, request: () => WEB_API.get('/health') });
+	const { data, loading, dispatch } = useAPI({ initialState: null, request: () => findSessions().catch(() => []) });
 
 	useEffect(() => {
 		dispatch();
 	}, []);
 
 	return (
-		<div className='h-screen max-h-full flex flex-col items-center justify-center'>
-			<Image src={logoImage} style={{ width: 48 }} className='relative -top-6 animate-bounce' />
-			<Typography className=''>Quizdation starts here</Typography>
+		<div className="min-h-full p-6">
+			{loading || !data ? (
+				<div className="h-screen max-h-full flex flex-col items-center justify-center">
+					<Image src={logoImage} style={{ width: 48 }} className="relative -top-6 animate-bounce" />
+					<Typography className="">Quizdation starts here</Typography>
+				</div>
+			) : (
+				<div className="flex flex-col gap-4">
+					<Typography className="text-lg font-bold">Sessions</Typography>
+					<SessionList sessions={data} />
+				</div>
+			)}
 		</div>
 	);
 }

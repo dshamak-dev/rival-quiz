@@ -1,0 +1,11 @@
+.container {
+	@apply w-full border rounded;
+
+	&::-webkit-progress-bar {
+		@apply bg-gray-50 rounded;
+	}
+
+	&::-webkit-progress-value {
+		@apply bg-black rounded;
+	}
+}

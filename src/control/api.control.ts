@@ -14,15 +14,22 @@ export class WEB_API {
 		return [this.apiUrl?.replace(/$\//, '') || '', path.replace(/^\//, '')].join('/');
 	}
 
+	static getAuthHeaders() {
+		const token = this.JWT;
+
+		return {
+			Authorization: token ? `Bearer ${token}` : undefined,
+		};
+	}
+
 	static get<T>(path: string, params?: Record<string, any>): Promise<T> {
 		const url = WEB_API.joinUrl(path);
-		const token = this.JWT;
 
 		return fetch(url, {
 			credentials: 'include',
 			...params,
 			headers: {
-				Authorization: token ? `Bearer ${token}` : undefined,
+				...this.getAuthHeaders(),
 				...params?.headers,
 			},
 		})
@@ -34,14 +41,14 @@ export class WEB_API {
 
 	static post<T>(path: string, params: Record<string, any>, includeHeaders = false): Promise<T> {
 		const url = this.joinUrl(path);
-		// const token = this.JWT;
+		const token = this.JWT;
 
 		return fetch(url, {
 			method: 'POST',
 			...params,
 			credentials: 'include',
 			headers: {
-				// Authorization: token ? `Bearer ${token}` : undefined,
+				...this.getAuthHeaders(),
 				...params.headers,
 			},
 		}).then((res) => {
@@ -75,14 +82,13 @@ export class WEB_API {
 
 	static delete<T>(path: string, params?: Record<string, any>): Promise<T> {
 		const url = WEB_API.joinUrl(path);
-		const token = this.JWT;
 
 		return fetch(url, {
 			method: 'DELETE',
 			credentials: 'include',
 			...params,
 			headers: {
-				Authorization: token ? `Bearer ${token}` : undefined,
+				...this.getAuthHeaders(),
 				...params?.headers,
 			},
 		})
@@ -120,8 +126,6 @@ export async function validateJSONResponse(response: Response) {
 
 	if (response.status >= 400) {
 		try {
-			console.timeLog(`${response.status}: ${response.statusText}`);
-
 			const errorBody: any = isJSON
 				? await response.json().then((res) => JSON.parse(res))
 				: { message: response.statusText };

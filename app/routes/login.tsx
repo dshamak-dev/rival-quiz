@@ -1,6 +1,6 @@
 import { authCookie } from '@/auth';
 import { ActionFunctionArgs, redirect } from '@remix-run/node';
-import { Form, useActionData, useSubmit } from '@remix-run/react';
+import { Form, useActionData, useLocation, useSearchParams, useSubmit } from '@remix-run/react';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
 import cookie from 'cookie';
@@ -9,14 +9,9 @@ import { useMemo, useState } from 'react';
 import { ClientComponent } from '@view/client/client.component';
 import { Icon } from '@view/icon';
 import { getErrorMessage, getRequestSearchField, WEB_API } from '@control/api.control';
-import { AuthDTO, UserDTO } from '@model/user.model';
+import { AuthDTO } from '@model/user.model';
 import { FormField } from '@view/form/form.field';
-
-// export async function loader({ request }: LoaderFunctionArgs) {
-// 	const id = await getAuthCookie(request);
-
-// 	return { id };
-// }
+import { Button } from '@view/button/button';
 
 type AuthPayload = {
 	email?: string;
@@ -113,6 +108,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function LoginPage() {
+	const [searchParams] = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
 	const actionData = useActionData<typeof action>();
 	const actionError = useMemo(() => {
@@ -121,15 +117,19 @@ export default function LoginPage() {
 
 	const handleSubmit = useSubmit();
 
+	const continueUrl = useMemo(() => {
+		return searchParams.get('continue') || '/';
+	}, []);
+
 	const [isSignUp, setIsSignUp] = useState(actionData?.payload?.isSignUp || false);
 
 	return (
-		<div className='bg-contain bg-center'>
+		<div className="bg-contain bg-center">
 			<div className={classNames('h-full flex flex-col gap-4 justify-center items-center')}>
 				<ClientComponent
 					fallback={
-						<div className='py-12'>
-							<Icon name='PersonArmsUp' size={48} className='text-white animate-bounce' />
+						<div className="py-12">
+							<Icon name="PersonArmsUp" size={48} className="text-white animate-bounce" />
 						</div>
 					}
 				>
@@ -140,8 +140,8 @@ export default function LoginPage() {
 								email: actionData?.payload?.email,
 							} as any
 						}
-						method='POST'
-						action={`/login?action=${isSignUp ? 'create' : 'enter'}`}
+						method="POST"
+						action={`/login?action=${isSignUp ? 'create' : 'enter'}&continue=${continueUrl}`}
 						className={classNames(
 							'grid grid-cols-1 gap-6 justify-center items-center py-12 px-12 min-w-[520px]',
 							'relative -top-6 bg-gray-100'
@@ -151,17 +151,17 @@ export default function LoginPage() {
 							handleSubmit(ev.currentTarget, { replace: true });
 						}}
 					>
-						<div className='flex flex-col justify-center items-center'>
-							<Typography className='text-xl font-semibold'>
+						<div className="flex flex-col justify-center items-center">
+							<Typography className="text-xl font-semibold">
 								{isSignUp ? 'Sign up' : 'Log in'} to Quizdation
 							</Typography>
-							{actionError ? <p className='text-red-600'>{actionError}</p> : null}
+							{actionError ? <p className="text-red-600">{actionError}</p> : null}
 						</div>
-						<div className='grid grid-cols-1 gap-4 w-full'>
+						<div className="grid grid-cols-1 gap-4 w-full">
 							<FormField
-								label='Email'
-								id='email'
-								type='email'
+								label="Email"
+								id="email"
+								type="email"
 								defaultValue={actionData?.payload?.email || undefined}
 								required
 
@@ -169,43 +169,45 @@ export default function LoginPage() {
 							/>
 
 							<FormField
-								label='Password'
-								id='password'
-								type='password'
+								label="Password"
+								id="password"
+								type="password"
 								// rules={[{ required: true, message: 'Please input your password!' }]}
 								required
-								className='flex flex-col'
+								className="flex flex-col"
 							/>
 
 							{isSignUp && (
 								<FormField
-									label='Confirm Password'
-									id='confirmPassword'
-									type='password'
+									label="Confirm Password"
+									id="confirmPassword"
+									type="password"
 									// rules={[{ required: true, message: 'Please input your password!' }]}
 									required
-									className='flex flex-col'
+									size="large"
+									className="flex flex-col"
 								/>
 							)}
 						</div>
-						<div className='flex'>
+						<div className="flex">
 							<Typography
-								className='cursor-pointer hover:text-sky-500 underline'
+								className="cursor-pointer hover:text-sky-500 underline"
 								onClick={() => setIsSignUp(!isSignUp)}
 							>
 								{isSignUp ? 'I have account' : "I don't have account"}
 							</Typography>
 						</div>
 						<div>
-							<button
+							<Button
 								// type='primary'
-								type='submit'
-								className='bg-black text-white text-xl py-2 shadow-md w-full uppercase'
+								type="submit"
+								size="base"
 								// loading={isLoading}
 								disabled={isLoading}
+								className="w-full"
 							>
 								{isSignUp ? 'Create account' : 'Log in'}
-							</button>
+							</Button>
 						</div>
 					</Form>
 				</ClientComponent>

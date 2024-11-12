@@ -31,17 +31,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	
 	if (token) {
-		// console.log('has token');
 		user = await findUserByToken().catch((err) => null);
 
-		console.log('user', user);
 		if (!user) {
 			const url = request.url;
-			// WEB_API.setJWT(null);
-			// throw await logOut(url);
+			WEB_API.setJWT(null);
+			throw await logOut(url);
 		}
-	} else {
-		console.log('has noe token');
 	}
 
 	return { token, user, envVariables };

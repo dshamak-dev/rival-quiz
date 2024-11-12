@@ -1,6 +1,7 @@
 // import { pushStoreItem } from "@control/storage.control";
-import { WEB_API } from "@control/api.control";
-import { UserDTO } from "@model/user.model";
+import { WEB_API } from '@control/api.control';
+import { ID } from '@model/api.model';
+import { UserDTO } from '@model/user.model';
 
 // export async function findMany(): Promise<IUser[]> {
 //   return WEB_API.get<IUser[]>("/users/all", {}).then((res) =>
@@ -9,15 +10,11 @@ import { UserDTO } from "@model/user.model";
 // }
 
 export async function findUserByToken() {
-  return WEB_API.get<UserDTO>("/users/current", {}).then((it) =>
-    normalizeUserDTO(it)
-  );
+	return WEB_API.get<UserDTO>('/users/current', {}).then((it) => normalizeUserDTO(it));
 }
 
-export async function findUserById(id: UserDTO["id"]): Promise<UserDTO> {
-  return WEB_API.get<UserDTO>(`/users/${id}`, {}).then((it) =>
-    normalizeUserDTO(it)
-  );
+export async function findUserById(id: UserDTO['id']): Promise<UserDTO> {
+	return WEB_API.get<UserDTO>(`/users/${id}`, {}).then((it) => normalizeUserDTO(it));
 }
 
 // export async function deleteOne(id: IUser["id"]): Promise<IUser> {
@@ -33,6 +30,6 @@ export async function findUserById(id: UserDTO["id"]): Promise<UserDTO> {
 //   });
 // }
 
-export function normalizeUserDTO(payload: UserDTO) {
-  return payload;
+export function normalizeUserDTO(payload: UserDTO): UserDTO {
+	return { ...payload, id: payload._id as UserDTO['id'] };
 }

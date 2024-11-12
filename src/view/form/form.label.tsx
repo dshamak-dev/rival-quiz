@@ -6,7 +6,7 @@ export type FormLabelProps = PropsWithChildren & { id?: string; required?: boole
 export function FormLabel({ required, children, id }: FormLabelProps) {
 	return (
 		<label htmlFor={id}>
-			<Typography className='text-md font-light flex gap-1'>
+			<Typography className='text-xs font-light capitalize flex gap-1'>
 				{children}
 				{required && <span className='text-red-500'>*</span>}
 			</Typography>

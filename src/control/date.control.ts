@@ -11,7 +11,7 @@ export function getGreetingText() {
   }
 }
 
-export function formatDate(value: Date | string | number): string | null {
+export function formatDate(value: Date | string | number, format: string | null = null): string | null {
   if (!value) {
     return null;
   }

@@ -14,6 +14,10 @@ export function useAuth() {
 		handleSubmit({ from: path }, { method: 'post', action: '/logout', replace: true });
 	};
 
+	const isLoggedIn = useMemo(() => {
+		return !!state.user;
+	}, [state?.user]);
+
 	const isRootUser = useMemo(() => {
 		if (!state?.user?.roles) {
 			return false;
@@ -22,5 +26,5 @@ export function useAuth() {
 		return state.user.roles.includes(SUPER_ADMIN_ROLE.id);
 	}, [state?.user]);
 
-	return { user: state?.user, isRootUser, logOut };
+	return { user: state?.user, isLoggedIn, isRootUser, logOut };
 }
