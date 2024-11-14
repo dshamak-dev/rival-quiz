@@ -11,10 +11,14 @@ import { getAuthCookie, logOut } from '@/auth';
 import { AppContextProvider } from 'src/state/app.state';
 import { WEB_API } from '@control/api.control';
 import { findUserByToken } from '@api/user.api';
-import { Navigation } from '@view/navigation/navigation';
+import { Navigation } from '@view/page/navigation';
 
 import logoImage from '@assets/logo.png';
 import { Image } from '@view/image/image';
+import { useUI } from '@control/ui.control';
+import classNames from 'classnames';
+import { DeviceType } from '@model/ui.model';
+import { HeaderMobile } from '@view/page/header.mobile';
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
@@ -29,7 +33,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	let user = null;
 
-	
 	if (token) {
 		user = await findUserByToken().catch((err) => null);
 
@@ -97,9 +100,14 @@ export const meta: MetaFunction = () => {
 export default function App() {
 	const initialData = useLoaderData<typeof loader>();
 	const { state } = useNavigation();
+	const { deviceType } = useUI();
 	const isLoading = useMemo(() => {
 		return state === 'loading';
 	}, [state]);
+
+	const isMobileView = useMemo(() => {
+		return deviceType != null && [DeviceType.Mobile].includes(deviceType);
+	}, [deviceType]);
 
 	WEB_API.setEnv(initialData.envVariables);
 
@@ -110,30 +118,43 @@ export default function App() {
 	return (
 		<html suppressHydrationWarning={true}>
 			<head>
-				<link rel='icon' href='data:image/x-icon;base64,AA' />
-				<meta charSet='utf-8' />
-				<meta name='viewport' content='width=device-width, initial-scale=1' />
+				<link rel="icon" href="data:image/x-icon;base64,AA" />
+				<meta charSet="utf-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<Meta />
 				<Links />
 			</head>
 			<body>
-				<main className='min-h-screen'>
+				<main className="min-h-screen">
 					{isLoading ? (
 						<ClientComponent>
-							<div className='h-screen max-h-full flex items-center justify-center'>
+							<div className="h-screen max-h-full flex items-center justify-center">
 								<Image
 									src={logoImage}
 									style={{ width: 48 }}
-									className='relative -top-6 animate-bounce'
+									className="relative -top-6 animate-bounce"
 								/>
 							</div>
 						</ClientComponent>
 					) : (
 						<AppContextProvider value={initialData}>
-							<div className='max-h-full h-screen grid grid-rows-[auto_1fr]'>
-								<div className='sticky left-0 top-0 z-20 bg-white/[.85] backdrop-blur-sm'>
-									<Navigation />
-								</div>
+							<div
+								className={classNames('max-h-full h-screen', {
+									'grid grid-rows-[auto_1fr]': !isMobileView && deviceType != null,
+									'grid grid-rows-[auto_1fr_auto]': isMobileView,
+								})}
+							>
+								{deviceType != null && (
+									<div
+										className={classNames('bg-white/[.85] backdrop-blur-sm', {
+											'sticky left-0 top-0 z-20': !isMobileView,
+											'sticky left-0 bottom-0 z-20 order-last': isMobileView,
+										})}
+									>
+										<Navigation />
+									</div>
+								)}
+								{isMobileView && <HeaderMobile />}
 								<Outlet context={{ state }} />
 							</div>
 						</AppContextProvider>

@@ -7,8 +7,8 @@ export class Session implements SessionType {
 	state: SessionStateType = SessionStateType.Draft;
 	title: string = '';
 	ownerId?: ID;
-	created: DateType = new Date().toISOString();
-	updated?: DateType;
+	createdAt: DateType = new Date().toISOString();
+	updatedAt?: DateType;
 	questions?: QuestionDTO[] = [];
 
 	constructor(data: SessionType | undefined) {
@@ -26,8 +26,8 @@ export type SessionDTO = {
 	title: string;
 	data?: SessionData;
 	ownerId: ID;
-	created: DateType;
-	updated?: DateType;
+	createdAt: DateType;
+	updatedAt?: DateType;
 	questions?: QuestionDTO[];
 };
 

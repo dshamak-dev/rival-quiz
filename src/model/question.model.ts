@@ -1,14 +1,15 @@
 import { DateType, ID } from './api.model';
 
 export type QuestionDTO = {
+	_id?: ID;
 	id: ID;
 	title: string;
 	description?: string;
 	type: QuestionType;
 	options: string[];
 	answer?: string;
-	created: DateType;
-	updated?: DateType;
+	createdAt: DateType;
+	updatedAt?: DateType;
 };
 
 export enum QuestionType {

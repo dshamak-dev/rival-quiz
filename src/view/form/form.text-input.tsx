@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { ChangeEvent, useCallback, useMemo } from 'react';
 import { FormLabel } from './form.label';
+import { getRandomId } from '@control/random';
 
 export type TextInputType = 'text' | 'email' | 'password';
 
@@ -19,42 +20,58 @@ export type TextInputProps = {
 	onChange?: (e: ChangeEvent<HTMLInputElement>, value: any) => void;
 };
 
-export function TextInput({ type = 'text', size = "base", onChange, ...props }: TextInputProps) {
+export function TextInput({
+	type = 'text',
+	size = 'base',
+	defaultValue,
+	className,
+	onChange,
+	...props
+}: TextInputProps) {
 	const id = useMemo(() => {
 		return props.id || `input-${Math.random().toString(36).substr(2, 9)}`;
 	}, [props.id]);
 
-	const inputClassName = useMemo(() => {
+	const sizeClassName = useMemo(() => {
 		switch (size) {
-            case 'small':
-                return 'text-xs px-2 py-1';
-            case 'large':
-                return 'text-lg px-2 py-2';
-            default:
-                return 'text-base px-2 py-1';
-        }
-	}, [size])
+			case 'small':
+				return 'text-xs px-2 py-1';
+			case 'large':
+				return 'text-lg px-2 py-2';
+			default:
+				return 'text-base px-2 py-1';
+		}
+	}, [size]);
+
+	const inputClassName = useMemo(() => {
+		return classNames(className, sizeClassName, 'rounded border border-gray-300');
+	}, [sizeClassName, className]);
 
 	const inputProps = useMemo(() => {
-		return {
+		const nextProps = {
 			...props,
+			defaultValue,
 			type,
 			required: props.required,
-			id,
+			id: `${id || ''}-${getRandomId()}`,
 			name: id,
-			value: props.value || '',
-			className: classNames(props.className, inputClassName, 'rounded border border-gray-300'),
+			value: props.value || defaultValue,
 			placeholder: props.placeholder || undefined,
 		};
+
+		return nextProps;
 	}, [props, id]);
 
-	const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-		if (!onChange) {
-			return;
-		}
+	const handleChange = useCallback(
+		(e: ChangeEvent<HTMLInputElement>) => {
+			if (!onChange) {
+				return;
+			}
 
-		onChange(e, e.target.value);
-	}, [onChange]);
+			onChange(e, e.target.value);
+		},
+		[onChange]
+	);
 
 	return (
 		<div className="grid w-full">
@@ -63,7 +80,7 @@ export function TextInput({ type = 'text', size = "base", onChange, ...props }: 
 					{props.label}
 				</FormLabel>
 			)}
-			<input {...inputProps} onChange={handleChange} />
+			<input {...inputProps} className={inputClassName} onChange={handleChange} />
 		</div>
 	);
 }

@@ -1,11 +1,13 @@
 import { useAPI } from '@api/api.hook';
 import { findSessions } from '@api/session.api';
+import { useUI } from '@control/ui.control';
 import { useNavigate } from '@remix-run/react';
 import { useAuth } from '@state/auth.hook';
 import { Anchor } from '@view/anchor';
 import { Button } from '@view/button/button';
 import { DateText } from '@view/date/date.text';
 import { Icon } from '@view/icon';
+import { MobileSupportPlaceholder } from '@view/page/mobile.support-placeholder';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
 import { useEffect, useMemo } from 'react';
@@ -14,6 +16,7 @@ import { sessionStateLabels } from 'src/constants/session.constant';
 export default function ProfileSessionListPage() {
 	const { isLoggedIn, user } = useAuth();
 	const navigate = useNavigate();
+	const { deviceType, isMobile } = useUI();
 	const { data, loading, dispatch } = useAPI({
 		initialState: undefined,
 		request: (query: string) => findSessions(query).catch((err) => null),
@@ -66,7 +69,7 @@ export default function ProfileSessionListPage() {
 						>
 							<div className="flex gap-6 items-center">
 								<DateText
-									date={session.updated ?? session.created}
+									date={session.updatedAt ?? session.createdAt}
 									className="text-sm text-gray-500 min-w-[80px]"
 								/>
 								<Typography className="min-w-[30%]">{session.title}</Typography>
@@ -86,5 +89,15 @@ export default function ProfileSessionListPage() {
 		);
 	}, [isLoggedIn, loading, data]);
 
-	return <div className="grid w-full min-h-full p-4">{content}</div>;
+	return (
+		<div className="grid w-full min-h-full p-4">
+			{isMobile ? (
+				<div className="grid items-center justify-center">
+					<MobileSupportPlaceholder />
+				</div>
+			) : (
+				content
+			)}
+		</div>
+	);
 }

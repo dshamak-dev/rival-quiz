@@ -42,7 +42,7 @@ export default function CreateSessionPage() {
 						type="text"
 						id="title"
 						placeholder="Enter session title"
-						defaultValue={initialState?.title || ''}
+						defaultValue={initialState?.title}
 					/>
 				</div>
 				<div>

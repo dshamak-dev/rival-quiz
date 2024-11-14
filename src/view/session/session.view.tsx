@@ -1,3 +1,4 @@
+import { QuestionDTO } from '@model/question.model';
 import { SessionDTO, SessionStateType } from '@model/session.model';
 import { useAuth } from '@state/auth.hook';
 import { Anchor } from '@view/anchor';
@@ -28,13 +29,9 @@ export function SessionView({ session }: SessionViewProps) {
 		}
 	}, [session?.state]);
 
-	const question = useMemo(() => {
-		return {
-			title: 'What is the most popular color in the world?',
-			options: ['Red', 'Blue', 'Green', 'Yellow'],
-			answer: 'Blue',
-		};
-	}, []);
+	const question: QuestionDTO | null = useMemo(() => {
+		return session.questions?.[0] || null;
+	}, [session.questions]);
 
 	const sessionStateContent = useMemo(() => {
 		if (!user) {
@@ -54,18 +51,27 @@ export function SessionView({ session }: SessionViewProps) {
 			case SessionStateType.Published: {
 				return (
 					<div className="flex flex-col gap-8 items-center">
-						<Typography className="text-4xl font-bold">{question.title}</Typography>
-						<select className="w-full border px-2 py-2 rounded">
-							<option disabled>Select An Option</option>
-							{question.options.map((it, index) => {
-								return (
-									<option key={index} value={it}>
-										{it}
-									</option>
-								);
-							})}
-						</select>
-						<Button>Confirm answer</Button>
+						<div>
+							<Typography className="text-2xl font-bold text-center">{question?.title}</Typography>
+							{question?.description && (
+								<Typography className="text-xs text-center">{question.description}</Typography>
+							)}
+						</div>
+						{question?.options?.length ? (
+							<>
+								<select className="w-full border px-2 py-2 rounded">
+									<option disabled>Select An Option</option>
+									{question?.options.map((it, index) => {
+										return (
+											<option key={index} value={it}>
+												{it}
+											</option>
+										);
+									})}
+								</select>
+								<Button>Confirm answer</Button>
+							</>
+						) : null}
 					</div>
 				);
 			}
@@ -84,7 +90,8 @@ export function SessionView({ session }: SessionViewProps) {
 	return (
 		<div className="grid grid-rows-[auto_1fr_auto] gap-2 w-full">
 			<div className="flex flex-col gap-2 w-full">
-				<Typography className="">{session.title}</Typography>
+				<Typography className="text-lg">{session.title}</Typography>
+				{session.description && <Typography className="text-xs">{session.description}</Typography>}
 				<Progress
 					className="h-[8px] w-full"
 					value={progressState.value}

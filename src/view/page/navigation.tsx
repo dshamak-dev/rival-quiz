@@ -7,10 +7,13 @@ import logoImage from '@assets/logo.png';
 import { Image } from '@view/image/image';
 import { useMemo } from 'react';
 import { useAuth } from '@state/auth.hook';
-import { Icon } from '@view/icon';
+import { Icon, IconType } from '@view/icon';
 import { Badge } from '@view/badge/badge';
+import { useUI } from '@control/ui.control';
+import { DeviceType } from '@model/ui.model';
 
 export function Navigation() {
+	const { deviceType } = useUI();
 	const { isLoggedIn, user } = useAuth();
 
 	const links = useMemo(() => {
@@ -30,6 +33,43 @@ export function Navigation() {
 
 		return _items;
 	}, [user]);
+
+	const mobileLinks = useMemo(() => {
+		const _items: { link: string; end: boolean; icon: IconType; text: string }[] = [
+			{ link: '/', end: true, icon: 'House', text: 'Home' },
+			{ link: '/profile/history', end: true, icon: 'ClockHistory', text: 'History' },
+			{ link: '/profile/wallet', end: true, icon: 'Wallet2', text: 'Wallet' },
+			{ link: '/profile', end: true, icon: 'Person', text: 'Profile' },
+		];
+
+		return _items;
+	}, []);
+
+	if (deviceType == null || deviceType === DeviceType.Mobile) {
+		return (
+			<nav
+				className={classNames(
+					`flex justify-between items-center py-4 px-8`,
+					'text-sm font-light border-t'
+				)}
+			>
+				{mobileLinks.map(({ end, link, text, icon }, index) => {
+					return (
+						<Anchor
+							key={index}
+							end={end}
+							href={link}
+							activeClassName="text-sky-700"
+							className="flex flex-col gap-1 items-center"
+						>
+							<Icon name={icon} size={24} />
+							<Typography className="text-xs text-center">{text}</Typography>
+						</Anchor>
+					);
+				})}
+			</nav>
+		);
+	}
 
 	return (
 		<nav

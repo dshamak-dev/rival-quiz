@@ -1,7 +1,7 @@
 import { useReducer } from "react";
 
 interface IProps<P, T> {
-  initialState: T | null;
+  initialState?: T | null;
   request: (props: P) => Promise<T>;
 }
 
