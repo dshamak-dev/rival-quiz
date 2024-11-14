@@ -12,6 +12,7 @@ import { getErrorMessage, getRequestSearchField, WEB_API } from '@control/api.co
 import { AuthDTO } from '@model/user.model';
 import { FormField } from '@view/form/form.field';
 import { Button } from '@view/button/button';
+import { useUI } from '@control/ui.control';
 
 type AuthPayload = {
 	email?: string;
@@ -114,6 +115,7 @@ export default function LoginPage() {
 	const actionError = useMemo(() => {
 		return actionData?.error || null;
 	}, [actionData?.error]);
+	const { deviceType, isMobile } = useUI();
 
 	const handleSubmit = useSubmit();
 
@@ -125,7 +127,7 @@ export default function LoginPage() {
 
 	return (
 		<div className="bg-contain bg-center">
-			<div className={classNames('h-full flex flex-col gap-4 justify-center items-center')}>
+			<div className={classNames('h-full flex flex-col gap-4 justify-center items-center p-4')}>
 				<ClientComponent
 					fallback={
 						<div className="py-12">
@@ -143,8 +145,12 @@ export default function LoginPage() {
 						method="POST"
 						action={`/login?action=${isSignUp ? 'create' : 'enter'}&continue=${continueUrl}`}
 						className={classNames(
-							'grid grid-cols-1 gap-6 justify-center items-center py-12 px-12 min-w-[520px]',
-							'relative -top-6 bg-gray-100'
+							'grid grid-cols-1 gap-6 justify-center items-center',
+							'relative -top-6 bg-gray-100',
+							{
+								'p-6 w-full': isMobile,
+								'py-12 px-12 min-w-[520px]': deviceType && !isMobile
+							}
 						)}
 						onSubmitCapture={(ev) => {
 							setIsLoading(true);

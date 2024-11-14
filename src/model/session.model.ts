@@ -10,6 +10,7 @@ export class Session implements SessionType {
 	createdAt: DateType = new Date().toISOString();
 	updatedAt?: DateType;
 	questions?: QuestionDTO[] = [];
+	image?: string = undefined;
 
 	constructor(data: SessionType | undefined) {
 		Object.assign(this, data);
@@ -29,6 +30,7 @@ export type SessionDTO = {
 	createdAt: DateType;
 	updatedAt?: DateType;
 	questions?: QuestionDTO[];
+	image?: string;
 };
 
 export type SessionData = Record<string, any>;

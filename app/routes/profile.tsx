@@ -19,12 +19,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function ProfilePage() {
 	const { deviceType } = useUI();
-	// const params = useParams();
-	// const { data, loading, dispatch } = useAPI({ initialState: null, request: (id: string) => fetchProfileById(id) });
-
-	// useEffect(() => {
-	// 	dispatch(params.id);
-	// }, [params.id]);
 
 	const isMobile = useMemo(() => {
 		return deviceType === DeviceType.Mobile;

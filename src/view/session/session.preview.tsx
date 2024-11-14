@@ -7,6 +7,9 @@ import { sessionStateLabels } from 'src/constants/session.constant';
 import { Button } from '@view/button/button';
 import { useAuth } from '@state/auth.hook';
 import { SUPER_ADMIN_ROLE } from '@model/user.role';
+import { Image } from '@view/image/image';
+
+import placeholderImage from '@assets/placeholders/p_01.png';
 
 export type SessionPreviewProps = {
 	session: SessionDTO;
@@ -73,7 +76,7 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 			className="relative grid grid-rows-[1fr_42px] min-h-[200px] gap-4 py-4 px-6 rounded border"
 		>
 			{canEdit && (
-				<div className="absolute right-2 top-2">
+				<div className="absolute right-2 top-1">
 					<Anchor
 						href={`/profile/sessions/${session.id}`}
 						className="flex items-center justify-center w-6 h-6 border rounded-full bg-black text-white hover:bg-amber-600"
@@ -82,8 +85,9 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 					</Anchor>
 				</div>
 			)}
+			<Typography className="absolute left-2 top-2 text-white py-1 px-2 rounded bg-black text-xs ">{sessionStateLabels[session.state]}</Typography>
 			<div className="flex flex-col gap-2 justify-between text-center">
-				<Typography className="text-gray-400">{sessionStateLabels[session.state]}</Typography>
+				<Image className="h-[120px] object-cover" src={session.image} placeholderImage={placeholderImage} />
 				<Typography className="text-4xl font-bold text-center">{session.title}</Typography>
 			</div>
 			<div className="grid items-end">{controlContent}</div>
