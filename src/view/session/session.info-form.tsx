@@ -6,7 +6,7 @@ import { TextInput } from '@view/form/form.text-input';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
 import { useEffect, useMemo, useState } from 'react';
-import { sessionStateLabels, sessionStateOptions } from 'src/constants/session.constant';
+import { sessionBetOptions, sessionStateLabels, sessionStateOptions } from 'src/constants/session.constant';
 
 export type SessionInfoFormProps = {
 	initialValue: Session;
@@ -63,7 +63,7 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 				defaultValue={initialValue?.description || ''}
 				onChange={(e, value) => handleChange(e.target.name, value)}
 			/>
-			{/* <Select id="state" label="state" disabled options={sessionStateOptions} defaultValue={formState.state} /> */}
+			<Select id="bet-type" label="Bet Type" options={sessionBetOptions} defaultValue={formState.betType} />
 
 			<div className="flex justify-end gap-4">
 				<Button

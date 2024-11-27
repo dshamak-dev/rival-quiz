@@ -1,5 +1,6 @@
 import { DateType, ID } from './api.model';
 import { QuestionDTO } from './question.model';
+import { SessionUserActionDTO } from './session.user.model';
 
 export class Session implements SessionType {
 	id?: ID;
@@ -11,6 +12,7 @@ export class Session implements SessionType {
 	updatedAt?: DateType;
 	questions?: QuestionDTO[] = [];
 	image?: string = undefined;
+	betType?: SessionBetType;
 
 	constructor(data: SessionType | undefined) {
 		Object.assign(this, data);
@@ -18,6 +20,13 @@ export class Session implements SessionType {
 }
 
 export type SessionType = Omit<SessionDTO, '_id' | 'id' | 'ownerId'>;
+
+export enum SessionBetType {
+	None = 0,
+	Single = 1,
+	Auction = 2,
+	Range = 3,
+}
 
 export type SessionDTO = {
 	_id: ID;
@@ -31,6 +40,7 @@ export type SessionDTO = {
 	updatedAt?: DateType;
 	questions?: QuestionDTO[];
 	image?: string;
+	userActions?: SessionUserActionDTO[];
 };
 
 export type SessionData = Record<string, any>;

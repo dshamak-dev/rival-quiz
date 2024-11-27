@@ -2,6 +2,8 @@ import { QuestionDTO } from '@model/question.model';
 import { Button } from '@view/button/button';
 import { TextInput } from '@view/form/form.text-input';
 import { useMemo, useState } from 'react';
+import { QuestionOptionsForm } from './question.options-form';
+import { FormLabel } from '@view/form/form.label';
 
 export type QuestionFormProps = {
 	initialValue: QuestionDTO;
@@ -31,7 +33,7 @@ export function QuestionForm({ initialValue, disabled, onSubmit }: QuestionFormP
 	}, [formState]);
 
 	const canSave = useMemo(() => {
-		return isDirty && !disabled || !check.isValid;
+		return (isDirty && !disabled) || !check.isValid;
 	}, [isDirty, disabled, check]);
 
 	const handleChange = (name: string, value: any) => {
@@ -52,9 +54,15 @@ export function QuestionForm({ initialValue, disabled, onSubmit }: QuestionFormP
 		}
 	};
 
+	const handleOptionsChange = (options: QuestionDTO['options']) => {
+		setFormState((state) => {
+			return { ...state, options };
+		});
+	};
+
 	return (
 		<div className="flex flex-col gap-4 p-4" data-id={initialValue?.id}>
-			<div className="flex flex-col gap-4 p-4">
+			<div className="flex flex-col gap-4">
 				<TextInput
 					id="title"
 					label="title"
@@ -69,6 +77,9 @@ export function QuestionForm({ initialValue, disabled, onSubmit }: QuestionFormP
 					defaultValue={initialValue?.description || ''}
 					onChange={(e, value) => handleChange(e.target.name, value)}
 				/>
+			</div>
+			<div>
+				<QuestionOptionsForm options={formState?.options} onChange={handleOptionsChange} />
 			</div>
 			<div className="flex justify-end gap-4">
 				<Button

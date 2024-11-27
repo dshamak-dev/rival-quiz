@@ -1,4 +1,4 @@
-import { SessionStateType } from '@model/session.model';
+import { SessionStateType, SessionBetType } from '@model/session.model';
 import { SelectOption } from '@view/form/form.select';
 
 export const sessionStateLabels: Record<SessionStateType, string> = {
@@ -12,8 +12,17 @@ export const sessionStateLabels: Record<SessionStateType, string> = {
 	[SessionStateType.Completed]: 'Completed',
 };
 
-export const sessionStateOptions: SelectOption[] = Object.entries(sessionStateLabels).map(
-	([value, label]) => {
-		return { label, value: Number(value) };
-	}
-);
+export const sessionStateOptions: SelectOption[] = Object.entries(sessionStateLabels).map(([value, label]) => {
+	return { label, value: Number(value) };
+});
+
+export const sessionBetLabels: Record<SessionBetType, string> = {
+	[SessionBetType.None]: 'No bets',
+	[SessionBetType.Single]: 'Signle bet',
+	[SessionBetType.Range]: 'Range bet value',
+	[SessionBetType.Auction]: 'Auction',
+};
+
+export const sessionBetOptions: SelectOption[] = Object.entries(sessionBetLabels).map(([value, label]) => {
+	return { label, value: Number(value) };
+});

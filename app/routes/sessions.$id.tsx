@@ -2,7 +2,7 @@ import { useAPI } from '@api/api.hook';
 import { findSessionById } from '@api/session.api';
 import { useParams } from '@remix-run/react';
 import { Icon } from '@view/icon';
-import { SessionView } from '@view/session/session.view';
+import { SessionView } from '@view/session/view/session.view';
 import { Typography } from '@view/typography/typography';
 import { useEffect } from 'react';
 

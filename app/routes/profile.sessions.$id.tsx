@@ -12,6 +12,7 @@ import { QuestionForm } from '@view/question/question.form';
 import { SessionInfoForm } from '@view/session/session.info-form';
 import { Typography } from '@view/typography/typography';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { sessionStateLabels } from 'src/constants/session.constant';
 
 export default function ProfileSessionPage() {
 	const params = useParams();
@@ -139,7 +140,9 @@ export default function ProfileSessionPage() {
 		return (
 			<>
 				<Collapse
-					title="General"
+					title={(isOpen) =>
+						isOpen ? 'General' : `General - ${sessionStateLabels[sessionState.state] || 'Unknown'}`
+					}
 					initialState={[
 						SessionStateType.Draft,
 						SessionStateType.Published,
@@ -254,9 +257,13 @@ export default function ProfileSessionPage() {
 			case SessionStateType.Paused: {
 				return (
 					<>
-						<Button {...buttonCommonProps} layout="primary" onClick={() => {
+						<Button
+							{...buttonCommonProps}
+							layout="primary"
+							onClick={() => {
 								handleUpdate('info', { state: SessionStateType.Draft });
-							}}>
+							}}
+						>
 							Unpublish
 						</Button>
 						<Button {...buttonCommonProps}>Delete</Button>

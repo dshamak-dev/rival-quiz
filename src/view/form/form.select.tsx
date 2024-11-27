@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { ChangeEvent, useMemo } from 'react';
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { FormLabel } from './form.label';
 
 export type SelectProps = {
@@ -15,9 +15,12 @@ export type SelectProps = {
 	onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
 };
 
-export type SelectOption = { value: string | number; label: string };
+export type SelectOption = { value: string | number; label: string; disabled?: boolean };
 
 export function Select({ label, options, className, ...props }: SelectProps) {
+	const [selectedAnswer, setSelectedAnswer] = useState<string | number | undefined>(
+		(props.value ?? props.defaultValue) || ''
+	);
 	const id = useMemo(() => {
 		return props.id || `input-${Math.random().toString(36).substr(2, 9)}`;
 	}, [props.id]);
@@ -34,10 +37,27 @@ export function Select({ label, options, className, ...props }: SelectProps) {
 			required: props.required,
 			id,
 			name: id,
-			value: props.value ?? props.defaultValue,
+			value: (props.value ?? props.defaultValue) || '',
 			placeholder: props.placeholder || undefined,
 		};
 	}, [props, id]);
+
+	useEffect(() => {
+		if (props.value != null) {
+			setSelectedAnswer(props.value);
+		}
+	}, [props.value]);
+
+	const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+		if (props.onChange) {
+			props.onChange(e);
+		}
+		setSelectedAnswer(e.target.value);
+
+		return () => {
+			setSelectedAnswer(undefined);
+		};
+	};
 
 	return (
 		<div className="w-full">
@@ -46,10 +66,10 @@ export function Select({ label, options, className, ...props }: SelectProps) {
 					{label}
 				</FormLabel>
 			)}
-			<select {...inputProps} className={inputClassName}>
-				{options.map(({ value, label }) => {
+			<select {...inputProps} onChange={handleChange} value={selectedAnswer} className={inputClassName}>
+				{options.map(({ disabled, value, label }) => {
 					return (
-						<option key={String(value)} value={value}>
+						<option key={String(value)} value={value} disabled={disabled}>
 							{label}
 						</option>
 					);
