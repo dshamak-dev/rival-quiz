@@ -55,6 +55,6 @@ function getSizeClassName(size: TypographySize) {
 		case 'huge':
 			return 'text-4xl';
 		default:
-			return null;
+			return 'custom';
 	}
 }

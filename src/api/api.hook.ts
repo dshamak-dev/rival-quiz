@@ -1,8 +1,10 @@
+import { waitForMS } from "@control/api.control";
 import { useReducer } from "react";
 
 interface IProps<P, T> {
   initialState?: T | null;
   request: (props: P) => Promise<T>;
+  minDuration?: number;
 }
 
 interface IState<T> {
@@ -23,7 +25,7 @@ interface IReturn<P, T> {
   set: (value: T) => void;
 }
 
-export function useAPI<P, T>({ request, initialState }: IProps<P, T>): IReturn<P, T> {
+export function useAPI<P, T>({ request, initialState, minDuration = 0 }: IProps<P, T>): IReturn<P, T> {
   const [{ loading, data }, dispatchAction] = useReducer(reducer, {
     data: initialState,
     loading: false,
@@ -31,9 +33,16 @@ export function useAPI<P, T>({ request, initialState }: IProps<P, T>): IReturn<P
 
   const dispatch = async (props: P) => {
     dispatchAction({ type: "loading", payload: true });
+    const startedAt = Date.now();
 
     return request(props)
-      .then((data) => {
+      .then(async (data) => {
+        const now = Date.now();
+        const passed = now - startedAt;
+        const delay = passed < minDuration ? minDuration - passed : 0;
+
+        await waitForMS(delay);
+
         dispatchAction({ type: "data", payload: data });
 
         return data;

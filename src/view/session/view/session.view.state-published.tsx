@@ -9,10 +9,12 @@ import { SessionUserActionPayload, SessionUserActionTypes } from '@model/session
 import { postSessionUserAction, fetchSessionUserActions } from '@api/session.user.api';
 import { ID } from '@model/api.model';
 import { FormLabel } from '@view/form/form.label';
+import { useSession } from '@state/session.state';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
-export function SessionViewPublished({ session }: SessionViewPublishedProps) {
+export function SessionViewPublished() {
+	const { session, dispatch } = useSession();
 	const {
 		data: postData,
 		loading,
@@ -25,25 +27,25 @@ export function SessionViewPublished({ session }: SessionViewPublishedProps) {
 		loading: loadingUserData,
 		dispatch: fetchUserActions,
 	} = useAPI({
-		initialState: session.userActions,
+		initialState: session?.userActions,
 		request: (sessionId: ID) => fetchSessionUserActions(sessionId),
 	});
 
 	const question: QuestionDTO | null = useMemo(() => {
-		return session.questions?.[0] || null;
-	}, [session.questions]);
+		return session?.questions?.[0] || null;
+	}, [session?.questions]);
 
 	const userData = useMemo(() => {
 		return {
-			answers: session.questions?.reduce((accum, it) => {
-				const qAction = userActions.find((it) => it.questionId === it.questionId);
+			answers: session?.questions?.reduce((accum, it) => {
+				const qAction = userActions?.find((it) => it.questionId === it.questionId);
 
 				accum[it.id] = qAction?.data?.value;
 
 				return accum;
 			}, {} as { [questionId: string]: string | undefined }),
 		};
-	}, [session.questions, userActions]);
+	}, [session?.questions, userActions]);
 
 	const getQuestionAnswer = (questionId?: string) => {
 		if (questionId == null) {
@@ -60,15 +62,19 @@ export function SessionViewPublished({ session }: SessionViewPublishedProps) {
 	const [selectedAnswer, setSelectedAnswer] = useState<string | undefined>(currentAnswer);
 
 	useEffect(() => {
-		if (selectedAnswer != null) {
-			return;
-		}
-
 		const qAnswer = getQuestionAnswer(question?.id);
 
 		if (qAnswer != null) {
-			setSelectedAnswer(qAnswer);
+			dispatch?.({ type: 'SET_USER_PROGRESS', payload: 1 });
+		} else {
+			dispatch?.({ type: 'SET_USER_PROGRESS', payload: 0 });
 		}
+
+		if (selectedAnswer != null || qAnswer == null) {
+			return;
+		}
+
+		setSelectedAnswer(qAnswer);
 	}, [selectedAnswer, userData]);
 
 	const questionOptions = useMemo(() => {
@@ -108,7 +114,7 @@ export function SessionViewPublished({ session }: SessionViewPublishedProps) {
 		// TODO: Update the session state to 'Answered'
 		// TODO: Update the user's bid if required
 
-		if (!question?.id || !selectedAnswer) {
+		if (!session || !question?.id || !selectedAnswer) {
 			return;
 		}
 
@@ -129,7 +135,7 @@ export function SessionViewPublished({ session }: SessionViewPublishedProps) {
 	};
 
 	const handleCancelAnswer = () => {
-		if (!question?.id || !currentAnswer) {
+		if (!session || !question?.id || !currentAnswer) {
 			return;
 		}
 
@@ -187,7 +193,7 @@ export function SessionViewPublished({ session }: SessionViewPublishedProps) {
 	return (
 		<div className="flex flex-col gap-8 items-center">
 			<div>
-				<Typography className="font-bold text-center text-2xl" size="custom">
+				<Typography className="font-bold text-center text-3xl" size="custom">
 					{question?.title}
 				</Typography>
 				{question?.description && (

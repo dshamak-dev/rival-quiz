@@ -34,9 +34,9 @@ export function SessionView({ session }: SessionViewProps) {
 			);
 		}
 
-		switch (session.state) {
+		switch (session?.state) {
 			case SessionStateType.Published: {
-				return <SessionViewPublished session={session} />;
+				return <SessionViewPublished />;
 			}
 			case SessionStateType.Draft: {
 				return (
