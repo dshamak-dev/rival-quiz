@@ -6,10 +6,11 @@ import { Typography } from '@view/typography/typography';
 
 export type QuestionOptionsFormProps = {
 	options?: QuestionDTO['options'];
+	disabled?: boolean;
 	onChange?: (options: QuestionDTO['options']) => void;
 };
 
-export function QuestionOptionsForm({ options = [], onChange }: QuestionOptionsFormProps) {
+export function QuestionOptionsForm({ options = [], disabled, onChange }: QuestionOptionsFormProps) {
 	const handleAddOption = () => {
 		if (onChange) {
 			onChange(options.concat(['']));
@@ -33,28 +34,39 @@ export function QuestionOptionsForm({ options = [], onChange }: QuestionOptionsF
 			{options?.length ? (
 				options.map((value, index) => {
 					return (
-						<div key={index} className="grid grid-cols-[1fr_auto] gap-2">
+						<div key={index} className="grid grid-cols-[18px_1fr_auto] gap-2">
+							<div className="mt-6 p-1"><Icon name="CaretRight" size={12} /></div>
 							<TextInput
 								label={`Option ${index + 1}`}
 								required
 								value={value}
+								disabled={disabled}
 								onChange={(e) => handleOptionChange(index, e.target.value)}
 							/>
-							<div
-								onClick={() => handleRemoveOption(index)}
-								className="flex items-center h-full pt-4 cursor-pointer hover:text-amber-600"
-							>
-								<Icon name="Trash" />
-							</div>
+							{disabled ? null : (
+								<div
+									onClick={() => handleRemoveOption(index)}
+									className="flex items-center h-full pt-4 cursor-pointer hover:text-amber-600"
+								>
+									<Icon name="Trash" />
+								</div>
+							)}
 						</div>
 					);
 				})
 			) : (
 				<Typography className="text-xs text-gray-400">No options</Typography>
 			)}
-			<Button onClick={handleAddOption} className="flex gap-1 items-center w-fit" size="small">
-				<Icon name="PlusCircle" /> Add Option
-			</Button>
+			{disabled ? null : (
+				<Button
+					disabled={disabled}
+					onClick={handleAddOption}
+					className="flex gap-1 items-center w-fit"
+					size="small"
+				>
+					<Icon name="PlusCircle" /> Add Option
+				</Button>
+			)}
 		</div>
 	);
 }

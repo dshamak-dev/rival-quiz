@@ -9,9 +9,10 @@ export type QuestionFormProps = {
 	initialValue: QuestionDTO;
 	onSubmit?: (question: QuestionDTO) => void;
 	disabled?: boolean;
+	onDelete?: () => void;
 };
 
-export function QuestionForm({ initialValue, disabled, onSubmit }: QuestionFormProps) {
+export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: QuestionFormProps) {
 	const [formState, setFormState] = useState({ ...initialValue });
 
 	const isDirty = useMemo(() => {
@@ -60,6 +61,12 @@ export function QuestionForm({ initialValue, disabled, onSubmit }: QuestionFormP
 		});
 	};
 
+	const handleDelete = () => {
+		if (onDelete) {
+			onDelete();
+		}
+	};
+
 	return (
 		<div className="flex flex-col gap-4 p-4" data-id={initialValue?.id}>
 			<div className="flex flex-col gap-4">
@@ -69,6 +76,7 @@ export function QuestionForm({ initialValue, disabled, onSubmit }: QuestionFormP
 					value={formState?.title}
 					defaultValue={initialValue?.title || ''}
 					onChange={(e, value) => handleChange(e.target.name, value)}
+					disabled={disabled}
 				/>
 				<TextInput
 					id="description"
@@ -76,12 +84,21 @@ export function QuestionForm({ initialValue, disabled, onSubmit }: QuestionFormP
 					value={formState?.description || ''}
 					defaultValue={initialValue?.description || ''}
 					onChange={(e, value) => handleChange(e.target.name, value)}
+					disabled={disabled}
 				/>
 			</div>
 			<div>
-				<QuestionOptionsForm options={formState?.options} onChange={handleOptionsChange} />
+				<QuestionOptionsForm disabled={disabled} options={formState?.options} onChange={handleOptionsChange} />
 			</div>
 			<div className="flex justify-end gap-4">
+				{onDelete && (
+					<Button disabled={disabled} size="small" onClick={handleDelete}>
+						Delete
+					</Button>
+				)}
+				<Button size="small" disabled={!isDirty} className="min-w-[100px]" onClick={handleCancel}>
+					Cancel
+				</Button>
 				<Button
 					layout="primary"
 					size="small"
@@ -90,9 +107,6 @@ export function QuestionForm({ initialValue, disabled, onSubmit }: QuestionFormP
 					onClick={handleSubmit}
 				>
 					Save
-				</Button>
-				<Button size="small" disabled={!isDirty} className="min-w-[100px]" onClick={handleCancel}>
-					Cancel
 				</Button>
 			</div>
 		</div>

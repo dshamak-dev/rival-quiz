@@ -6,6 +6,8 @@ import { useSession } from '@state/session.state';
 import classNames from 'classnames';
 import { useAPI } from '@api/api.hook';
 import { findSessionById } from '@api/session.api';
+import { useAuth } from '@state/auth.hook';
+import { useNavigate } from '@remix-run/react';
 
 // TODO: Implement actual progress tracking and state updates
 const progressBar = {
@@ -27,6 +29,8 @@ const progressBar = {
 
 export function SessionViewHeader() {
 	const { session, userProgress = 0, dispatch } = useSession();
+	const { user } = useAuth();
+	const natigate = useNavigate();
 	const { loading, dispatch: fetchSession } = useAPI({
 		initialState: null,
 		request: (id: string) => findSessionById(id),
@@ -44,6 +48,10 @@ export function SessionViewHeader() {
 		}
 	}, [session?.state, userProgress]);
 
+	const isSessionAdmin = useMemo(() => {
+		return user?.id === session?.ownerId;
+	}, [user?.id, session?.ownerId]);
+
 	if (!session) {
 		return null;
 	}
@@ -57,21 +65,33 @@ export function SessionViewHeader() {
 					</Typography>
 					{session.description && <Typography className="text-xs">{session.description}</Typography>}
 				</div>
-				<div
-					className="p-2 cursor-pointer opacity-50 hover:opacity-100"
-					onClick={() => {
-						fetchSession(session.id).then((res) => {
-							dispatch?.({ type: 'SET_SESSION', payload: res });
-						});
-					}}
-				>
-					<Icon
-						name="ArrowClockwise"
-						size={24}
-						className={classNames({
-							'animate-spin': loading,
-						})}
-					/>
+				<div className="flex items-center gap-2">
+					{isSessionAdmin && (
+						<div
+							className="p-2 cursor-pointer opacity-50 hover:opacity-100"
+							onClick={() => {
+								natigate(`/profile/sessions/${session.id}`);
+							}}
+						>
+							<Icon name="Pencil" size={18} />
+						</div>
+					)}
+					<div
+						className="p-2 cursor-pointer opacity-50 hover:opacity-100"
+						onClick={() => {
+							fetchSession(session.id).then((res) => {
+								dispatch?.({ type: 'SET_SESSION', payload: res });
+							});
+						}}
+					>
+						<Icon
+							name="ArrowClockwise"
+							size={18}
+							className={classNames({
+								'animate-spin': loading,
+							})}
+						/>
+					</div>
 				</div>
 			</div>
 			<div

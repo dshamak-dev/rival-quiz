@@ -13,6 +13,7 @@ export class Session implements SessionType {
 	questions?: QuestionDTO[] = [];
 	image?: string = undefined;
 	betType?: SessionBetType;
+	users?: ID[] = [];
 
 	constructor(data: SessionType | undefined) {
 		Object.assign(this, data);

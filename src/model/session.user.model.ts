@@ -2,6 +2,11 @@ import { ID } from './api.model';
 
 export type SessionUserActionDTO = SessionUserActionPayload;
 
+export type SessionUserDTO = SessionUserActionPayload & {
+	name: string;
+};
+
+
 export type SessionUserActionPayload = {
 	sessionId: ID;
 	questionId: ID;

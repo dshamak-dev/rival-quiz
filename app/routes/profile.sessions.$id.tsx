@@ -9,10 +9,13 @@ import { Button, ButtonSizeType } from '@view/button/button';
 import { Collapse } from '@view/collapse/collapse';
 import { Icon } from '@view/icon';
 import { QuestionForm } from '@view/question/question.form';
+import { SingleQuestionSessionHeader } from '@view/session/single-question/single-question.controls';
 import { SessionInfoForm } from '@view/session/session.info-form';
 import { Typography } from '@view/typography/typography';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { sessionStateLabels } from 'src/constants/session.constant';
+import { SingleQuestionSessionForm } from '@view/session/single-question/single-question.form';
+import { SessionparticipantsForm } from '@view/session/session.participants-form';
 
 export default function ProfileSessionPage() {
 	const params = useParams();
@@ -135,8 +138,6 @@ export default function ProfileSessionPage() {
 			return <div>Session not found</div>;
 		}
 
-		const nowTime = Date.now();
-
 		return (
 			<>
 				<Collapse
@@ -160,119 +161,33 @@ export default function ProfileSessionPage() {
 					title={`Questions (${sessionState?.questions?.length || 0})`}
 					initialState={!sessionState.questions?.length || sessionState.questions.length <= 1}
 				>
-					<div className="flex flex-col gap-6 p-4">
-						{sessionState.questions?.length ? (
-							sessionState.questions.map((question, index) => {
-								const createdTime = new Date(question.createdAt).getTime();
-								const isOpenDefault = nowTime - createdTime <= 5000;
-
-								return (
-									<Collapse
-										initialState={isOpenDefault}
-										key={question.id}
-										title={
-											<div className="w-full flex gap-2 justify-between items-center">
-												<div className="flex gap-2 items-center">
-													<Icon name="QuestionSquareFill" />
-													<Typography>{`Question ${index + 1}`}</Typography>
-												</div>
-
-												<div
-													onClick={(e) => {
-														e.stopPropagation();
-														handleDeleteQuestion(question.id);
-													}}
-												>
-													<Icon name="Trash" />
-												</div>
-											</div>
-										}
-									>
-										<QuestionForm
-											initialValue={question}
-											disabled={isBusy}
-											onSubmit={(questionData) =>
-												handleUpdate(`questions.${question.id}`, questionData)
-											}
-										/>
-									</Collapse>
-								);
-							})
-						) : (
-							<Typography className="text-xs">No questions</Typography>
-						)}
-						<div>
-							<Button
-								layout="tertiary"
-								size="small"
-								className="flex gap-2 items-center"
-								onClick={() => {
-									handleAddQuestion();
-								}}
-							>
-								<Icon name="PlusCircle" />
-								Add question
-							</Button>
-						</div>
-					</div>
+					<SingleQuestionSessionForm
+						session={sessionState}
+						loading={loading || isBusy}
+						onUpdate={handleUpdate}
+						onAdd={handleAddQuestion}
+						onDelete={handleDeleteQuestion}
+					/>
 				</Collapse>
 
-				<Collapse title="Participants" initialState={true}>
-					<div className="p-4">
-						<Typography className="text-xs">No participants</Typography>
-					</div>
+				<Collapse
+					title={`Participants (${sessionState?.users?.length || 0})`}
+					initialState={!sessionState?.users?.length || sessionState.users.length < 3}
+				>
+					<SessionparticipantsForm
+						session={sessionState}
+						loading={loading || isBusy}
+						onUpdate={handleUpdate}
+					/>
 				</Collapse>
 			</>
 		);
-	}, [sessionState, loading, isBusy, handleAddQuestion]);
+	}, [sessionState, loading, isBusy, handleAddQuestion, handleDeleteQuestion]);
 
 	const controls = useMemo(() => {
-		const buttonCommonProps: { className: string; size: ButtonSizeType; disabled: boolean } = {
-			size: 'small',
-			className: 'min-w-[100px]',
-			disabled: isBusy || loading,
-		};
-
-		switch (sessionState?.state) {
-			case SessionStateType.Draft: {
-				const canPublish = !!sessionState.questions?.length;
-
-				return (
-					<>
-						<Button
-							{...buttonCommonProps}
-							layout="primary"
-							disabled={!canPublish || buttonCommonProps.disabled}
-							onClick={() => {
-								handleUpdate('info', { state: SessionStateType.Published });
-							}}
-						>
-							Publish
-						</Button>
-						<Button {...buttonCommonProps}>Delete</Button>
-					</>
-				);
-			}
-			case SessionStateType.Published:
-			case SessionStateType.Paused: {
-				return (
-					<>
-						<Button
-							{...buttonCommonProps}
-							layout="primary"
-							onClick={() => {
-								handleUpdate('info', { state: SessionStateType.Draft });
-							}}
-						>
-							Unpublish
-						</Button>
-						<Button {...buttonCommonProps}>Delete</Button>
-					</>
-				);
-			}
-		}
-
-		return null;
+		return (
+			<SingleQuestionSessionHeader session={sessionState} loading={loading || isBusy} onUpdate={handleUpdate} />
+		);
 	}, [sessionState, loading, isBusy]);
 
 	return (

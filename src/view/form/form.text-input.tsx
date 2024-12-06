@@ -17,6 +17,7 @@ export type TextInputProps = {
 	className?: string;
 	defaultValue?: string;
 	size?: TextInputSizeType;
+	disabled?: boolean;
 	onChange?: (e: ChangeEvent<HTMLInputElement>, value: any) => void;
 };
 

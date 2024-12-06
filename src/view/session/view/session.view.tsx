@@ -23,7 +23,7 @@ export function SessionView({ session }: SessionViewProps) {
 	const sessionStateContent = useMemo(() => {
 		if (!user) {
 			return (
-				<div>
+				<div className="flex justify-center">
 					<Anchor href={`/login?continue=${location.href}`}>
 						<Button layout="tertiary" className="flex items-center gap-2 justify-center">
 							<span className="text-sm">Login to Join</span>
