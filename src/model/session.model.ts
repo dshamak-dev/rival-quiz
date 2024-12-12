@@ -42,7 +42,17 @@ export type SessionDTO = {
 	questions?: QuestionDTO[];
 	image?: string;
 	userActions?: SessionUserActionDTO[];
+	users?: ID[];
+	type?: SessionTypes;
+	allowBids?: boolean;
 };
+
+export enum SessionTypes {
+	Single = 'single',
+    Multiple ='multiple',
+    Range = 'range',
+    Auction = 'auction',
+}
 
 export type SessionData = Record<string, any>;
 

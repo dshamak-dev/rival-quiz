@@ -15,7 +15,7 @@ export type SelectProps = {
 	onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
 };
 
-export type SelectOption = { value: string | number; label: string; disabled?: boolean };
+export type SelectOption = { value: string | number; label: string | JSX.Element; disabled?: boolean };
 
 export function Select({ label, options, className, ...props }: SelectProps) {
 	const [selectedAnswer, setSelectedAnswer] = useState<string | number | undefined>(

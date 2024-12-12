@@ -7,10 +7,11 @@ const rootPath = '/sessions';
 
 export async function findSessions(query: string | null = null): Promise<SessionDTO[]> {
 	return WEB_API.get<SessionDTO[]>(`${rootPath}${query ? `?${query}` : ''}`, {}).then((items) =>
-		items?.map(normalizeSessionDTO).filter((it) => {
-			// TODO: show user linked sessions
-			return [SessionStateType.Published].includes(it.state);
-		})
+		items?.map(normalizeSessionDTO)
+		// .filter((it) => {
+		// 	// TODO: show user linked sessions
+		// 	return [SessionStateType.Published].includes(it.state);
+		// })
 	);
 }
 

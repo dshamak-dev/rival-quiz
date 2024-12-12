@@ -197,7 +197,12 @@ export default function ProfileSessionPage() {
 					<Icon name="ArrowLeft" />
 					<Typography className="text-xs">Go Back</Typography>
 				</Anchor>
-				<div className="flex items-center justify-end gap-4">{controls}</div>
+				<div className="flex items-center justify-end gap-4">
+					<Anchor href={`/sessions/${sessionId}`} className="text-xs text-black hover:text-blue-600">
+						<Icon name="Eye" size={18} />
+					</Anchor>
+					{controls}
+				</div>
 			</div>
 			<div className="flex flex-col gap-6">{content}</div>
 		</div>

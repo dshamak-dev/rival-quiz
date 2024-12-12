@@ -3,19 +3,32 @@ import { Typography } from '@view/typography/typography';
 import logoImage from '@assets/logo.png';
 import { Image } from '@view/image/image';
 import { useAPI } from '@api/api.hook';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { findSessions } from '@api/session.api';
 import { SessionList } from '@view/session/session.list';
 import classNames from 'classnames';
 import { useUI } from '@control/ui.control';
+import { SessionStateType } from '@model/session.model';
+import { useAuth } from '@state/auth.hook';
 
 export default function LandingPage() {
+	const { user } = useAuth();
 	const { isMobile } = useUI();
 	const { data, loading, dispatch } = useAPI({ initialState: null, request: () => findSessions().catch(() => []) });
 
 	useEffect(() => {
 		dispatch();
 	}, []);
+
+	const availableSessions = useMemo(() => {
+		return data?.filter((session) => {
+			if (session.users?.includes(user?.id)) {
+				return true;
+			}
+
+			return [SessionStateType.Published].includes(session.state)
+		}) || [];
+	}, [data, user]);
 
 	return (
 		<div className={classNames('min-h-full p-6', {
@@ -30,7 +43,7 @@ export default function LandingPage() {
 			) : (
 				<div className="flex flex-col gap-4">
 					{/* <Typography className="text-lg font-bold">Sessions</Typography> */}
-					<SessionList sessions={data} />
+					<SessionList sessions={availableSessions} />
 				</div>
 			)}
 		</div>

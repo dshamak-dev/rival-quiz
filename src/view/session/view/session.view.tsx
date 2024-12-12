@@ -1,5 +1,5 @@
 import { QuestionDTO } from '@model/question.model';
-import { SessionDTO, SessionStateType } from '@model/session.model';
+import { SessionDTO, SessionStateType, SessionTypes } from '@model/session.model';
 import { useAuth } from '@state/auth.hook';
 import { Anchor } from '@view/anchor';
 import { Button } from '@view/button/button';
@@ -7,7 +7,7 @@ import { Icon } from '@view/icon';
 import { Progress } from '@view/progress/progress';
 import { Typography } from '@view/typography/typography';
 import { useMemo } from 'react';
-import { SessionViewPublished } from './session.view.state-published';
+import { SessionViewSingleQuestion } from './session.view.stingle-quistion';
 import { SessionContextProvider } from '@state/session.state';
 import { SessionViewHeader } from './session.view.header';
 
@@ -34,18 +34,18 @@ export function SessionView({ session }: SessionViewProps) {
 			);
 		}
 
-		switch (session?.state) {
-			case SessionStateType.Published: {
-				return <SessionViewPublished />;
+		switch (session?.type) {
+			case SessionTypes.Single: {
+				return <SessionViewSingleQuestion />;
 			}
-			case SessionStateType.Draft: {
-				return (
-					<div className="flex flex-col gap-8 items-center">
-						<Typography className="text-4xl font-bold text-center">Session is not started yet.</Typography>
-						<Button>Notify me</Button>
-					</div>
-				);
-			}
+			// case SessionStateType.Draft: {
+			// 	return (
+			// 		<div className="flex flex-col gap-8 items-center">
+			// 			<Typography className="text-4xl font-bold text-center">Session is not started yet.</Typography>
+			// 			<Button>Notify me</Button>
+			// 		</div>
+			// 	);
+			// }
 			default: {
 				return (
 					<div className="flex flex-col gap-8 items-center">

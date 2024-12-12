@@ -68,8 +68,16 @@ export function SingleQuestionSessionHeader({ session, loading, onUpdate }: Sing
 					<Button
 						{...buttonCommonProps}
 						onClick={() => {
-							// TOSO: show confirm dialog with answer selection before completing the session
-							// handleUpdate('info', { state: SessionStateType.Completed });
+							onUpdate('info', { state: SessionStateType.Published });
+						}}
+					>
+						Unlock
+					</Button>
+					<Button
+						{...buttonCommonProps}
+						onClick={() => {
+							// TODO: show confirm dialog with answer selection before completing the session
+							// onUpdate('info', { state: SessionStateType.Completed });
 						}}
 						layout="primary"
 					>

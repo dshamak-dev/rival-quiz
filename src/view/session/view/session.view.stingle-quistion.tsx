@@ -3,17 +3,18 @@ import { Button } from '@view/button/button';
 import { Typography } from '@view/typography/typography';
 import { useEffect, useMemo, useState } from 'react';
 import { SessionViewProps } from './session.view';
-import { Select, SelectOption } from '@view/form/form.select';
+import { SelectOption } from '@view/form/form.select';
 import { useAPI } from '@api/api.hook';
 import { SessionUserActionPayload, SessionUserActionTypes } from '@model/session.user.model';
 import { postSessionUserAction, fetchSessionUserActions } from '@api/session.user.api';
 import { ID } from '@model/api.model';
-import { FormLabel } from '@view/form/form.label';
 import { useSession } from '@state/session.state';
+import { SessionStateType } from '@model/session.model';
+import { RadioList } from '@view/form/form.radio';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
-export function SessionViewPublished() {
+export function SessionViewSingleQuestion() {
 	const { session, dispatch } = useSession();
 	const {
 		data: postData,
@@ -30,6 +31,14 @@ export function SessionViewPublished() {
 		initialState: session?.userActions,
 		request: (sessionId: ID) => fetchSessionUserActions(sessionId),
 	});
+
+	const isLocked = useMemo(() => {
+		if (!session?.state) {
+			return true;
+		}
+
+		return ![SessionStateType.Published].includes(session?.state);
+	}, [session?.state]);
 
 	const question: QuestionDTO | null = useMemo(() => {
 		return session?.questions?.[0] || null;
@@ -79,11 +88,11 @@ export function SessionViewPublished() {
 
 	const questionOptions = useMemo(() => {
 		const options: SelectOption[] = [
-			{
-				label: 'No answer',
-				value: '',
-				disabled: true,
-			},
+			// {
+			// 	label: 'No answer',
+			// 	value: '',
+			// 	disabled: true,
+			// },
 		];
 
 		if (question?.options?.length) {
@@ -129,8 +138,8 @@ export function SessionViewPublished() {
 		});
 	};
 
-	const handleAnswerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const selectedAnswer = e.target.value;
+	const handleAnswerChange = (selectedAnswer: any) => {
+		// const selectedAnswer = e.target.value;
 		setSelectedAnswer(selectedAnswer);
 	};
 
@@ -151,44 +160,49 @@ export function SessionViewPublished() {
 	};
 
 	const content = useMemo(() => {
+		if (session?.state == null) {
+			return null;
+		}
+
 		if (isLoading) {
 			return <div>Loading...</div>;
 		}
 
-		if (currentAnswer == null) {
-			return (
-				<>
-					<Select
-						id="answer"
-						className="w-full border px-2 py-2 rounded"
-						required
-						value={selectedAnswer}
-						options={questionOptions}
-						onChange={handleAnswerChange}
-					/>
-					<Button layout="primary" disabled={!canSave} onClick={handleSave}>
-						Confirm answer
-					</Button>
-				</>
-			);
+		if (!question) {
+			return <div>No question available</div>;
 		}
 
-		return (
-			<>
-				<div>
-					<FormLabel>Your Answer</FormLabel>
-					<Typography size="large" className="text-center">
-						{currentAnswer}
-					</Typography>
-				</div>
-				<Button layout="primary" onClick={handleCancelAnswer}>
-					Cancel Answer
-				</Button>
-			</>
+		const answerVariants = (
+			<RadioList
+				disabled={isLocked}
+				items={questionOptions}
+				value={selectedAnswer}
+				onChange={handleAnswerChange}
+			/>
 		);
 
-		return null;
-	}, [currentAnswer, selectedAnswer, isLoading]);
+		switch (session.state) {
+			case SessionStateType.Published:
+				return (
+					<div className="text-center">
+						{answerVariants}
+						{currentAnswer == null ? (
+							<Button layout="primary" disabled={!canSave} onClick={handleSave}>
+								Confirm answer
+							</Button>
+						) : (
+							<Button layout="primary" onClick={handleCancelAnswer} disabled={!canSave}>
+								Cancel answer
+							</Button>
+						)}
+					</div>
+				);
+			case SessionStateType.Locked:
+			default: {
+				return <div className="text-center">{answerVariants}</div>;
+			}
+		}
+	}, [isLocked, currentAnswer, selectedAnswer, isLoading]);
 
 	return (
 		<div className="flex flex-col gap-8 items-center">
