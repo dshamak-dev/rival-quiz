@@ -26,7 +26,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	// Save session to database
 	// Return session ID or redirect to session page
-	return redirect(`/sessions/${session.id}`);
+	return redirect(`profile/sessions/${session.id}`);
 }
 
 export default function CreateSessionPage() {

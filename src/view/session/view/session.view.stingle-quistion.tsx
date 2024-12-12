@@ -84,7 +84,7 @@ export function SessionViewSingleQuestion() {
 		}
 
 		setSelectedAnswer(qAnswer);
-	}, [selectedAnswer, userData]);
+	}, [userData]);
 
 	const questionOptions = useMemo(() => {
 		const options: SelectOption[] = [
@@ -174,7 +174,7 @@ export function SessionViewSingleQuestion() {
 
 		const answerVariants = (
 			<RadioList
-				disabled={isLocked}
+				disabled={isLocked || currentAnswer != null}
 				items={questionOptions}
 				value={selectedAnswer}
 				onChange={handleAnswerChange}
@@ -184,22 +184,22 @@ export function SessionViewSingleQuestion() {
 		switch (session.state) {
 			case SessionStateType.Published:
 				return (
-					<div className="text-center">
+					<>
 						{answerVariants}
 						{currentAnswer == null ? (
 							<Button layout="primary" disabled={!canSave} onClick={handleSave}>
 								Confirm answer
 							</Button>
 						) : (
-							<Button layout="primary" onClick={handleCancelAnswer} disabled={!canSave}>
+							<Button layout="primary" onClick={handleCancelAnswer}>
 								Cancel answer
 							</Button>
 						)}
-					</div>
+					</>
 				);
 			case SessionStateType.Locked:
 			default: {
-				return <div className="text-center">{answerVariants}</div>;
+				return <>{answerVariants}</>;
 			}
 		}
 	}, [isLocked, currentAnswer, selectedAnswer, isLoading]);

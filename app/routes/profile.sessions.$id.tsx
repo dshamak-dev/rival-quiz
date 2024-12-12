@@ -1,14 +1,12 @@
 import { useAPI } from '@api/api.hook';
-import { findSessionById, patchSession, deleteSessionQuestion, postSessionQuestion } from '@api/session.api';
+import { findSessionById, patchSession, deleteSession, deleteSessionQuestion, postSessionQuestion } from '@api/session.api';
 import { getErrorMessage } from '@control/api.control';
 import { QuestionDTO } from '@model/question.model';
 import { Session, SessionDTO, SessionStateType, SessionType } from '@model/session.model';
-import { useParams } from '@remix-run/react';
+import { useNavigate, useParams } from '@remix-run/react';
 import { Anchor } from '@view/anchor';
-import { Button, ButtonSizeType } from '@view/button/button';
 import { Collapse } from '@view/collapse/collapse';
 import { Icon } from '@view/icon';
-import { QuestionForm } from '@view/question/question.form';
 import { SingleQuestionSessionHeader } from '@view/session/single-question/single-question.controls';
 import { SessionInfoForm } from '@view/session/session.info-form';
 import { Typography } from '@view/typography/typography';
@@ -18,6 +16,7 @@ import { SingleQuestionSessionForm } from '@view/session/single-question/single-
 import { SessionparticipantsForm } from '@view/session/session.participants-form';
 
 export default function ProfileSessionPage() {
+	const navigate = useNavigate();
 	const params = useParams();
 	const { data, loading, dispatch, set } = useAPI({
 		request: (id: SessionDTO['id']) => findSessionById(id),
@@ -30,6 +29,9 @@ export default function ProfileSessionPage() {
 
 	const { loading: isPatching, dispatch: dispatchPatch } = useAPI({
 		request: (payload: any) => patchSession(sessionId as SessionDTO['id'], payload),
+	});
+	const { loading: isDeleting, dispatch: dispatchDelete } = useAPI({
+		request: () => deleteSession(sessionId as SessionDTO['id']),
 	});
 	const { loading: isDeletingQuestion, dispatch: dispatchDeleteQuestion } = useAPI({
 		request: (id: QuestionDTO['id']) => deleteSessionQuestion(sessionId, id),
@@ -75,6 +77,16 @@ export default function ProfileSessionPage() {
 
 		setSessionState(nextState);
 	}, [sessionState, dispatchCreateQuestion]);
+
+	const handleDeleteSession = useCallback(async () => {
+		if (!sessionState) {
+			return;
+		}
+
+		dispatchDelete(sessionState.id).then(() => {
+			navigate('/profile/sessions');
+		});
+	}, [sessionState]);
 
 	const handleDeleteQuestion = useCallback(
 		async (questionId: QuestionDTO['id']) => {
@@ -186,7 +198,12 @@ export default function ProfileSessionPage() {
 
 	const controls = useMemo(() => {
 		return (
-			<SingleQuestionSessionHeader session={sessionState} loading={loading || isBusy} onUpdate={handleUpdate} />
+			<SingleQuestionSessionHeader
+				session={sessionState}
+				loading={loading || isBusy}
+				onUpdate={handleUpdate}
+				onDelete={handleDeleteSession}
+			/>
 		);
 	}, [sessionState, loading, isBusy]);
 

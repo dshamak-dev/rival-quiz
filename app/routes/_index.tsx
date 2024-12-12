@@ -22,7 +22,7 @@ export default function LandingPage() {
 
 	const availableSessions = useMemo(() => {
 		return data?.filter((session) => {
-			if (session.users?.includes(user?.id)) {
+			if (session.users?.includes(user?.id) || session.ownerId === user?.id) {
 				return true;
 			}
 

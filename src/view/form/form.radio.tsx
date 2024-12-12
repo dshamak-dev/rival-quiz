@@ -61,7 +61,7 @@ export function RadioInput({ icons, children, selected, className, disabled, ...
 		<div
 			{...other}
 			className={classNames(
-				'grid grid-cols-[auto_1fr] gap-4',
+				'grid grid-cols-[auto_1fr] gap-4 items-center',
 				{
 					'text-gray-400 cursor-default': disabled,
 					'cursor-pointer': !disabled, 		
@@ -69,7 +69,7 @@ export function RadioInput({ icons, children, selected, className, disabled, ...
 				className
 			)}
 		>
-			<Icon name={icon} size={24} />
+			<Icon name={icon} size={20} />
 			<Typography className="text-left">{children}</Typography>
 		</div>
 	);

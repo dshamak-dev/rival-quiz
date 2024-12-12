@@ -5,9 +5,10 @@ export type SingleQuestionSessionHeaderProps = {
 	session?: Session;
 	loading: boolean;
 	onUpdate: (path: string, value: any) => Promise<SessionDTO>;
+	onDelete?: () => Promise<void>;
 };
 
-export function SingleQuestionSessionHeader({ session, loading, onUpdate }: SingleQuestionSessionHeaderProps) {
+export function SingleQuestionSessionHeader({ session, loading, onUpdate, onDelete }: SingleQuestionSessionHeaderProps) {
 	const buttonCommonProps: { className: string; size: ButtonSizeType; disabled: boolean } = {
 		size: 'small',
 		className: 'min-w-[100px]',
@@ -32,7 +33,7 @@ export function SingleQuestionSessionHeader({ session, loading, onUpdate }: Sing
 					>
 						Publish
 					</Button>
-					<Button {...buttonCommonProps}>Delete</Button>
+					<Button {...buttonCommonProps} onClick={onDelete}>Delete</Button>
 				</>
 			);
 		}
@@ -58,7 +59,7 @@ export function SingleQuestionSessionHeader({ session, loading, onUpdate }: Sing
 					>
 						Lock
 					</Button>
-					<Button {...buttonCommonProps}>Delete</Button>
+					<Button {...buttonCommonProps} onClick={onDelete}>Delete</Button>
 				</>
 			);
 		}

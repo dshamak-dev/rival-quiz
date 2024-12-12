@@ -63,7 +63,13 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 				defaultValue={initialValue?.description || ''}
 				onChange={(e, value) => handleChange(e.target.name, value)}
 			/>
-			<Select id="bet-type" label="Bet Type" options={sessionBetOptions} defaultValue={formState.betType} />
+			<Select
+				id="bet-type"
+				label="Bet Type"
+				options={sessionBetOptions}
+				defaultValue={formState.betType}
+				className="flex flex-col"
+			/>
 
 			<div className="flex justify-end gap-4">
 				<Button
