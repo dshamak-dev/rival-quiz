@@ -107,6 +107,7 @@ export function SessionViewHeader() {
 
 					return (
 						<div
+							key={index}
 							className={classNames('relative h-3 w-full rounded-md border', {
 								'bg-black': isPassed || isActive,
 								'text-black': isActive,

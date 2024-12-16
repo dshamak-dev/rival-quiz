@@ -63,5 +63,6 @@ export function normalizeSessionDTO(dto: SessionDTO) {
 		...dto,
 		id: dto._id,
 		questions: dto.questions ? dto.questions.map(normalizeQuesionDTO) : [],
+		data: dto.data
 	};
 }

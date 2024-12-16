@@ -56,6 +56,29 @@ export function SessionViewSingleQuestion() {
 		};
 	}, [session?.questions, userActions]);
 
+	const sessionData: any = useMemo(() => {
+		const _data = {
+			totalUsers: 0,
+			votesByQuestion: {},
+		};
+
+		if (session?.data) {
+			_data.totalUsers = session.data.totalUsers;
+
+			_data.votesByQuestion = session.data.votesByQuestion;
+		}
+
+		return _data;
+	}, [session?.data, userData]);
+
+	const questionData = useMemo(() => {
+		if (!question || !sessionData?.votesByQuestion) {
+			return null;
+		}
+
+		return sessionData.votesByQuestion[question.id] || null;
+	}, [question, sessionData]);
+
 	const getQuestionAnswer = (questionId?: string) => {
 		if (questionId == null) {
 			return;
@@ -69,6 +92,17 @@ export function SessionViewSingleQuestion() {
 	}, [question?.id, userData]);
 
 	const [selectedAnswer, setSelectedAnswer] = useState<string | undefined>(currentAnswer);
+
+	const userPrizePart = useMemo(() => {
+		if (!questionData || !selectedAnswer) {
+			return 0;
+		}
+
+		const totalVotes = questionData?.totalVotes || 0;
+		const userTargetOption = questionData.totalByAnswers[selectedAnswer] || 0;
+
+		return userTargetOption / totalVotes;
+	}, [sessionData, questionData]);
 
 	useEffect(() => {
 		const qAnswer = getQuestionAnswer(question?.id);
@@ -95,17 +129,41 @@ export function SessionViewSingleQuestion() {
 			// },
 		];
 
-		if (question?.options?.length) {
+		if (!question) {
+			return options;
+		}
+
+		if (question.options?.length) {
+			const totalByAnswers = questionData?.totalByAnswers;
+			const totalVotes = questionData?.totalVotes || 0;
+
 			question.options.forEach((it, index) => {
-				options.push({
+				const _option: SelectOption = {
 					label: it,
 					value: it,
-				});
+				};
+
+				if (questionData) {
+					const _itVotes = totalByAnswers[it] || 0;
+					const progress = _itVotes / totalVotes;
+
+					_option.label = (
+						<div className="flex gap-4 items-center">
+							<span>{_option.label}</span>
+							<Typography size="small">{progress * 100}%</Typography>
+							<Typography size="small">
+								{_itVotes}/{totalVotes}
+							</Typography>
+						</div>
+					);
+				}
+
+				options.push(_option);
 			});
 		}
 
 		return options;
-	}, [question?.options]);
+	}, [question?.options, questionData]);
 
 	const isLoading = useMemo(() => {
 		return loading || loadingUserData;
@@ -197,7 +255,14 @@ export function SessionViewSingleQuestion() {
 						)}
 					</>
 				);
-			case SessionStateType.Locked:
+			case SessionStateType.Locked: {
+				return (
+					<>
+						{answerVariants}
+						{userPrizePart ? <div>Your Share is <b>{userPrizePart * 100}%</b></div> : null}
+					</>
+				);
+			}
 			default: {
 				return <>{answerVariants}</>;
 			}
