@@ -10,13 +10,25 @@ import { useAuth } from '@state/auth.hook';
 import { useNavigate } from '@remix-run/react';
 
 // TODO: Implement actual progress tracking and state updates
+export enum ProgressStage {
+	Lobby = 0,
+	Question = 1,
+	Pending = 2,
+	Processing = 3,
+	Results = 4,
+	Summary = 5,
+}
+
 const progressBar = {
 	stages: [
+		{
+			label: 'Waiting for participants',
+		},
 		{
 			label: 'Waiting for answers...',
 		},
 		{
-			label: 'Waiting for people...',
+			label: 'Waiting for people to answer',
 		},
 		{
 			label: 'Waiting for results...',
@@ -40,11 +52,11 @@ export function SessionViewHeader() {
 	const stageIndex = useMemo(() => {
 		switch (session?.state) {
 			case SessionStateType.Locked:
-				return Math.max(2, userProgress);
+				return Math.max(ProgressStage.Processing, userProgress);
 			case SessionStateType.Published:
 			case SessionStateType.Draft:
 			default:
-				return Math.max(0, userProgress);
+				return Math.max(ProgressStage.Lobby, userProgress);
 		}
 	}, [session?.state, userProgress]);
 

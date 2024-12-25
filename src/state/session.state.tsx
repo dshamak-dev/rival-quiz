@@ -1,3 +1,4 @@
+import { addSessionUser, removeSessionUser } from '@api/session.api';
 import { SessionDTO } from '@model/session.model';
 import { createContext, useContext, useEffect, useReducer, useState } from 'react';
 
@@ -5,6 +6,8 @@ interface IState {
 	session?: SessionDTO;
 	userProgress?: number;
 	dispatch?: (action: Action) => void;
+	join?: () => void;
+	leave?: () => void;
 }
 
 type Action =
@@ -16,6 +19,19 @@ export const SessionContext = createContext<IState>({ session: undefined });
 
 export function SessionContextProvider({ value, children }: { value: SessionDTO; children: React.ReactNode }) {
 	const [state, dispatch] = useReducer(reducer, { session: value, userProgress: 0 });
+	const sessionId = state.session?.id;
+
+	const join = async () => {
+		if (sessionId) {
+			addSessionUser(sessionId).then((res) => dispatch({ type: 'SET_SESSION', payload: res }));
+		}
+	};
+
+	const leave = async () => {
+		if (sessionId) {
+			removeSessionUser(sessionId).then((res) => dispatch({ type: 'SET_SESSION', payload: res }));
+		}
+	};
 
 	useEffect(() => {
 		if (value) {
@@ -23,7 +39,7 @@ export function SessionContextProvider({ value, children }: { value: SessionDTO;
 		}
 	}, [value]);
 
-	return <SessionContext.Provider value={{ ...state, dispatch }}>{children}</SessionContext.Provider>;
+	return <SessionContext.Provider value={{ ...state, join, leave, dispatch }}>{children}</SessionContext.Provider>;
 }
 
 function reducer(state: IState, action: Action) {

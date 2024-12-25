@@ -9,13 +9,16 @@ import { SessionUserActionPayload, SessionUserActionTypes } from '@model/session
 import { postSessionUserAction, fetchSessionUserActions } from '@api/session.user.api';
 import { ID } from '@model/api.model';
 import { useSession } from '@state/session.state';
-import { SessionStateType } from '@model/session.model';
+import { SessionDTO, SessionStateType } from '@model/session.model';
 import { RadioList } from '@view/form/form.radio';
+import { useAuth } from '@state/auth.hook';
+import { addSessionUser } from '@api/session.api';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
 export function SessionViewSingleQuestion() {
-	const { session, dispatch } = useSession();
+	const { session, dispatch, join, leave } = useSession();
+	const { user, isLoggedIn } = useAuth();
 	const {
 		data: postData,
 		loading,
@@ -32,17 +35,29 @@ export function SessionViewSingleQuestion() {
 		request: (sessionId: ID) => fetchSessionUserActions(sessionId),
 	});
 
-	const isLocked = useMemo(() => {
-		if (!session?.state) {
-			return true;
+	const hasJoined = useMemo(() => {
+		if (!isLoggedIn || !user) {
+			return false;
 		}
 
-		return ![SessionStateType.Published].includes(session?.state);
-	}, [session?.state]);
+		return session?.users?.includes(user?.id);
+	}, [isLoggedIn, user, session?.users]);
+
+	const canAnswer = useMemo(() => {
+		if (!session?.state || !hasJoined) {
+			return false;
+		}
+
+		return [SessionStateType.Active].includes(session.state);
+	}, [session?.state, hasJoined]);
 
 	const question: QuestionDTO | null = useMemo(() => {
+		if (!session?.state || ![SessionStateType.Active, SessionStateType.Locked].includes(session.state)) {
+			return null;
+		}
+
 		return session?.questions?.[0] || null;
-	}, [session?.questions]);
+	}, [session?.state, session?.questions]);
 
 	const userData = useMemo(() => {
 		return {
@@ -179,6 +194,13 @@ export function SessionViewSingleQuestion() {
 		return question?.id && selectedAnswer !== undefined && currentAnswer == null;
 	}, [currentAnswer, question, selectedAnswer]);
 
+	const handleJoinSession = () => {
+		join?.();
+	};
+	const handleLeaveSession = () => {
+		leave?.();
+	};
+
 	const handleSave = () => {
 		// TODO: Save the answer to the session
 		// TODO: Update the session state to 'Answered'
@@ -229,13 +251,9 @@ export function SessionViewSingleQuestion() {
 			return <div>Loading...</div>;
 		}
 
-		if (!question) {
-			return <div>No question available</div>;
-		}
-
 		const answerVariants = (
 			<RadioList
-				disabled={isLocked || currentAnswer != null}
+				disabled={!canAnswer || currentAnswer != null}
 				items={questionOptions}
 				value={selectedAnswer}
 				onChange={handleAnswerChange}
@@ -243,7 +261,25 @@ export function SessionViewSingleQuestion() {
 		);
 
 		switch (session.state) {
-			case SessionStateType.Published:
+			case SessionStateType.Published: {
+				if (!hasJoined) {
+					return (
+						<div className="flex flex-col gap-2 items-center">
+							<Typography>You need to join the session to proceed</Typography>
+							<Button layout="primary" onClick={() => handleJoinSession()}>
+								Join session
+							</Button>
+						</div>
+					);
+				}
+
+				return (
+					<Button layout="primary" onClick={() => handleLeaveSession()}>
+						Leave session
+					</Button>
+				);
+			}
+			case SessionStateType.Active:
 				return (
 					<>
 						{answerVariants}
@@ -279,7 +315,7 @@ export function SessionViewSingleQuestion() {
 				return <>{answerVariants}</>;
 			}
 		}
-	}, [isLocked, currentAnswer, selectedAnswer, isLoading]);
+	}, [canAnswer, hasJoined, currentAnswer, selectedAnswer, isLoading]);
 
 	return (
 		<div className="flex flex-col gap-8 items-center">
