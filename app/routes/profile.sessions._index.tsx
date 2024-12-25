@@ -87,14 +87,16 @@ export default function ProfileSessionListPage() {
 				})}
 				<Anchor
 					href="/sessions/create"
-					className={classNames(
-						'flex justify-center items-center gap-2',
-						'p-2 text-sm text-gray-500 hover:text-sky-600 ',
-						'border hover:border-sky-600 cursor-pointer'
-					)}
+					// className={classNames(
+					// 	'flex justify-center items-center gap-2',
+					// 	'p-2 text-sm text-gray-500 hover:text-sky-600 ',
+					// 	'border hover:border-sky-600 cursor-pointer'
+					// )}
 				>
-					<Icon name="PlusCircle" />
-					<span>Add New Session</span>
+					<Button layout="primary" size="small" className={classNames('w-full flex justify-center items-center gap-2')}>
+						<Icon name="PlusCircle" />
+						<span>Create New Session</span>
+					</Button>
 				</Anchor>
 			</div>
 		);

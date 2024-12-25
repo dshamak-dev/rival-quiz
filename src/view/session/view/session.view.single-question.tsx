@@ -93,15 +93,20 @@ export function SessionViewSingleQuestion() {
 
 	const [selectedAnswer, setSelectedAnswer] = useState<string | undefined>(currentAnswer);
 
-	const userPrizePart = useMemo(() => {
+	const prizeData = useMemo(() => {
 		if (!questionData || !selectedAnswer) {
 			return 0;
 		}
 
 		const totalVotes = questionData?.totalVotes || 0;
 		const userTargetOption = questionData.totalByAnswers[selectedAnswer] || 0;
+		const userShare = 1 / userTargetOption;
 
-		return userTargetOption / totalVotes;
+		return {
+			userShare,
+			userTotal: totalVotes * userShare,
+			totalPoints: totalVotes,
+		};
 	}, [sessionData, questionData]);
 
 	useEffect(() => {
@@ -148,12 +153,10 @@ export function SessionViewSingleQuestion() {
 					const progress = _itVotes / totalVotes;
 
 					_option.label = (
-						<div className="flex gap-4 items-center">
-							<span>{_option.label}</span>
+						<div className="flex gap-2 items-center">
+							<Typography>{_option.label}</Typography>
+							<span>-</span>
 							<Typography size="small">{progress * 100}%</Typography>
-							<Typography size="small">
-								{_itVotes}/{totalVotes}
-							</Typography>
 						</div>
 					);
 				}
@@ -259,7 +262,16 @@ export function SessionViewSingleQuestion() {
 				return (
 					<>
 						{answerVariants}
-						{userPrizePart ? <div>Your Share is <b>{userPrizePart * 100}%</b></div> : null}
+						{prizeData ? (
+							<div className="px-8 py-4 bg-gray-100 rounded text-center">
+								<div>
+									Your share is <b>{prizeData.userShare * 100}%</b>
+								</div>
+								<div>
+									Prize is <b>{prizeData.userTotal}</b> points
+								</div>
+							</div>
+						) : null}
 					</>
 				);
 			}

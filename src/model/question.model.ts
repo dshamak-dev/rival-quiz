@@ -10,6 +10,7 @@ export type QuestionDTO = {
 	answer?: string;
 	createdAt: DateType;
 	updatedAt?: DateType;
+	hasAnswer?: boolean;
 };
 
 export enum QuestionType {

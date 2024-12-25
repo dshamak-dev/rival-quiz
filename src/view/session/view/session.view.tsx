@@ -1,13 +1,12 @@
 import { QuestionDTO } from '@model/question.model';
-import { SessionDTO, SessionStateType, SessionTypes } from '@model/session.model';
+import { SessionDTO, SessionTypes } from '@model/session.model';
 import { useAuth } from '@state/auth.hook';
 import { Anchor } from '@view/anchor';
 import { Button } from '@view/button/button';
 import { Icon } from '@view/icon';
-import { Progress } from '@view/progress/progress';
 import { Typography } from '@view/typography/typography';
 import { useMemo } from 'react';
-import { SessionViewSingleQuestion } from './session.view.stingle-quistion';
+import { SessionViewSingleQuestion } from './session.view.single-question';
 import { SessionContextProvider } from '@state/session.state';
 import { SessionViewHeader } from './session.view.header';
 

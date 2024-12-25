@@ -67,7 +67,7 @@ const getRoadmapItems = (): {
 		progress: false,
 	},
 	{
-		date: '2024-12-01',
+		date: '2024-12-30',
 		title: 'Add Single Question No-Bet quiz',
 		description: 'Create wireframes, design mockups, and finish development',
 		icon: 'Question',

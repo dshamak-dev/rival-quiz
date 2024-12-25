@@ -1,14 +1,21 @@
-import { Session, SessionDTO, SessionStateType } from '@model/session.model';
+import { SessionDTO, SessionStateType } from '@model/session.model';
 import { Button, ButtonSizeType } from '@view/button/button';
+import { ModalButton } from '@view/modal/modal.button';
+import { SingleQuestionCompleteForm } from './single-question.complete-form';
 
 export type SingleQuestionSessionHeaderProps = {
-	session?: Session;
+	session?: SessionDTO;
 	loading: boolean;
 	onUpdate: (path: string, value: any) => Promise<SessionDTO>;
 	onDelete?: () => Promise<void>;
 };
 
-export function SingleQuestionSessionHeader({ session, loading, onUpdate, onDelete }: SingleQuestionSessionHeaderProps) {
+export function SingleQuestionSessionHeader({
+	session,
+	loading,
+	onUpdate,
+	onDelete,
+}: SingleQuestionSessionHeaderProps) {
 	const buttonCommonProps: { className: string; size: ButtonSizeType; disabled: boolean } = {
 		size: 'small',
 		className: 'min-w-[100px]',
@@ -33,12 +40,13 @@ export function SingleQuestionSessionHeader({ session, loading, onUpdate, onDele
 					>
 						Publish
 					</Button>
-					<Button {...buttonCommonProps} onClick={onDelete}>Delete</Button>
+					<Button {...buttonCommonProps} onClick={onDelete}>
+						Delete
+					</Button>
 				</>
 			);
 		}
-		case SessionStateType.Published:
-		case SessionStateType.Paused: {
+		case SessionStateType.Published: {
 			return (
 				<>
 					<Button
@@ -53,13 +61,34 @@ export function SingleQuestionSessionHeader({ session, loading, onUpdate, onDele
 						{...buttonCommonProps}
 						layout="primary"
 						onClick={() => {
+							onUpdate('info', { state: SessionStateType.Active });
+						}}
+						disabled={!participantsNumber || participantsNumber < 2}
+					>
+						Start
+					</Button>
+					<Button {...buttonCommonProps} onClick={onDelete}>
+						Delete
+					</Button>
+				</>
+			);
+		}
+		case SessionStateType.Active: {
+			return (
+				<>
+					<Button
+						{...buttonCommonProps}
+						layout="primary"
+						onClick={() => {
 							onUpdate('info', { state: SessionStateType.Locked });
 						}}
 						disabled={!participantsNumber || participantsNumber < 2}
 					>
 						Lock
 					</Button>
-					<Button {...buttonCommonProps} onClick={onDelete}>Delete</Button>
+					{/* <Button {...buttonCommonProps} onClick={onDelete}>
+						Delete
+					</Button> */}
 				</>
 			);
 		}
@@ -74,16 +103,20 @@ export function SingleQuestionSessionHeader({ session, loading, onUpdate, onDele
 					>
 						Unlock
 					</Button>
-					<Button
-						{...buttonCommonProps}
-						onClick={() => {
-							// TODO: show confirm dialog with answer selection before completing the session
-							// onUpdate('info', { state: SessionStateType.Completed });
+					<ModalButton
+						title="Confirm completion"
+						buttonProps={{
+							...buttonCommonProps,
+							onClick: () => {
+								// TODO: show confirm dialog with answer selection before completing the session
+								// onUpdate('info', { state: SessionStateType.Completed });
+							},
+							layout: 'primary',
+							children: 'Complete',
 						}}
-						layout="primary"
 					>
-						Complete
-					</Button>
+						<SingleQuestionCompleteForm session={session} />
+					</ModalButton>
 				</>
 			);
 		}

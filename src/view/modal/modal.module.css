@@ -1,0 +1,30 @@
+.overlay {
+	@apply fixed top-0 left-0 flex items-center justify-center h-screen;
+	
+	width: 100%;
+	z-index: 5;
+	background: #0006;
+}
+
+.container {
+	@apply flex flex-col gap-4 items-center;
+	@apply relative py-4 px-8 max-w-full min-w-[420px];
+	@apply  bg-white;
+
+	& .close {
+		@apply absolute top-2 right-2 text-black;
+        cursor: pointer;
+	}
+
+	& .header {
+        @apply relative w-full flex justify-center items-center px-8;
+    }
+
+	& .content {
+        @apply w-full py-2;
+    }
+
+	& .footer {
+		@apply flex gap-4 justify-end w-full;	
+	}
+}

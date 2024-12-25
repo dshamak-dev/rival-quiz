@@ -2,7 +2,7 @@ import { useAPI } from '@api/api.hook';
 import { findSessionById, patchSession, deleteSession, deleteSessionQuestion, postSessionQuestion } from '@api/session.api';
 import { getErrorMessage } from '@control/api.control';
 import { QuestionDTO } from '@model/question.model';
-import { Session, SessionDTO, SessionStateType, SessionType } from '@model/session.model';
+import { SessionDTO, SessionStateType } from '@model/session.model';
 import { useNavigate, useParams } from '@remix-run/react';
 import { Anchor } from '@view/anchor';
 import { Collapse } from '@view/collapse/collapse';
@@ -14,6 +14,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { sessionStateLabels } from 'src/constants/session.constant';
 import { SingleQuestionSessionForm } from '@view/session/single-question/single-question.form';
 import { SessionparticipantsForm } from '@view/session/session.participants-form';
+import { Session } from '@model/session';
+
+type StateType = SessionDTO | undefined;
 
 export default function ProfileSessionPage() {
 	const navigate = useNavigate();
@@ -39,7 +42,7 @@ export default function ProfileSessionPage() {
 	const { loading: isCreatingQuestion, dispatch: dispatchCreateQuestion } = useAPI({
 		request: () => postSessionQuestion(sessionId as SessionDTO['id'], null),
 	});
-	const [sessionState, setSessionState] = useState<Session | undefined>(undefined);
+	const [sessionState, setSessionState] = useState<StateType>(undefined);
 
 	const isBusy = useMemo(() => {
 		return loading || isPatching || isDeletingQuestion || isCreatingQuestion;
@@ -55,7 +58,8 @@ export default function ProfileSessionPage() {
 
 	useEffect(() => {
 		if (data) {
-			setSessionState(new Session(data));
+			const _it = new Session(data).json;
+			setSessionState(_it);
 		}
 	}, [data]);
 
@@ -67,7 +71,7 @@ export default function ProfileSessionPage() {
 		}
 
 		const state = sessionState ? { ...sessionState } : {};
-		const nextState = new Session(state as SessionType);
+		const nextState = new Session(state as SessionDTO).json;
 
 		if (!nextState.questions) {
 			nextState.questions = [];
@@ -99,9 +103,9 @@ export default function ProfileSessionPage() {
 				});
 
 			if (ok) {
-				setSessionState((current) => {
+				setSessionState((current: any) => {
 					const next = current ? { ...current } : new Session(current);
-					const questions = current?.questions?.filter((it) => it.id != questionId) || [];
+					const questions = current?.questions?.filter((it: QuestionDTO) => it.id != questionId) || [];
 
 					return { ...next, questions };
 				});
@@ -112,7 +116,7 @@ export default function ProfileSessionPage() {
 
 	const handleUpdate = (path: string, value: any) => {
 		return dispatchPatch({ path, value }).then((res) => {
-			setSessionState((current) => {
+			setSessionState((current: any) => {
 				let next = current ? { ...current } : new Session(current);
 				const [target, targetId] = path.split('.');
 
@@ -120,7 +124,7 @@ export default function ProfileSessionPage() {
 					case 'questions': {
 						const questions = next.questions || [value];
 
-						next = { ...next, questions: questions.map((it) => (it.id === targetId ? value : it)) };
+						next = { ...next, questions: questions.map((it: QuestionDTO) => (it.id === targetId ? value : it)) };
 						break;
 					}
 					default: {
@@ -159,7 +163,7 @@ export default function ProfileSessionPage() {
 					initialState={[
 						SessionStateType.Draft,
 						SessionStateType.Published,
-						SessionStateType.Paused,
+						SessionStateType.Active,
 					].includes(sessionState.state)}
 				>
 					<SessionInfoForm

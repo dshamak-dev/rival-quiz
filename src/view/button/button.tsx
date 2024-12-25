@@ -25,7 +25,7 @@ export function Button({ className, layout, size = 'base', ...props }: ButtonPro
 	const sizeClassName = useMemo(() => {
 		switch (size) {
 			case 'small':
-				return 'text-xs text-xl py-1 px-4';
+				return 'text-xs text-xl py-2 px-4';
 			case 'large':
 				return 'text-lg text-xl py-2 px-4';
 			default:

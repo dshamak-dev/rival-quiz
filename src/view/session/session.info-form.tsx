@@ -1,16 +1,15 @@
-import { Session, SessionDTO } from '@model/session.model';
+import { SessionDTO } from '@model/session.model';
 import { Button } from '@view/button/button';
-import { FormLabel } from '@view/form/form.label';
 import { Select } from '@view/form/form.select';
 import { TextInput } from '@view/form/form.text-input';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
 import { useEffect, useMemo, useState } from 'react';
-import { sessionBetOptions, sessionStateLabels, sessionStateOptions } from 'src/constants/session.constant';
+import { sessionBetOptions, sessionStateLabels } from 'src/constants/session.constant';
 
 export type SessionInfoFormProps = {
-	initialValue: Session;
-	onSubmit: (session: Session) => void;
+	initialValue: SessionDTO;
+	onSubmit: (session: SessionDTO) => void;
 	disabled?: boolean;
 };
 

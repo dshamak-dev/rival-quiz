@@ -2,23 +2,23 @@ import { DateType, ID } from './api.model';
 import { QuestionDTO } from './question.model';
 import { SessionUserActionDTO } from './session.user.model';
 
-export class Session implements SessionType {
-	id?: ID;
-	description?: string;
-	state: SessionStateType = SessionStateType.Draft;
-	title: string = '';
-	ownerId?: ID;
-	createdAt: DateType = new Date().toISOString();
-	updatedAt?: DateType;
-	questions?: QuestionDTO[] = [];
-	image?: string = undefined;
-	betType?: SessionBetType;
-	users?: ID[] = [];
+// export class Session implements SessionType {
+	// id?: ID;
+	// description?: string;
+	// state: SessionStateType = SessionStateType.Draft;
+	// title: string = '';
+	// ownerId?: ID;
+	// createdAt: DateType = new Date().toISOString();
+	// updatedAt?: DateType;
+	// questions?: QuestionDTO[] = [];
+	// image?: string = undefined;
+	// betType?: SessionBetType;
+	// users?: ID[] = [];
 
-	constructor(data: SessionType | undefined) {
-		Object.assign(this, data);
-	}
-}
+// 	constructor(data: SessionType | undefined) {
+// 		Object.assign(this, data);
+// 	}
+// }
 
 export type SessionType = Omit<SessionDTO, '_id' | 'id' | 'ownerId'>;
 
@@ -30,7 +30,6 @@ export enum SessionBetType {
 }
 
 export type SessionDTO = {
-	_id: ID;
 	id: ID;
 	description?: string;
 	state: SessionStateType;
@@ -45,6 +44,8 @@ export type SessionDTO = {
 	users?: ID[];
 	type?: SessionTypes;
 	allowBids?: boolean;
+	betType?: SessionBetType;
+	hasNextAnswer?: boolean;
 };
 
 export enum SessionTypes {
@@ -59,7 +60,7 @@ export type SessionData = Record<string, any>;
 export enum SessionStateType {
 	Draft = 0,
 	Published = 1,
-	Paused = 2,
+	Active = 2,
 	Canceled = 3,
 	Archived = 4,
 	Locked = 5,

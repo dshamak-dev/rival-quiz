@@ -95,7 +95,7 @@ export function SessionViewHeader() {
 				</div>
 			</div>
 			<div
-				className={classNames(`grid gap-6`)}
+				className={classNames(`grid gap-2 sm:gap-6`)}
 				style={{
 					gridTemplateColumns: `repeat(${progressBar.stages.length}, 1fr)`,
 				}}

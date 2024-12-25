@@ -1,5 +1,5 @@
 import { QuestionDTO } from '@model/question.model';
-import { Session, SessionDTO, SessionStateType } from '@model/session.model';
+import { SessionDTO, SessionStateType } from '@model/session.model';
 import { Button } from '@view/button/button';
 import { Collapse } from '@view/collapse/collapse';
 import { Icon } from '@view/icon';
@@ -7,7 +7,7 @@ import { QuestionForm } from '@view/question/question.form';
 import { Typography } from '@view/typography/typography';
 
 export type SingleQuestionSessionFormProps = {
-	session?: Session;
+	session?: SessionDTO;
 	loading: boolean;
 	onUpdate: (path: string, value: any) => Promise<SessionDTO>;
 	onAdd: () => Promise<void>;
