@@ -1,4 +1,4 @@
-import { SessionStateType } from '@model/session.model';
+import { ProgressStage, SessionStateType } from '@model/session.model';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
 import { useMemo } from 'react';
@@ -10,29 +10,25 @@ import { useAuth } from '@state/auth.hook';
 import { useNavigate } from '@remix-run/react';
 
 // TODO: Implement actual progress tracking and state updates
-export enum ProgressStage {
-	Lobby = 0,
-	Question = 1,
-	Pending = 2,
-	Processing = 3,
-	Results = 4,
-	Summary = 5,
-}
-
 const progressBar = {
 	stages: [
+		// ProgressStage.Lobby
 		{
 			label: 'Waiting for participants',
 		},
+		// ProgressStage.Question
 		{
-			label: 'Waiting for answers...',
+			label: 'Give an answer',
 		},
+		// ProgressStage.Pending
 		{
 			label: 'Waiting for people to answer',
 		},
+		// ProgressStage.Processing
 		{
 			label: 'Waiting for results...',
 		},
+		// ProgressStage.Results
 		{
 			label: 'Results',
 		},
@@ -55,8 +51,9 @@ export function SessionViewHeader() {
 				return Math.max(ProgressStage.Processing, userProgress);
 			case SessionStateType.Published:
 			case SessionStateType.Draft:
-			default:
 				return Math.max(ProgressStage.Lobby, userProgress);
+			default:
+				return Math.max(ProgressStage.Question, userProgress);
 		}
 	}, [session?.state, userProgress]);
 
@@ -115,19 +112,28 @@ export function SessionViewHeader() {
 				{progressBar.stages.map((it, index) => {
 					const isPassed = index < stageIndex;
 					const isActive = index === stageIndex;
-					const isNext = index === stageIndex + 1;
+					// TODO: Implement progress tracking and next state preview
+					const isNext = false; //index === stageIndex + 1;
 
 					return (
 						<div
 							key={index}
-							className={classNames('relative h-3 w-full rounded-md border', {
+							className={classNames('relative flex justify-center h-3 w-full rounded-md border', {
 								'bg-black': isPassed || isActive,
 								'text-black': isActive,
 								'text-gray-400': isNext,
 								'text-transparent': !isActive && !isNext,
 							})}
 						>
-							<Typography className="relative -bottom-3 text-center text-sm pointer-events-none">
+							<Typography
+								className={classNames(
+									'absolute -bottom-6 text-nowrap text-center text-sm pointer-events-none',
+									{
+										'left-0': index === 0,
+										'right-0': index === progressBar.stages.length - 1,
+									}
+								)}
+							>
 								{it.label}
 							</Typography>
 						</div>

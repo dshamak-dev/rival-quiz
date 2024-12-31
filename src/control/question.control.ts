@@ -1,5 +1,5 @@
 import { QuestionDTO } from '@model/question.model';
 
-export function normalizeQuesionDTO({ _id, ...other }: QuestionDTO) {
-	return { ...other, id: _id || other.id };
+export function normalizeQuesionDTO({ _id, ...other }: QuestionDTO): QuestionDTO {
+	return { ...other, id: other.id };
 }

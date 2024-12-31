@@ -4,7 +4,7 @@ import { SelectOption } from '@view/form/form.select';
 export const sessionStateLabels: Record<SessionStateType, string> = {
 	[SessionStateType.Draft]: 'Draft',
 	[SessionStateType.Published]: 'Published',
-	[SessionStateType.Paused]: 'Paused',
+	[SessionStateType.Active]: 'Active',
 	[SessionStateType.Canceled]: 'Canceled',
 	[SessionStateType.Archived]: 'Archived',
 	[SessionStateType.Locked]: 'Locked',

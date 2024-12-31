@@ -1,5 +1,5 @@
 import { addSessionUser, removeSessionUser } from '@api/session.api';
-import { SessionDTO } from '@model/session.model';
+import { ProgressStage, SessionDTO } from '@model/session.model';
 import { createContext, useContext, useEffect, useReducer, useState } from 'react';
 
 interface IState {
@@ -12,7 +12,7 @@ interface IState {
 
 type Action =
 	| { type: 'SET_SESSION'; payload: SessionDTO }
-	| { type: 'SET_USER_PROGRESS'; payload: number }
+	| { type: 'SET_USER_PROGRESS'; payload: ProgressStage }
 	| { type: 'SYNC_STATE'; payload?: undefined };
 
 export const SessionContext = createContext<IState>({ session: undefined });

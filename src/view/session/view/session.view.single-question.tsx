@@ -9,15 +9,21 @@ import { SessionUserActionPayload, SessionUserActionTypes } from '@model/session
 import { postSessionUserAction, fetchSessionUserActions } from '@api/session.user.api';
 import { ID } from '@model/api.model';
 import { useSession } from '@state/session.state';
-import { SessionDTO, SessionStateType } from '@model/session.model';
+import { ProgressStage, SessionDTO, SessionStateType } from '@model/session.model';
 import { RadioList } from '@view/form/form.radio';
 import { useAuth } from '@state/auth.hook';
 import { addSessionUser } from '@api/session.api';
+import { SingleQuestionSession } from '@model/session/single-question';
+import { Icon } from '@view/icon';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
 export function SessionViewSingleQuestion() {
 	const { session, dispatch, join, leave } = useSession();
+
+	const sessionModel = useMemo(() => {
+		return new SingleQuestionSession(session);
+	}, [session]);
 	const { user, isLoggedIn } = useAuth();
 	const {
 		data: postData,
@@ -52,12 +58,12 @@ export function SessionViewSingleQuestion() {
 	}, [session?.state, hasJoined]);
 
 	const question: QuestionDTO | null = useMemo(() => {
-		if (!session?.state || ![SessionStateType.Active, SessionStateType.Locked].includes(session.state)) {
+		if (!sessionModel?.state || ![SessionStateType.Active, SessionStateType.Locked].includes(sessionModel.state)) {
 			return null;
 		}
 
-		return session?.questions?.[0] || null;
-	}, [session?.state, session?.questions]);
+		return sessionModel.getActiveQuestion() || null;
+	}, [sessionModel?.state, sessionModel?.questions]);
 
 	const userData = useMemo(() => {
 		return {
@@ -114,8 +120,8 @@ export function SessionViewSingleQuestion() {
 		}
 
 		const totalVotes = questionData?.totalVotes || 0;
-		const userTargetOption = questionData.totalByAnswers[selectedAnswer] || 0;
-		const userShare = 1 / userTargetOption;
+		const userTargetOption = questionData.totalByAnswers ? questionData.totalByAnswers[selectedAnswer] || 0 : 0;
+		const userShare = userTargetOption ? 1 / userTargetOption : 0;
 
 		return {
 			userShare,
@@ -128,7 +134,7 @@ export function SessionViewSingleQuestion() {
 		const qAnswer = getQuestionAnswer(question?.id);
 
 		if (qAnswer != null) {
-			dispatch?.({ type: 'SET_USER_PROGRESS', payload: 1 });
+			dispatch?.({ type: 'SET_USER_PROGRESS', payload: ProgressStage.Pending });
 		} else {
 			dispatch?.({ type: 'SET_USER_PROGRESS', payload: 0 });
 		}
@@ -164,8 +170,8 @@ export function SessionViewSingleQuestion() {
 				};
 
 				if (questionData) {
-					const _itVotes = totalByAnswers[it] || 0;
-					const progress = _itVotes / totalVotes;
+					const _itVotes = totalByAnswers ? totalByAnswers[it] || 0 : 0;
+					const progress = !totalByAnswers ? 0 : _itVotes / totalVotes;
 
 					_option.label = (
 						<div className="flex gap-2 items-center">
@@ -251,14 +257,14 @@ export function SessionViewSingleQuestion() {
 			return <div>Loading...</div>;
 		}
 
-		const answerVariants = (
+		const answerVariants = question ? (
 			<RadioList
 				disabled={!canAnswer || currentAnswer != null}
 				items={questionOptions}
 				value={selectedAnswer}
 				onChange={handleAnswerChange}
 			/>
-		);
+		) : null;
 
 		switch (session.state) {
 			case SessionStateType.Published: {
@@ -274,9 +280,12 @@ export function SessionViewSingleQuestion() {
 				}
 
 				return (
-					<Button layout="primary" onClick={() => handleLeaveSession()}>
-						Leave session
-					</Button>
+					<div className="flex flex-col gap-2 items-center">
+						<Typography>Please wait, we will start shortly</Typography>
+						<Button layout="primary" onClick={() => handleLeaveSession()}>
+							Leave session
+						</Button>
+					</div>
 				);
 			}
 			case SessionStateType.Active:
@@ -295,6 +304,17 @@ export function SessionViewSingleQuestion() {
 					</>
 				);
 			case SessionStateType.Locked: {
+				if (!answerVariants && !prizeData) {
+					return (
+						<div className='flex flex-col justify-center items-center'>
+							<Icon size={48} name="PiggyBank" className="relative -top-6 animate-bounce" />
+							<Typography className="text-center relative -right-2">
+								Almost done. Calculating results..
+							</Typography>
+						</div>
+					);
+				}
+
 				return (
 					<>
 						{answerVariants}

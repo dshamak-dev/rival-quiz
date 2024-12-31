@@ -1,7 +1,6 @@
 import { SessionDTO, SessionStateType } from '@model/session.model';
 import { Button, ButtonSizeType } from '@view/button/button';
-import { ModalButton } from '@view/modal/modal.button';
-import { SingleQuestionCompleteForm } from './single-question.complete-form';
+import { SessionAdminQuestionAnswerModalButton } from '../admin/session.admin.question-nswer-modal-buttoon';
 
 export type SingleQuestionSessionHeaderProps = {
 	session?: SessionDTO;
@@ -98,25 +97,12 @@ export function SingleQuestionSessionHeader({
 					<Button
 						{...buttonCommonProps}
 						onClick={() => {
-							onUpdate('info', { state: SessionStateType.Published });
+							onUpdate('info', { state: SessionStateType.Active });
 						}}
 					>
 						Unlock
 					</Button>
-					<ModalButton
-						title="Confirm completion"
-						buttonProps={{
-							...buttonCommonProps,
-							onClick: () => {
-								// TODO: show confirm dialog with answer selection before completing the session
-								// onUpdate('info', { state: SessionStateType.Completed });
-							},
-							layout: 'primary',
-							children: 'Complete',
-						}}
-					>
-						<SingleQuestionCompleteForm session={session} />
-					</ModalButton>
+					<SessionAdminQuestionAnswerModalButton session={session} buttonCommonProps={buttonCommonProps} />
 				</>
 			);
 		}

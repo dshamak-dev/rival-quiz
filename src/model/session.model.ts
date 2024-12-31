@@ -67,3 +67,17 @@ export enum SessionStateType {
 	LockedForReview = 6,
 	Completed = 7,
 }
+
+export enum ProgressStage {
+	Lobby = 0,
+	Question = 1,
+	Pending = 2,
+	Processing = 3,
+	Results = 4,
+	Summary = 5,
+}
+
+export type SessionAnswerPayload = {
+	questionId: ID;
+	answer: string;
+};

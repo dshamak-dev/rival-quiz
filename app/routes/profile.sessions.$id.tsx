@@ -1,5 +1,11 @@
 import { useAPI } from '@api/api.hook';
-import { findSessionById, patchSession, deleteSession, deleteSessionQuestion, postSessionQuestion } from '@api/session.api';
+import {
+	findSessionById,
+	patchSession,
+	deleteSession,
+	deleteSessionQuestion,
+	postSessionQuestion,
+} from '@api/session.api';
 import { getErrorMessage } from '@control/api.control';
 import { QuestionDTO } from '@model/question.model';
 import { SessionDTO, SessionStateType } from '@model/session.model';
@@ -15,6 +21,7 @@ import { sessionStateLabels } from 'src/constants/session.constant';
 import { SingleQuestionSessionForm } from '@view/session/single-question/single-question.form';
 import { SessionparticipantsForm } from '@view/session/session.participants-form';
 import { Session } from '@model/session';
+import classNames from 'classnames';
 
 type StateType = SessionDTO | undefined;
 
@@ -62,6 +69,10 @@ export default function ProfileSessionPage() {
 			setSessionState(_it);
 		}
 	}, [data]);
+
+	const handleFetchSession = useCallback(() => {
+		dispatch(sessionId);
+	}, [dispatch]);
 
 	const handleAddQuestion = useCallback(async () => {
 		const question = await dispatchCreateQuestion().catch((err) => null);
@@ -124,7 +135,10 @@ export default function ProfileSessionPage() {
 					case 'questions': {
 						const questions = next.questions || [value];
 
-						next = { ...next, questions: questions.map((it: QuestionDTO) => (it.id === targetId ? value : it)) };
+						next = {
+							...next,
+							questions: questions.map((it: QuestionDTO) => (it.id === targetId ? value : it)),
+						};
 						break;
 					}
 					default: {
@@ -163,7 +177,6 @@ export default function ProfileSessionPage() {
 					initialState={[
 						SessionStateType.Draft,
 						SessionStateType.Published,
-						SessionStateType.Active,
 					].includes(sessionState.state)}
 				>
 					<SessionInfoForm
@@ -216,12 +229,21 @@ export default function ProfileSessionPage() {
 			<div className="flex items-center justify-between gap-6">
 				<Anchor end href="/profile/sessions" className="flex items-center gap-2 text-xs">
 					<Icon name="ArrowLeft" />
-					<Typography className="text-xs">Go Back</Typography>
+					<Typography className="text-xs max-[640px]:hidden">Go Back</Typography>
 				</Anchor>
 				<div className="flex items-center justify-end gap-4">
 					<Anchor href={`/sessions/${sessionId}`} className="text-xs text-black hover:text-blue-600">
 						<Icon name="Eye" size={18} />
 					</Anchor>
+					<div className="p-2 cursor-pointer opacity-50 hover:opacity-100" onClick={handleFetchSession}>
+						<Icon
+							name="ArrowClockwise"
+							size={18}
+							className={classNames({
+								'animate-spin': loading,
+							})}
+						/>
+					</div>
 					{controls}
 				</div>
 			</div>

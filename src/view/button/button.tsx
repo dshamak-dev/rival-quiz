@@ -1,14 +1,16 @@
+import { Icon } from '@view/icon';
 import classNames from 'classnames';
 import { ButtonHTMLAttributes, PropsWithChildren, useMemo } from 'react';
 
 export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
 	layout?: 'primary' | 'secondary' | 'tertiary';
 	size?: ButtonSizeType;
+	loading?: boolean;
 };
 
 export type ButtonSizeType = 'base' | 'small' | 'large';
 
-export function Button({ className, layout, size = 'base', ...props }: ButtonProps) {
+export function Button({ className, layout, size = 'base', loading, children, ...props }: ButtonProps) {
 	const layoutClassName = useMemo(() => {
 		switch (layout) {
 			case 'primary':
@@ -46,6 +48,17 @@ export function Button({ className, layout, size = 'base', ...props }: ButtonPro
 				},
 				className
 			)}
-		/>
+		>
+			{loading ? (
+				<Icon
+					name="ArrowClockwise"
+					size={18}
+					className={classNames({
+						'animate-spin': loading,
+					})}
+				/>
+			) : null}
+			{children}
+		</button>
 	);
 }

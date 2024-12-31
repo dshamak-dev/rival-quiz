@@ -1,7 +1,7 @@
 import { WEB_API } from '@control/api.control';
 import { normalizeQuesionDTO } from '@control/question.control';
 import { QuestionDTO } from '@model/question.model';
-import { SessionDTO } from '@model/session.model';
+import { SessionAnswerPayload, SessionDTO } from '@model/session.model';
 
 const rootPath = '/sessions';
 
@@ -62,7 +62,19 @@ export async function removeSessionUser(sessionId: SessionDTO['id']): Promise<Se
 	return WEB_API.delete<SessionDTO>(`${rootPath}/${sessionId}/user`, {}).then((res) => normalizeSessionDTO(res));
 }
 
-export function normalizeSessionDTO(dto: SessionDTO) {
+export async function PostSessionQuestionAnswer(
+	sessionId: SessionDTO['id'],
+	payload: SessionAnswerPayload
+): Promise<SessionDTO> {
+	return WEB_API.post<SessionDTO>(`${rootPath}/${sessionId}/answer`, {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(payload || {}),
+	}).then((res) => normalizeSessionDTO(res));
+}
+
+export function normalizeSessionDTO(dto: SessionDTO): SessionDTO {
 	return {
 		...dto,
 		questions: dto.questions ? dto.questions.map(normalizeQuesionDTO) : [],
