@@ -4,6 +4,8 @@ export type SessionUserActionDTO = SessionUserActionPayload;
 
 export type SessionUserDTO = SessionUserActionPayload & {
 	name: string;
+	score?: number;
+	bet?: number;
 };
 
 export type SessionUserActionPayload = {

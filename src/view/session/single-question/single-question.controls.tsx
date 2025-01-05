@@ -1,6 +1,7 @@
 import { SessionDTO, SessionStateType } from '@model/session.model';
 import { Button, ButtonSizeType } from '@view/button/button';
 import { SessionAdminQuestionAnswerModalButton } from '../admin/session.admin.question-nswer-modal-buttoon';
+import { SessionAdminResolveButton } from '../admin/session.admin.resolve-button';
 
 export type SingleQuestionSessionHeaderProps = {
 	session?: SessionDTO;
@@ -102,7 +103,14 @@ export function SingleQuestionSessionHeader({
 					>
 						Unlock
 					</Button>
-					<SessionAdminQuestionAnswerModalButton session={session} buttonCommonProps={buttonCommonProps} />
+					<SessionAdminQuestionAnswerModalButton session={session} buttonProps={buttonCommonProps} />
+				</>
+			);
+		}
+		case SessionStateType.LockedForReview: {
+			return (
+				<>
+					<SessionAdminResolveButton session={session} buttonProps={buttonCommonProps} />
 				</>
 			);
 		}

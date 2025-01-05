@@ -8,6 +8,7 @@ type TypographySize = 'small' | 'medium' | 'large' | 'huge' | 'custom';
 interface IProps extends PropsWithChildren<any> {
 	type?: TypographyType;
 	size?: TypographySize;
+	tag?: string;
 }
 
 export function Typography(props: IProps) {
@@ -16,29 +17,31 @@ export function Typography(props: IProps) {
 	}, [props.size]);
 
 	const { tag, className } = useMemo(() => {
+		const tag = props.tag;
+
 		switch (props.type) {
 			case 'h1': {
-				return { tag: 'h1', className: classNames('font-bold', sizeClassName || "text-2xl") };
+				return { tag: tag ?? 'h1', className: classNames('font-bold', sizeClassName || "text-2xl") };
 			}
 			case 'h2': {
 				return {
-					tag: 'h2',
+					tag: tag ?? 'h2',
 					className: classNames('font-semibold', sizeClassName || getSizeClassName('large')),
 				};
 			}
 			case 'h3': {
-				return { tag: 'h3', className: sizeClassName || getSizeClassName('large') };
+				return { tag: tag ?? 'h3', className: sizeClassName || getSizeClassName('large') };
 			}
 			case 'paragraph': {
-				return { tag: 'p', className: sizeClassName || 'text-base' };
+				return { tag: tag ?? 'p', className: sizeClassName || 'text-base' };
 			}
 			default: {
-				return { tag: 'div', className: sizeClassName || 'text-base' };
+				return { tag: tag ?? 'div', className: sizeClassName || 'text-base' };
 			}
 		}
-	}, [props.type, sizeClassName]);
+	}, [props.type, props.tag, sizeClassName]);
 
-	return createElement(tag, {
+	return createElement(tag as string, {
 		...props,
 		className: classNames(className, props.className, sizeClassName),
 	});

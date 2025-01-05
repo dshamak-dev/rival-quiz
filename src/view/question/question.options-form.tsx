@@ -3,14 +3,16 @@ import { Button } from '@view/button/button';
 import { TextInput } from '@view/form/form.text-input';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
+import classNames from 'classnames';
 
 export type QuestionOptionsFormProps = {
 	options?: QuestionDTO['options'];
 	disabled?: boolean;
 	onChange?: (options: QuestionDTO['options']) => void;
+	answer?: QuestionDTO['answer'];
 };
 
-export function QuestionOptionsForm({ options = [], disabled, onChange }: QuestionOptionsFormProps) {
+export function QuestionOptionsForm({ answer, options = [], disabled, onChange }: QuestionOptionsFormProps) {
 	const handleAddOption = () => {
 		if (onChange) {
 			onChange(options.concat(['']));
@@ -33,14 +35,36 @@ export function QuestionOptionsForm({ options = [], disabled, onChange }: Questi
 		<div className="flex flex-col gap-2">
 			{options?.length ? (
 				options.map((value, index) => {
+					const isAnswer = answer === value;
+
 					return (
 						<div key={index} className="grid grid-cols-[18px_1fr_auto] gap-2">
-							<div className="mt-6 p-1"><Icon name="CaretRight" size={12} /></div>
+							<div className="mt-6 p-1">
+								<Icon name="CaretRight" size={12} />
+							</div>
 							<TextInput
-								label={`Option ${index + 1}`}
+								label={
+									<Typography tag="span" size="small" className="inline-flex items-center gap-2">
+										Option {index + 1}
+									</Typography>
+								}
+								postfix={
+									isAnswer && (
+										<Typography
+											tag="span"
+											size="custom"
+											className="ml-2 uppercase font-bold text-xs"
+										>
+											(Answer)
+										</Typography>
+									)
+								}
 								required
 								value={value}
 								disabled={disabled}
+								className={classNames({
+									'text-black': isAnswer,
+								})}
 								onChange={(e) => handleOptionChange(index, e.target.value)}
 							/>
 							{disabled ? null : (

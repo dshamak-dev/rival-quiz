@@ -88,7 +88,7 @@ export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: Que
 				/>
 			</div>
 			<div>
-				<QuestionOptionsForm disabled={disabled} options={formState?.options} onChange={handleOptionsChange} />
+				<QuestionOptionsForm disabled={disabled} answer={formState.answer} options={formState?.options} onChange={handleOptionsChange} />
 			</div>
 			<div className="flex justify-end gap-4">
 				{onDelete && (

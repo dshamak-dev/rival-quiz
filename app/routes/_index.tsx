@@ -30,6 +30,8 @@ export default function LandingPage() {
 		}) || [];
 	}, [data, user]);
 
+	console.log('availableSessions', {data, availableSessions});
+
 	return (
 		<div className={classNames('min-h-full p-6', {
 			'h-full overflow-y-auto': isMobile,

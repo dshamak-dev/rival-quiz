@@ -18,6 +18,7 @@ export class Session implements SessionModelType {
 	users?: ID[] = [];
 	data?: SessionData;
 	hasNextAnswer?: boolean;
+	activeQuestionId?: ID;
 
 	get json(): SessionDTO {
 		return {
@@ -34,6 +35,7 @@ export class Session implements SessionModelType {
 			users: this.users,
 			type: this.data?.type,
 			allowBids: this.data?.allowBids,
+			activeQuestionId: this.data?.activeQuestionId,
 			betType: this.data?.betType,
 		};
 	}
@@ -47,7 +49,13 @@ export class Session implements SessionModelType {
 	}
 
 	getActiveQuestion() {
-		return this.json.questions?.find((question) => !question.hasAnswer);
+		const json = this.json;
+
+		if (json.activeQuestionId) {
+			json.questions?.find((question) => question.id === json.activeQuestionId);
+		}
+
+		return json.questions?.find((question) => !question.hasAnswer);
 	}
 
 	getActiveQuestionIndex() {

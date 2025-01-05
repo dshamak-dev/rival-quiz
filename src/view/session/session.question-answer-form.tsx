@@ -12,10 +12,12 @@ export type SessionQuestionAnswerFormProps = {
 
 export function SessionQuestionAnswerForm({ session, onSubmit, onChange }: SessionQuestionAnswerFormProps) {
 	const [payload, setPayload] = useState<SessionAnswerPayload>({ questionId: '', answer: '' });
+	const sessionModel = useMemo(() => new SingleQuestionSession(session), [session]);
 
 	const question = useMemo(() => {
-		return new SingleQuestionSession(session).getActiveQuestion();
-	}, [session]);
+		return sessionModel.getActiveQuestion();
+	}, [sessionModel]);
+
 	const answerOptions = useMemo(() => {
 		if (!question?.options?.length) {
 			return [

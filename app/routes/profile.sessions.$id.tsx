@@ -225,8 +225,8 @@ export default function ProfileSessionPage() {
 	}, [sessionState, loading, isBusy]);
 
 	return (
-		<div className="min-h-full p-4 grid grid-rows-[auto_1fr] gap-6">
-			<div className="flex items-center justify-between gap-6">
+		<div className="min-h-full p-4 grid grid-rows-[auto_1fr] gap-6 bg-inherit">
+			<div className="sticky top-0 bg-inherit z-10 flex items-center justify-between gap-6">
 				<Anchor end href="/profile/sessions" className="flex items-center gap-2 text-xs">
 					<Icon name="ArrowLeft" />
 					<Typography className="text-xs max-[640px]:hidden">Go Back</Typography>

@@ -25,7 +25,7 @@ export function HeaderMobile() {
 	}
 
 	return (
-		<div className="grid grid-cols-[auto_1fr_auto] gap-4 py-3 px-4 border-b">
+		<div className="sticky top-0 z-20 bg-white grid grid-cols-[auto_1fr_auto] gap-4 py-3 px-4 border-b">
 			<div>
 				{canGoBack ? (
 					<div onClick={() => navigate(-1)}>

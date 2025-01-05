@@ -1,6 +1,7 @@
 import { useAPI } from '@api/api.hook';
 import { getSessionUsers } from '@api/session.user.api';
-import { Session, SessionDTO } from '@model/session.model';
+import { Session } from '@model/session';
+import { SessionDTO } from '@model/session.model';
 import { SessionUserDTO } from '@model/session.user.model';
 import { Button } from '@view/button/button';
 import { Icon } from '@view/icon';
@@ -9,7 +10,7 @@ import classNames from 'classnames';
 import { useEffect } from 'react';
 
 export type SessionparticipantsFormProps = {
-	session?: Session;
+	session?: SessionDTO;
 	loading: boolean;
 	onUpdate: (path: string, value: any) => Promise<SessionDTO>;
 };
@@ -21,13 +22,14 @@ export function SessionparticipantsForm({ session, loading, onUpdate }: Sessionp
 		dispatch: fetchUsers,
 	} = useAPI({
 		initialState: [],
-		request: async (id: SessionDTO['id']) => {
+		request: async (id: SessionDTO['id']): Promise<SessionUserDTO[]> => {
+			// TODO: Replace with actual API call
 			return (
 				session?.users?.map((userId) => {
 					return {
 						userId,
 						name: 'User not found',
-					};
+					} as SessionUserDTO;
 				}) || []
 			);
 
@@ -39,7 +41,7 @@ export function SessionparticipantsForm({ session, loading, onUpdate }: Sessionp
 		if (session?.id && session.users?.length) {
 			fetchUsers(session.id);
 		}
-	}, [session?.id]);
+	}, [session?.id, session?.users]);
 
 	if (!session || !session?.users?.length) {
 		return (
@@ -60,10 +62,10 @@ export function SessionparticipantsForm({ session, loading, onUpdate }: Sessionp
 
 	return (
 		<div className="flex flex-col p-4">
-			{users?.map((user, index) => (
+			{users?.map((user: SessionUserDTO, index: number) => (
 				<Participant
 					key={user.userId}
-					user={user as SessionUserDTO}
+					user={user}
 					className={classNames({
 						'border-t': index !== 0,
 					})}
@@ -73,14 +75,31 @@ export function SessionparticipantsForm({ session, loading, onUpdate }: Sessionp
 	);
 }
 
+function Property({ label, children }: { label: string; children: string | React.ReactNode }) {
+	return (
+		<Typography className="flex gap-2 items-center">
+			<Typography tag="span" className="font-bold">
+				{label}:{' '}
+			</Typography>
+			<Typography tag="span" size="small">
+				{children}
+			</Typography>
+		</Typography>
+	);
+}
+
 function Participant({ user, className }: { user: SessionUserDTO; className: string }) {
 	return (
-		<div className={classNames('grid grid-cols-[1fr_auto] gap-2 items-center w-full items-center py-3', className)}>
-			<div className="flex gap-2 items-center">
-				<div className="text-white bg-black p-1 rounded-full">
-					<Icon name="Person" />
+		<div className={classNames('grid grid-cols-[1fr_auto] gap-8 items-center w-full items-center py-3', className)}>
+			<div className="flex gap-4 items-center">
+				<div className="flex flex-grow gap-2 items-center">
+					<div className="text-white bg-black p-1 rounded-full">
+						<Icon name="Person" />
+					</div>
+					<Typography>{user.name}</Typography>
 				</div>
-				<Typography>{user.name}</Typography>
+				<Property label="Score">{user.score ?? 'None'}</Property>
+				<Property label="Bet">{user.bet ?? 'None'}</Property>
 			</div>
 			<div>
 				<Button layout="primary" disabled size="small">

@@ -62,7 +62,7 @@ export async function removeSessionUser(sessionId: SessionDTO['id']): Promise<Se
 	return WEB_API.delete<SessionDTO>(`${rootPath}/${sessionId}/user`, {}).then((res) => normalizeSessionDTO(res));
 }
 
-export async function PostSessionQuestionAnswer(
+export async function postSessionQuestionAnswer(
 	sessionId: SessionDTO['id'],
 	payload: SessionAnswerPayload
 ): Promise<SessionDTO> {
@@ -72,6 +72,10 @@ export async function PostSessionQuestionAnswer(
 		},
 		body: JSON.stringify(payload || {}),
 	}).then((res) => normalizeSessionDTO(res));
+}
+
+export async function resolveSession(sessionId: SessionDTO['id']): Promise<SessionDTO> {
+	return WEB_API.post<SessionDTO>(`${rootPath}/${sessionId}/resolve`, {}).then((res) => normalizeSessionDTO(res));
 }
 
 export function normalizeSessionDTO(dto: SessionDTO): SessionDTO {

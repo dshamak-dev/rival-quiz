@@ -8,7 +8,8 @@ export type TextInputType = 'text' | 'email' | 'password';
 export type TextInputSizeType = 'base' | 'small' | 'large';
 
 export type TextInputProps = {
-	label?: string;
+	label?: string | React.ReactNode;
+	postfix?: string | React.ReactNode;
 	type?: TextInputType;
 	required?: boolean;
 	value?: string;
@@ -27,6 +28,7 @@ export function TextInput({
 	defaultValue,
 	className,
 	onChange,
+	postfix,
 	...props
 }: TextInputProps) {
 	const id = useMemo(() => {
@@ -45,8 +47,10 @@ export function TextInput({
 	}, [size]);
 
 	const inputClassName = useMemo(() => {
-		return classNames(className, sizeClassName, 'rounded border border-gray-300');
-	}, [sizeClassName, className]);
+		return classNames(className, sizeClassName, 'rounded border border-gray-300', {
+			'opacity-50': props.disabled,
+		});
+	}, [sizeClassName, className, props.disabled]);
 
 	const inputProps = useMemo(() => {
 		const nextProps = {
@@ -56,7 +60,7 @@ export function TextInput({
 			required: props.required,
 			id: `${id || ''}-${getRandomId()}`,
 			name: id,
-			value: props.value || defaultValue,
+			value: props.value,
 			placeholder: props.placeholder || undefined,
 		};
 
@@ -77,7 +81,12 @@ export function TextInput({
 	return (
 		<div className="grid w-full">
 			{props.label && (
-				<FormLabel required={props.required} id={props.id}>
+				<FormLabel
+					required={props.required}
+					id={props.id}
+					postfix={postfix}
+					className="flex items-center"
+				>
 					{props.label}
 				</FormLabel>
 			)}

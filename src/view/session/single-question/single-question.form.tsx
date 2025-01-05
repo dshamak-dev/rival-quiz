@@ -1,10 +1,12 @@
 import { QuestionDTO } from '@model/question.model';
+import { Session } from '@model/session';
 import { SessionDTO, SessionStateType } from '@model/session.model';
 import { Button } from '@view/button/button';
 import { Collapse } from '@view/collapse/collapse';
 import { Icon } from '@view/icon';
 import { QuestionForm } from '@view/question/question.form';
 import { Typography } from '@view/typography/typography';
+import classNames from 'classnames';
 
 export type SingleQuestionSessionFormProps = {
 	session?: SessionDTO;
@@ -14,16 +16,24 @@ export type SingleQuestionSessionFormProps = {
 	onDelete: (questionId: QuestionDTO['id']) => Promise<void>;
 };
 
-export function SingleQuestionSessionForm({ session, loading, onUpdate, onAdd, onDelete }: SingleQuestionSessionFormProps) {
+export function SingleQuestionSessionForm({
+	session,
+	loading,
+	onUpdate,
+	onAdd,
+	onDelete,
+}: SingleQuestionSessionFormProps) {
 	if (!session) {
 		return null;
 	}
 
+	const sessionModel = new Session(session);
 	const nowTime = Date.now();
 
 	const questionsNum = session.questions?.length || 0;
 	const canAddQuestion = questionsNum === 0;
 	const canEditQuestion = [SessionStateType.Draft, SessionStateType.Published].includes(session.state);
+	const activeQuestion = sessionModel.getActiveQuestion() || null;
 
 	return (
 		<div className="flex flex-col gap-6 p-4">
@@ -31,6 +41,8 @@ export function SingleQuestionSessionForm({ session, loading, onUpdate, onAdd, o
 				session.questions.map((question, index) => {
 					const createdTime = new Date(question.createdAt).getTime();
 					const isOpenDefault = nowTime - createdTime <= 5000;
+					const isActive = activeQuestion?.id === question.id;
+					const isAnswerd = question.hasAnswer;
 
 					return (
 						<Collapse
@@ -38,9 +50,18 @@ export function SingleQuestionSessionForm({ session, loading, onUpdate, onAdd, o
 							key={question.id}
 							title={
 								<div className="w-full flex gap-2 justify-between items-center">
-									<div className="flex gap-2 items-center">
-										<Icon name="QuestionSquareFill" />
-										<Typography>{`Question ${index + 1}`}</Typography>
+									<div
+										className={classNames('flex gap-2 items-center', {
+											'text-gray-600': !isActive,
+										})}
+									>
+										<Icon name={isActive ? "QuestionSquareFill" : "CheckSquare"} />
+										<Typography className={classNames({
+											'line-through': isAnswerd
+										})}>
+											{`Question ${index + 1}`}
+											{isActive ? ' (ACTIVE)' : null}
+										</Typography>
 									</div>
 								</div>
 							}

@@ -28,9 +28,9 @@ const progressBar = {
 		{
 			label: 'Waiting for results...',
 		},
-		// ProgressStage.Results
+		// ProgressStage.Summary
 		{
-			label: 'Results',
+			label: 'Stage Summary',
 		},
 	],
 };
@@ -45,17 +45,51 @@ export function SessionViewHeader() {
 		minDuration: 1000,
 	});
 
-	const stageIndex = useMemo(() => {
+	const progressBarStages = useMemo(() => {
 		switch (session?.state) {
-			case SessionStateType.Locked:
-				return Math.max(ProgressStage.Processing, userProgress);
 			case SessionStateType.Published:
 			case SessionStateType.Draft:
-				return Math.max(ProgressStage.Lobby, userProgress);
+			case SessionStateType.Active:
+			case SessionStateType.Locked:
+			case SessionStateType.LockedForReview:
+				return progressBar.stages;
+			case SessionStateType.Canceled:
+			case SessionStateType.Archived:
+			case SessionStateType.Completed:
+				return [
+					{
+						label: 'Session Summary',
+					},
+				];
 			default:
-				return Math.max(ProgressStage.Question, userProgress);
+				return [];
 		}
-	}, [session?.state, userProgress]);
+	}, [session?.state]);
+
+	const stageIndex = useMemo(() => {
+		const stagesLength = progressBarStages.length;
+		let progressStageIndex = 0;
+
+		switch (session?.state) {
+			case SessionStateType.Draft:
+			case SessionStateType.Published:
+				progressStageIndex = Math.max(ProgressStage.Lobby, userProgress);
+				break;
+			case SessionStateType.Active:
+				progressStageIndex = Math.max(ProgressStage.Question, userProgress);
+				break;
+			case SessionStateType.Locked:
+				progressStageIndex = Math.max(ProgressStage.Processing, userProgress);
+				break;
+			case SessionStateType.LockedForReview:
+				progressStageIndex = Math.max(ProgressStage.Summary, userProgress);
+				break;
+			default:
+				progressStageIndex = 0;
+		}
+
+		return Math.min(stagesLength - 1, progressStageIndex);
+	}, [session?.state, userProgress, progressBarStages]);
 
 	const isSessionAdmin = useMemo(() => {
 		return user?.id === session?.ownerId;
@@ -106,10 +140,10 @@ export function SessionViewHeader() {
 			<div
 				className={classNames(`grid gap-2 sm:gap-6`)}
 				style={{
-					gridTemplateColumns: `repeat(${progressBar.stages.length}, 1fr)`,
+					gridTemplateColumns: `repeat(${progressBarStages.length}, 1fr)`,
 				}}
 			>
-				{progressBar.stages.map((it, index) => {
+				{progressBarStages.map((it, index) => {
 					const isPassed = index < stageIndex;
 					const isActive = index === stageIndex;
 					// TODO: Implement progress tracking and next state preview

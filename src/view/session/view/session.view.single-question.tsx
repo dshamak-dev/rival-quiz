@@ -171,7 +171,11 @@ export function SessionViewSingleQuestion() {
 
 				if (questionData) {
 					const _itVotes = totalByAnswers ? totalByAnswers[it] || 0 : 0;
-					const progress = !totalByAnswers ? 0 : _itVotes / totalVotes;
+					let progress = !totalByAnswers ? 0 : _itVotes / totalVotes;
+
+					if (progress) {
+						progress = Number(progress.toFixed(2));
+					}
 
 					_option.label = (
 						<div className="flex gap-2 items-center">
@@ -303,13 +307,14 @@ export function SessionViewSingleQuestion() {
 						)}
 					</>
 				);
-			case SessionStateType.Locked: {
+			case SessionStateType.Locked:
+			case SessionStateType.LockedForReview: {
 				if (!answerVariants && !prizeData) {
 					return (
-						<div className='flex flex-col justify-center items-center'>
+						<div className="flex flex-col justify-center items-center">
 							<Icon size={48} name="PiggyBank" className="relative -top-6 animate-bounce" />
 							<Typography className="text-center relative -right-2">
-								Almost done. Calculating results..
+								Almost done. Calculating stage summary..
 							</Typography>
 						</div>
 					);
@@ -324,7 +329,7 @@ export function SessionViewSingleQuestion() {
 									Your share is <b>{prizeData.userShare * 100}%</b>
 								</div>
 								<div>
-									Prize is <b>{prizeData.userTotal}</b> points
+									Potential prize is <b>{prizeData.userTotal}</b> points
 								</div>
 							</div>
 						) : null}

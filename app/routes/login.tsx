@@ -1,5 +1,5 @@
-import { authCookie } from '@/auth';
-import { ActionFunctionArgs, redirect } from '@remix-run/node';
+import { authCookie, getAuthCookie } from '@/auth';
+import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { Form, useActionData, useLocation, useSearchParams, useSubmit } from '@remix-run/react';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
@@ -108,6 +108,19 @@ export async function action({ request }: ActionFunctionArgs) {
 	});
 }
 
+export async function loader({ request }: LoaderFunctionArgs) {
+	const authToken = await getAuthCookie(request);
+
+	if (!authToken) {
+		return null;
+	}
+
+	const urlParts = new URL(request.url);
+	const redirectUrl = urlParts.searchParams.get('continue') || '/';
+
+	return redirect(redirectUrl);
+}
+
 export default function LoginPage() {
 	const [searchParams] = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
@@ -149,7 +162,7 @@ export default function LoginPage() {
 							'relative -top-6 bg-gray-100',
 							{
 								'p-6 w-full': isMobile,
-								'py-12 px-12 min-w-[520px]': deviceType && !isMobile
+								'py-12 px-12 min-w-[520px]': deviceType && !isMobile,
 							}
 						)}
 						onSubmitCapture={(ev) => {

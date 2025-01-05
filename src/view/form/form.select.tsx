@@ -27,7 +27,7 @@ export function Select({ label, options, className, ...props }: SelectProps) {
 
 	const inputClassName = useMemo(() => {
 		return classNames(className, 'rounded border border-gray-300 px-1 py-1 text-inherit', {
-			'bg-gray-100 text-gray-400': props.disabled,
+			'bg-gray-100 opacity-50': props.disabled,
 		});
 	}, [className, props.disabled]);
 

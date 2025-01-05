@@ -1,5 +1,5 @@
 import { SessionAnswerPayload, SessionDTO } from '@model/session.model';
-import { PostSessionQuestionAnswer } from '@api/session.api';
+import { postSessionQuestionAnswer } from '@api/session.api';
 import { SessionQuestionAnswerForm } from '../session.question-answer-form';
 import { ModalButton } from '@view/modal/modal.button';
 import { ButtonProps } from '@view/button/button';
@@ -7,10 +7,10 @@ import { useState } from 'react';
 
 export function SessionAdminQuestionAnswerModalButton({
 	session,
-	buttonCommonProps,
+	buttonProps,
 }: {
 	session: SessionDTO;
-	buttonCommonProps?: ButtonProps;
+	buttonProps?: ButtonProps;
 }) {
 	const [{ payload, isValid }, setFormData] = useState<{
 		isValid: boolean;
@@ -19,13 +19,11 @@ export function SessionAdminQuestionAnswerModalButton({
 	const sessionId = session?.id;
 
 	const handleSubmit = async (): Promise<void> => {
-		console.log('Submitting answer:', payload);
-
 		if (!payload) {
 			throw new Error('No answer selected');
 		}
 
-		return PostSessionQuestionAnswer(sessionId as SessionDTO['id'], payload)
+		return postSessionQuestionAnswer(sessionId as SessionDTO['id'], payload)
 			.then((res) => {
 				return;
 			})
@@ -40,7 +38,7 @@ export function SessionAdminQuestionAnswerModalButton({
 		<ModalButton
 			title="Confirm completion"
 			buttonProps={{
-				...buttonCommonProps,
+				...buttonProps,
 				onClick: () => {
 					// TODO: show confirm dialog with answer selection before completing the session
 					// onUpdate('info', { state: SessionStateType.Completed });

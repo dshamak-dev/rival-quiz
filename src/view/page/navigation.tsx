@@ -39,6 +39,7 @@ export function Navigation() {
 			{ link: '/', end: true, icon: 'House', text: 'Home' },
 			{ link: '/profile/history', end: true, icon: 'ClockHistory', text: 'History' },
 			{ link: '/profile/wallet', end: true, icon: 'Wallet2', text: 'Wallet' },
+			{ link: '/profile/transactions', end: true, icon: 'PiggyBank', text: 'Transactions' },
 			{ link: '/profile', end: true, icon: 'Person', text: 'Profile' },
 		];
 
@@ -47,12 +48,7 @@ export function Navigation() {
 
 	if (deviceType == null || deviceType === DeviceType.Mobile) {
 		return (
-			<nav
-				className={classNames(
-					`flex justify-between items-center py-4 px-8`,
-					'text-sm font-light border-t'
-				)}
-			>
+			<nav className={classNames(`flex justify-between items-center py-4 px-8`, 'text-sm font-light border-t')}>
 				{mobileLinks.map(({ end, link, text, icon }, index) => {
 					return (
 						<Anchor
@@ -73,7 +69,11 @@ export function Navigation() {
 
 	return (
 		<nav
-			className={classNames('grid grid-cols-[auto_1fr_auto] items-center gap-8 py-4 px-8', 'text-sm font-light')}
+			className={classNames(
+				'grid grid-cols-[auto_1fr_auto] items-center gap-8 py-4 px-8',
+				'sticky top-0 z-20 bg-white ',
+				'text-sm font-light'
+			)}
 		>
 			<div>
 				<Anchor end href="/" className="relative -left-4 flex gap-2 items-center" activeClassName="">

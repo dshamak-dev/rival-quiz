@@ -1,4 +1,4 @@
-import { SessionDTO } from '@model/session.model';
+import { SessionDTO, SessionStateType } from '@model/session.model';
 import { Button } from '@view/button/button';
 import { Select } from '@view/form/form.select';
 import { TextInput } from '@view/form/form.text-input';
@@ -20,9 +20,14 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 		return JSON.stringify(initialValue) !== JSON.stringify(formState);
 	}, [formState]);
 
+	const state = formState.state || SessionStateType.Draft;
+
 	const canSave = useMemo(() => {
-		return isDirty && !disabled;
-	}, [isDirty, disabled]);
+		return (
+			(isDirty && !disabled) ||
+			[SessionStateType.Archived, SessionStateType.Completed, SessionStateType.Canceled].includes(state)
+		);
+	}, [isDirty, disabled, state]);
 
 	const handleChange = (name: string, value: any) => {
 		setFormState((state) => {
@@ -51,6 +56,7 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 			<TextInput
 				id="title"
 				label="title"
+				disabled={![SessionStateType.Draft, SessionStateType.Published].includes(state)}
 				value={formState?.title}
 				defaultValue={initialValue?.title || ''}
 				onChange={(e, value) => handleChange(e.target.name, value)}
@@ -58,6 +64,9 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 			<TextInput
 				id="description"
 				label="description"
+				disabled={[SessionStateType.LockedForReview, SessionStateType.Archived, SessionStateType.Completed, SessionStateType.Canceled].includes(
+					state
+				)}
 				value={formState?.description}
 				defaultValue={initialValue?.description || ''}
 				onChange={(e, value) => handleChange(e.target.name, value)}
@@ -65,6 +74,7 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 			<Select
 				id="bet-type"
 				label="Bet Type"
+				disabled={![SessionStateType.Draft, SessionStateType.Published].includes(state)}
 				options={sessionBetOptions}
 				defaultValue={formState.betType}
 				className="flex flex-col"

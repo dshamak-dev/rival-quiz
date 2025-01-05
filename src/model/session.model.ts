@@ -46,6 +46,7 @@ export type SessionDTO = {
 	allowBids?: boolean;
 	betType?: SessionBetType;
 	hasNextAnswer?: boolean;
+	activeQuestionId?: ID;
 };
 
 export enum SessionTypes {
@@ -73,8 +74,8 @@ export enum ProgressStage {
 	Question = 1,
 	Pending = 2,
 	Processing = 3,
-	Results = 4,
-	Summary = 5,
+	Summary = 4,
+	Results = 5,
 }
 
 export type SessionAnswerPayload = {

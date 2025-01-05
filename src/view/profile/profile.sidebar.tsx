@@ -2,21 +2,22 @@ import { useUI } from '@control/ui.control';
 import { useMatches, useNavigate } from '@remix-run/react';
 import { useAuth } from '@state/auth.hook';
 import { Anchor } from '@view/anchor';
-import { Select } from '@view/form/form.select';
+// import { Select } from '@view/form/form.select';
 import { Icon, IconType } from '@view/icon';
 import { useMemo } from 'react';
 
 export function ProfileSidebar() {
 	const { isLoggedIn, user } = useAuth();
 	const { deviceType, isMobile } = useUI();
-	const navigate = useNavigate();
+	// const navigate = useNavigate();
 	const matches = useMatches();
 
 	const links = useMemo(() => {
 		const _items: { link: string; end?: boolean; text: string; icon: IconType }[] = [
 			{ link: '/profile', end: true, text: 'General', icon: 'Person' },
 			{ link: '/profile/sessions', text: 'Sessions', icon: 'Grid' },
-			{ link: '/profile/payment', text: 'Payment', icon: 'Wallet' },
+			{ link: '/profile/wallet', text: 'Wallet', icon: 'Wallet' },
+			{ link: '/profile/transactions', text: 'Transactions', icon: 'ClockHistory' },
 		];
 
 		return _items;
