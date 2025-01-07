@@ -1,7 +1,7 @@
 import { useContext, useMemo } from 'react';
 import { AppContext } from '@state/app.state';
 import { useLocation, useSubmit } from '@remix-run/react';
-import { SUPER_ADMIN_ROLE } from '@model/user.role';
+// import { SUPER_ADMIN_ROLE } from '@model/user.role';
 
 export function useAuth() {
 	const state = useContext(AppContext);
@@ -18,13 +18,13 @@ export function useAuth() {
 		return !!state.user;
 	}, [state?.user]);
 
-	const isRootUser = useMemo(() => {
-		if (!state?.user?.roles) {
-			return false;
-		}
+	// const isRootUser = useMemo(() => {
+	// 	if (!state?.user) {
+	// 		return false;
+	// 	}
 
-		return state.user.roles.includes(SUPER_ADMIN_ROLE.id);
-	}, [state?.user]);
+	// 	return state.user.includes(SUPER_ADMIN_ROLE.id);
+	// }, [state?.user]);
 
-	return { user: state?.user, isLoggedIn, isRootUser, logOut };
+	return { user: state?.user, wallet: state?.wallet, isLoggedIn, logOut };
 }

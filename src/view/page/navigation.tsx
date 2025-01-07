@@ -11,6 +11,7 @@ import { Icon, IconType } from '@view/icon';
 import { Badge } from '@view/badge/badge';
 import { useUI } from '@control/ui.control';
 import { DeviceType } from '@model/ui.model';
+import { WalletBalance } from '@view/wallet/wallet.balance';
 
 export function Navigation() {
 	const { deviceType } = useUI();
@@ -39,7 +40,6 @@ export function Navigation() {
 			{ link: '/', end: true, icon: 'House', text: 'Home' },
 			{ link: '/profile/history', end: true, icon: 'ClockHistory', text: 'History' },
 			{ link: '/profile/wallet', end: true, icon: 'Wallet2', text: 'Wallet' },
-			{ link: '/profile/transactions', end: true, icon: 'PiggyBank', text: 'Transactions' },
 			{ link: '/profile', end: true, icon: 'Person', text: 'Profile' },
 		];
 
@@ -108,10 +108,7 @@ export function Navigation() {
 
 							<Icon name="Bookmark" size={16} />
 
-							<div className="flex gap-2 items-center">
-								<span>0</span>
-								<Icon name="Coin" size={16} />
-							</div>
+							<WalletBalance />
 						</div>
 						<div className="pl-2 mr-2 border-r h-4"></div>
 					</>

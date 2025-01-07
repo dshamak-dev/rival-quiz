@@ -19,6 +19,7 @@ import { useUI } from '@control/ui.control';
 import classNames from 'classnames';
 import { DeviceType } from '@model/ui.model';
 import { HeaderMobile } from '@view/page/header.mobile';
+import { getUserWallet } from '@api/wallet.api';
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
@@ -43,7 +44,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}
 	}
 
-	return { token, user, envVariables };
+	const wallet = await getUserWallet().catch((err) => null);
+
+	return { token, user, wallet, envVariables };
 }
 
 export const links: LinksFunction = () => [

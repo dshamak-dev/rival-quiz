@@ -16,8 +16,7 @@ export function ProfileSidebar() {
 		const _items: { link: string; end?: boolean; text: string; icon: IconType }[] = [
 			{ link: '/profile', end: true, text: 'General', icon: 'Person' },
 			{ link: '/profile/sessions', text: 'Sessions', icon: 'Grid' },
-			{ link: '/profile/wallet', text: 'Wallet', icon: 'Wallet' },
-			{ link: '/profile/transactions', text: 'Transactions', icon: 'ClockHistory' },
+			{ link: '/profile/wallet', text: 'Wallet', icon: 'Wallet' }
 		];
 
 		return _items;
