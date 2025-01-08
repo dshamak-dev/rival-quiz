@@ -1,5 +1,6 @@
 import { CurrencyTypeEnum } from '@model/wallet.model';
 import { useAuth } from '@state/auth.hook';
+import { Anchor } from '@view/anchor';
 import { Icon } from '@view/icon';
 import { useMemo } from 'react';
 
@@ -13,15 +14,15 @@ export function WalletBalance() {
 				return 'CurrencyBitcoin';
 			}
 			default: {
-				return 'Coin';
+				return 'PiggyBank';
 			}
 		}
 	}, [wallet?.currency]);
 
 	return (
-		<div className="flex gap-2 items-center">
+		<Anchor activeClassName='' href="/profile/wallet" className="flex gap-1 items-center">
 			<span>{balance}</span>
 			<Icon name={currencyIcon} size={16} />
-		</div>
+		</Anchor>
 	);
 }

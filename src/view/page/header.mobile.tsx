@@ -9,6 +9,8 @@ import { Image } from '@view/image/image';
 import { Typography } from '@view/typography/typography';
 
 import logoImage from '@assets/logo.png';
+import { WalletBalance } from '@view/wallet/wallet.balance';
+import { Anchor } from '@view/anchor';
 
 export function HeaderMobile() {
 	const location = useLocation();
@@ -42,14 +44,14 @@ export function HeaderMobile() {
 			{isLoggedIn && (
 				<>
 					<div className="flex items-center justify-end gap-6">
+						<Anchor href="/sessions/create">
+							<Icon name="PlusCircle" size={16} />
+						</Anchor>
 						<Badge>
 							<Icon name="Bell" size={16} className="animate-bounce" />
 						</Badge>
 
-						<div className="flex gap-2 items-center">
-							<span>0</span>
-							<Icon name="Coin" size={16} />
-						</div>
+						<WalletBalance />
 					</div>
 				</>
 			)}

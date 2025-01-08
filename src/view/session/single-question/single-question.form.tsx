@@ -55,10 +55,12 @@ export function SingleQuestionSessionForm({
 											'text-gray-600': !isActive,
 										})}
 									>
-										<Icon name={isActive ? "QuestionSquareFill" : "CheckSquare"} />
-										<Typography className={classNames({
-											'line-through': isAnswerd
-										})}>
+										<Icon name={isActive ? 'QuestionSquareFill' : 'CheckSquare'} />
+										<Typography
+											className={classNames({
+												'line-through': isAnswerd,
+											})}
+										>
 											{`Question ${index + 1}`}
 											{isActive ? ' (ACTIVE)' : null}
 										</Typography>
@@ -67,6 +69,8 @@ export function SingleQuestionSessionForm({
 							}
 						>
 							<QuestionForm
+								sessionId={session.id}
+								active={isActive}
 								initialValue={question}
 								disabled={loading || !canEditQuestion}
 								onSubmit={(questionData) => onUpdate(`questions.${question.id}`, questionData)}

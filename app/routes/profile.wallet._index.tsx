@@ -46,7 +46,7 @@ export default function ProfileWalletPage() {
 	if (loading || !data) {
 		return (
 			<div className="h-full flex flex-col items-center justify-center justify-self-center align-self-center">
-				<Icon size={48} name="Wallet" className="relative -top-6 animate-bounce" />
+				<Icon size={48} name="Wallet2" className="relative -top-6 animate-bounce" />
 				<Typography className="text-center relative">Loading transactions</Typography>
 			</div>
 		);
@@ -68,7 +68,7 @@ export default function ProfileWalletPage() {
 			<div>
 				<WalletCard item={wallet} />
 			</div>
-			<div className="grid grid-rows-[auto_1fr] gap-2 h-full overflow-hidden">
+			<div className="grid grid-rows-[auto_1fr] gap-1 h-full overflow-hidden">
 				<Typography>Transactions:</Typography>
 				<div className="flex flex-col gap-4 h-full overflow-y-auto">
 					{data?.length ? (

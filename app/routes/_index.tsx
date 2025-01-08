@@ -21,32 +21,33 @@ export default function LandingPage() {
 	}, []);
 
 	const availableSessions = useMemo(() => {
-		return data?.filter((session) => {
-			if (session.users?.includes(user?.id) || session.ownerId === user?.id) {
-				return true;
-			}
+		return (
+			data?.filter((session) => {
+				if (user?.id && (session.users?.includes(user?.id) || session.ownerId === user?.id)) {
+					return ![SessionStateType.Archived, SessionStateType.Canceled, SessionStateType.Completed].includes(
+						session.state
+					);
+				}
 
-			return [SessionStateType.Published].includes(session.state)
-		}) || [];
+				return [SessionStateType.Published].includes(session.state);
+			}) || []
+		);
 	}, [data, user]);
 
-	console.log('availableSessions', {data, availableSessions});
-
 	return (
-		<div className={classNames('min-h-full p-6', {
-			'h-full overflow-y-auto': isMobile,
-			'h-fit': !isMobile
-		})}>
+		<div
+			className={classNames('min-h-full p-6', {
+				'h-full overflow-y-auto': isMobile,
+				'h-fit': !isMobile,
+			})}
+		>
 			{loading || !data ? (
 				<div className="h-screen max-h-full flex flex-col items-center justify-center">
 					<Image src={logoImage} style={{ width: 48 }} className="relative -top-6 animate-bounce" />
 					<Typography className="">Quizdation starts here</Typography>
 				</div>
 			) : (
-				<div className="flex flex-col gap-4">
-					{/* <Typography className="text-lg font-bold">Sessions</Typography> */}
-					<SessionList sessions={availableSessions} />
-				</div>
+				<SessionList sessions={availableSessions} />
 			)}
 		</div>
 	);

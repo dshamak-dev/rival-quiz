@@ -3,7 +3,7 @@ import { ID } from '@model/api.model';
 import { SessionDTO } from '@model/session.model';
 import { SessionUserActionPayload, SessionUserActionDTO , SessionUserDTO} from '@model/session.user.model';
 
-const rootPath = `/session-user-actions`;
+const rootPath = `/user-actions`;
 
 export async function fetchSessionUserActions(sessionId: ID) {
 	return WEB_API.get<SessionUserActionDTO[]>(`${rootPath}/${sessionId}`, {}).then((items) =>

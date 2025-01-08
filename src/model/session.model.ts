@@ -1,19 +1,19 @@
 import { DateType, ID } from './api.model';
-import { QuestionDTO } from './question.model';
+import { QuestionDataDTO, QuestionDTO } from './question.model';
 import { SessionUserActionDTO } from './session.user.model';
 
 // export class Session implements SessionType {
-	// id?: ID;
-	// description?: string;
-	// state: SessionStateType = SessionStateType.Draft;
-	// title: string = '';
-	// ownerId?: ID;
-	// createdAt: DateType = new Date().toISOString();
-	// updatedAt?: DateType;
-	// questions?: QuestionDTO[] = [];
-	// image?: string = undefined;
-	// betType?: SessionBetType;
-	// users?: ID[] = [];
+// id?: ID;
+// description?: string;
+// state: SessionStateType = SessionStateType.Draft;
+// title: string = '';
+// ownerId?: ID;
+// createdAt: DateType = new Date().toISOString();
+// updatedAt?: DateType;
+// questions?: QuestionDTO[] = [];
+// image?: string = undefined;
+// betType?: SessionBetType;
+// users?: ID[] = [];
 
 // 	constructor(data: SessionType | undefined) {
 // 		Object.assign(this, data);
@@ -47,13 +47,14 @@ export type SessionDTO = {
 	betType?: SessionBetType;
 	hasNextAnswer?: boolean;
 	activeQuestionId?: ID;
+	questionData?: QuestionDataDTO;
 };
 
 export enum SessionTypes {
 	Single = 'single',
-    Multiple ='multiple',
-    Range = 'range',
-    Auction = 'auction',
+	Multiple = 'multiple',
+	Range = 'range',
+	Auction = 'auction',
 }
 
 export type SessionData = Record<string, any>;

@@ -1,5 +1,6 @@
 import { WEB_API } from '@control/api.control';
 import { normalizeQuesionDTO } from '@control/question.control';
+import { ID } from '@model/api.model';
 import { QuestionDTO } from '@model/question.model';
 import { SessionAnswerPayload, SessionDTO } from '@model/session.model';
 

@@ -15,6 +15,7 @@ import { useAuth } from '@state/auth.hook';
 import { addSessionUser } from '@api/session.api';
 import { SingleQuestionSession } from '@model/session/single-question';
 import { Icon } from '@view/icon';
+import { LinkButton } from '@view/anchor/link.button';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
@@ -78,26 +79,24 @@ export function SessionViewSingleQuestion() {
 	}, [session?.questions, userActions]);
 
 	const sessionData: any = useMemo(() => {
-		const _data = {
-			totalUsers: 0,
-			votesByQuestion: {},
-		};
+		// const _data = {
+		// 	totalUsers: 0,
+		// 	votesByQuestion: {},
+		// };
 
-		if (session?.data) {
-			_data.totalUsers = session.data.totalUsers;
+		// if (session?.data) {
+		// 	_data.totalUsers = session.data.totalUsers;
 
-			_data.votesByQuestion = session.data.votesByQuestion;
-		}
+		// 	_data.votesByQuestion = session.data.votesByQuestion;
+		// }
 
-		return _data;
+		return session?.data;
 	}, [session?.data, userData]);
 
 	const questionData = useMemo(() => {
-		if (!question || !sessionData?.votesByQuestion) {
-			return null;
-		}
+		return session?.questionData;
 
-		return sessionData.votesByQuestion[question.id] || null;
+		// return sessionData.votesByQuestion[question.id] || null;
 	}, [question, sessionData]);
 
 	const getQuestionAnswer = (questionId?: string) => {
@@ -334,6 +333,29 @@ export function SessionViewSingleQuestion() {
 							</div>
 						) : null}
 					</>
+				);
+			}
+			case SessionStateType.Completed: {
+				const userPrize = user?.id ? sessionData?.userScores?.summary?.[user.id] : 0;
+				const hasPrize = !!userPrize;
+
+				return (
+					<div className="flex flex-col gap-4 items-center">
+						{hasPrize ? (
+							<div className="text-center">
+								<Typography size="large">
+									YOU WON <b className="text-[1.25em]">{userPrize}</b> point(s).
+								</Typography>
+								<Typography size="small">The Prize was transferred to your account</Typography>
+							</div>
+						) : (
+							<Typography>Good luck next time!</Typography>
+						)}
+
+						<LinkButton layout="primary" href="/">
+							Leave Session
+						</LinkButton>
+					</div>
 				);
 			}
 			default: {

@@ -2,6 +2,8 @@ import { SessionDTO, SessionStateType } from '@model/session.model';
 import { Button, ButtonSizeType } from '@view/button/button';
 import { SessionAdminQuestionAnswerModalButton } from '../admin/session.admin.question-nswer-modal-buttoon';
 import { SessionAdminResolveButton } from '../admin/session.admin.resolve-button';
+import { SingleQuestionSession } from '@model/session/single-question';
+import { requestQuestionSync } from '@api/question.api';
 
 export type SingleQuestionSessionHeaderProps = {
 	session?: SessionDTO;
@@ -16,6 +18,7 @@ export function SingleQuestionSessionHeader({
 	onUpdate,
 	onDelete,
 }: SingleQuestionSessionHeaderProps) {
+	const questionModel = new SingleQuestionSession(session);
 	const buttonCommonProps: { className: string; size: ButtonSizeType; disabled: boolean } = {
 		size: 'small',
 		className: 'min-w-[100px]',
@@ -23,6 +26,7 @@ export function SingleQuestionSessionHeader({
 	};
 
 	const participantsNumber = session?.users?.length || 0;
+	const activeQuestion = questionModel?.getActiveQuestion();
 
 	switch (session?.state) {
 		case SessionStateType.Draft: {

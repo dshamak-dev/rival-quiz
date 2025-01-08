@@ -10,7 +10,7 @@ export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
 
 export type ButtonSizeType = 'base' | 'small' | 'large';
 
-export function Button({ className, layout, size = 'base', loading, children, ...props }: ButtonProps) {
+export function Button({ className, layout, size = 'small', loading, children, ...props }: ButtonProps) {
 	const layoutClassName = useMemo(() => {
 		switch (layout) {
 			case 'primary':

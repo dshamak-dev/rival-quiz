@@ -1,19 +1,30 @@
 import { QuestionDTO } from '@model/question.model';
 import { Button } from '@view/button/button';
 import { TextInput } from '@view/form/form.text-input';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { QuestionOptionsForm } from './question.options-form';
 import { FormLabel } from '@view/form/form.label';
+import { ID } from '@model/api.model';
+import { requestQuestionSync } from '@api/question.api';
 
 export type QuestionFormProps = {
 	initialValue: QuestionDTO;
 	onSubmit?: (question: QuestionDTO) => void;
 	disabled?: boolean;
 	onDelete?: () => void;
+	sessionId: ID;
+	active?: boolean;
 };
 
-export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: QuestionFormProps) {
+export function QuestionForm({ sessionId, active, initialValue, disabled, onSubmit, onDelete }: QuestionFormProps) {
 	const [formState, setFormState] = useState({ ...initialValue });
+
+	const questionId = initialValue.id;
+	const isActive = active;
+
+	useEffect(() => {
+		setFormState(initialValue);
+	}, [initialValue])
 
 	const isDirty = useMemo(() => {
 		return JSON.stringify(initialValue) !== JSON.stringify(formState) && !disabled;
@@ -67,6 +78,10 @@ export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: Que
 		}
 	};
 
+	const handleSync = () => {
+		requestQuestionSync({ questionId: questionId, sessionId: sessionId });
+	};
+
 	return (
 		<div className="flex flex-col gap-4 p-4" data-id={initialValue?.id}>
 			<div className="flex flex-col gap-4">
@@ -88,7 +103,12 @@ export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: Que
 				/>
 			</div>
 			<div>
-				<QuestionOptionsForm disabled={disabled} answer={formState.answer} options={formState?.options} onChange={handleOptionsChange} />
+				<QuestionOptionsForm
+					disabled={disabled}
+					answer={formState.answer}
+					options={formState?.options}
+					onChange={handleOptionsChange}
+				/>
 			</div>
 			<div className="flex justify-end gap-4">
 				{onDelete && (
@@ -99,6 +119,9 @@ export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: Que
 				<Button size="small" disabled={!isDirty} className="min-w-[100px]" onClick={handleCancel}>
 					Cancel
 				</Button>
+				{isActive && <Button size="small" layout="tertiary" onClick={handleSync}>
+					Sync Data
+				</Button>}
 				<Button
 					layout="primary"
 					size="small"
