@@ -292,18 +292,24 @@ export function SessionViewSingleQuestion() {
 				);
 			}
 			case SessionStateType.Active:
+				const controls = canAnswer ? (
+					currentAnswer == null ? (
+						<Button layout="primary" disabled={!canSave} onClick={handleSave}>
+							Confirm answer
+						</Button>
+					) : (
+						<Button layout="primary" onClick={handleCancelAnswer}>
+							Cancel answer
+						</Button>
+					)
+				) : (
+					<Typography>You can't participate</Typography>
+				);
+
 				return (
 					<>
 						{answerVariants}
-						{currentAnswer == null ? (
-							<Button layout="primary" disabled={!canSave} onClick={handleSave}>
-								Confirm answer
-							</Button>
-						) : (
-							<Button layout="primary" onClick={handleCancelAnswer}>
-								Cancel answer
-							</Button>
-						)}
+						{controls}
 					</>
 				);
 			case SessionStateType.Locked:
@@ -362,7 +368,7 @@ export function SessionViewSingleQuestion() {
 				return <>{answerVariants}</>;
 			}
 		}
-	}, [canAnswer, hasJoined, currentAnswer, selectedAnswer, isLoading]);
+	}, [canAnswer, prizeData, hasJoined, currentAnswer, selectedAnswer, isLoading]);
 
 	return (
 		<div className="flex flex-col gap-8 items-center">

@@ -20,6 +20,7 @@ import classNames from 'classnames';
 import { DeviceType } from '@model/ui.model';
 import { HeaderMobile } from '@view/page/header.mobile';
 import { getUserWallet } from '@api/wallet.api';
+import { BroadcastProvider } from '@state/broadcast.state';
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
@@ -140,27 +141,29 @@ export default function App() {
 							</div>
 						</ClientComponent>
 					) : (
-						<AppContextProvider value={initialData}>
-							<div
-								className={classNames('max-h-full h-screen', {
-									'grid grid-rows-[auto_1fr]': !isMobileView && deviceType != null,
-									'grid grid-rows-[auto_1fr_auto]': isMobileView,
-								})}
-							>
-								{deviceType != null && (
-									<div
-										className={classNames('bg-white/[.85] backdrop-blur-sm', {
-											'sticky left-0 top-0 z-20': !isMobileView,
-											'sticky left-0 bottom-0 z-20 order-last': isMobileView,
-										})}
-									>
-										<Navigation />
-									</div>
-								)}
-								{isMobileView && <HeaderMobile />}
-								<Outlet context={{ state }} />
-							</div>
-						</AppContextProvider>
+						<BroadcastProvider env={initialData.envVariables}>
+							<AppContextProvider value={initialData}>
+								<div
+									className={classNames('max-h-full h-screen', {
+										'grid grid-rows-[auto_1fr]': !isMobileView && deviceType != null,
+										'grid grid-rows-[auto_1fr_auto]': isMobileView,
+									})}
+								>
+									{deviceType != null && (
+										<div
+											className={classNames('bg-white/[.85] backdrop-blur-sm', {
+												'sticky left-0 top-0 z-20': !isMobileView,
+												'sticky left-0 bottom-0 z-20 order-last': isMobileView,
+											})}
+										>
+											<Navigation />
+										</div>
+									)}
+									{isMobileView && <HeaderMobile />}
+									<Outlet context={{ state }} />
+								</div>
+							</AppContextProvider>
+						</BroadcastProvider>
 					)}
 				</main>
 				<Scripts />

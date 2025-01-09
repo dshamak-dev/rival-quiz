@@ -22,14 +22,22 @@ import { SingleQuestionSessionForm } from '@view/session/single-question/single-
 import { SessionparticipantsForm } from '@view/session/session.participants-form';
 import { Session } from '@model/session';
 import classNames from 'classnames';
+import { useAuth } from '@state/auth.hook';
 
 type StateType = SessionDTO | undefined;
 
 export default function ProfileSessionPage() {
+	const { user } = useAuth();
 	const navigate = useNavigate();
 	const params = useParams();
 	const { data, loading, dispatch, set } = useAPI({
-		request: (id: SessionDTO['id']) => findSessionById(id),
+		request: (id: SessionDTO['id']) =>
+			findSessionById(id).then((res) => {
+				if (res.ownerId === user?.id) {
+					return res;
+				}
+				return null;
+			}),
 		initialState: undefined,
 	});
 
@@ -49,7 +57,7 @@ export default function ProfileSessionPage() {
 	const { loading: isCreatingQuestion, dispatch: dispatchCreateQuestion } = useAPI({
 		request: () => postSessionQuestion(sessionId as SessionDTO['id'], null),
 	});
-	const [sessionState, setSessionState] = useState<StateType>(undefined);
+	const [sessionState, setSessionState] = useState<StateType | null>(undefined);
 
 	const isBusy = useMemo(() => {
 		return loading || isPatching || isDeletingQuestion || isCreatingQuestion;
@@ -64,9 +72,11 @@ export default function ProfileSessionPage() {
 	}, [sessionId]);
 
 	useEffect(() => {
-		if (data) {
+		if (data != null) {
 			const _it = new Session(data).json;
 			setSessionState(_it);
+		} else {
+			setSessionState(null);
 		}
 	}, [data]);
 
@@ -174,10 +184,7 @@ export default function ProfileSessionPage() {
 					title={(isOpen) =>
 						isOpen ? 'General' : `General - ${sessionStateLabels[sessionState.state] || 'Unknown'}`
 					}
-					initialState={[
-						SessionStateType.Draft,
-						SessionStateType.Published,
-					].includes(sessionState.state)}
+					initialState={[SessionStateType.Draft, SessionStateType.Published].includes(sessionState.state)}
 				>
 					<SessionInfoForm
 						initialValue={sessionState}
@@ -214,6 +221,10 @@ export default function ProfileSessionPage() {
 	}, [sessionState, loading, isBusy, handleAddQuestion, handleDeleteQuestion]);
 
 	const controls = useMemo(() => {
+		if (!sessionState){
+			return null;
+		}
+
 		return (
 			<SingleQuestionSessionHeader
 				session={sessionState}

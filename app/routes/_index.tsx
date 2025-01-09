@@ -14,24 +14,29 @@ import { useAuth } from '@state/auth.hook';
 export default function LandingPage() {
 	const { user } = useAuth();
 	const { isMobile } = useUI();
-	const { data, loading, dispatch } = useAPI({ initialState: null, request: () => findSessions().catch(() => []) });
+	const { data, loading, dispatch } = useAPI({
+		initialState: null,
+		request: () =>
+			findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).catch(() => []),
+	});
 
 	useEffect(() => {
 		dispatch();
 	}, []);
 
 	const availableSessions = useMemo(() => {
-		return (
-			data?.filter((session) => {
-				if (user?.id && (session.users?.includes(user?.id) || session.ownerId === user?.id)) {
-					return ![SessionStateType.Archived, SessionStateType.Canceled, SessionStateType.Completed].includes(
-						session.state
-					);
-				}
+		return data || [];
+		// return (
+		// 	data?.filter((session) => {
+		// 		if (user?.id && (session.users?.includes(user?.id) || session.ownerId === user?.id)) {
+		// 			return ![SessionStateType.Archived, SessionStateType.Canceled, SessionStateType.Completed].includes(
+		// 				session.state
+		// 			);
+		// 		}
 
-				return [SessionStateType.Published].includes(session.state);
-			}) || []
-		);
+		// 		return [SessionStateType.Published].includes(session.state);
+		// 	}) || []
+		// );
 	}, [data, user]);
 
 	return (
