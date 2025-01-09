@@ -3,15 +3,21 @@ import { createContext, useCallback, useContext, useEffect, useReducer, useRef, 
 
 export type BroadcastState = {
 	broadcasts?: Map<BroadcastDTO['entity'], BroadcastDTO>;
+	isConnected?: boolean;
 	updated?: number;
 	dispatch?: React.Dispatch<ActionType>;
 	send?: (message: BroadcastMessageDTO) => void;
 };
 
-export type ActionType = {
-	type: 'ADD_BROADCAST';
-	payload: BroadcastDTO;
-};
+export type ActionType =
+	| {
+			type: 'ADD_BROADCAST';
+			payload: BroadcastDTO;
+	  }
+	| {
+			type: 'SET_CONNECTION_STATUS';
+			payload: boolean;
+	  };
 
 export const BroadcastContext = createContext<BroadcastState>({});
 
@@ -38,7 +44,7 @@ export function BroadcastProvider({ children, env }: any) {
 		const manager = new BroadcastManager(env.WS_URL);
 
 		manager.addEventListener('open', () => {
-			console.info('Connected to server');
+			dispatch({ type: 'SET_CONNECTION_STATUS', payload: true });
 		});
 
 		manager.addEventListener('message', (event) => {
@@ -48,7 +54,7 @@ export function BroadcastProvider({ children, env }: any) {
 		let closeTimer: NodeJS.Timeout | null = null;
 
 		manager.addEventListener('close', (event) => {
-			console.info('Connection closed');
+			dispatch({ type: 'SET_CONNECTION_STATUS', payload: false });
 
 			if (event?.wasClean === false) {
 				closeTimer = setTimeout(() => {
@@ -83,6 +89,9 @@ function reducer(state: BroadcastState, action: ActionType): BroadcastState {
 			state.broadcasts?.set(action.payload.entity, action.payload);
 
 			return { ...state, updated: Date.now() };
+		}
+		case 'SET_CONNECTION_STATUS': {
+			return { ...state, isConnected: action.payload };
 		}
 		default:
 			return state;

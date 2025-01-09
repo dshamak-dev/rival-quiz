@@ -11,12 +11,14 @@ import { Typography } from '@view/typography/typography';
 import logoImage from '@assets/logo.png';
 import { WalletBalance } from '@view/wallet/wallet.balance';
 import { Anchor } from '@view/anchor';
+import { useBroadcast } from '@state/broadcast.state';
 
 export function HeaderMobile() {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { deviceType } = useUI();
 	const { isLoggedIn, user } = useAuth();
+	const { isConnected } = useBroadcast();
 
 	const canGoBack = useMemo(() => {
 		return !['', '/'].includes(location.pathname);
@@ -36,7 +38,9 @@ export function HeaderMobile() {
 				) : (
 					<div className="flex gap-2 items-center">
 						<Image src={logoImage} style={{ width: 24 }} />
-						<Typography className="uppercase text-xs font-black">Quizdation</Typography>
+						<Badge visible={isConnected} color="#71f8ce" transform="translateX(8px) translateY(4px)">
+							<Typography className="uppercase text-xs font-black">Quizdation</Typography>
+						</Badge>
 					</div>
 				)}
 			</div>

@@ -12,6 +12,7 @@
 
 .container {
 	--size: 0.7em;
+	--color: #f87171;
 	@apply relative;
 
 	&:before {
@@ -21,10 +22,12 @@
 		width: var(--size);
 		height: var(--size);
 		top: calc(-0.2 * var(--size));
+		transform: var(--transform);
+		background-color: var(--color);
 
 		/* animation-timing-function: cubic-bezier(0, 0, 1, 1); */
 		/* animation: jump 1s infinite; */
 
-		@apply absolute right-0 bg-red-400;
+		@apply absolute right-0;
 	}
 }

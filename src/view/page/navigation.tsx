@@ -12,10 +12,12 @@ import { Badge } from '@view/badge/badge';
 import { useUI } from '@control/ui.control';
 import { DeviceType } from '@model/ui.model';
 import { WalletBalance } from '@view/wallet/wallet.balance';
+import { useBroadcast } from '@state/broadcast.state';
 
 export function Navigation() {
 	const { deviceType } = useUI();
 	const { isLoggedIn, user } = useAuth();
+	const { isConnected } = useBroadcast();
 
 	const links = useMemo(() => {
 		const _items = [
@@ -78,7 +80,9 @@ export function Navigation() {
 			<div>
 				<Anchor end href="/" className="relative -left-4 flex gap-2 items-center" activeClassName="">
 					<Image src={logoImage} style={{ width: 24 }} />
-					<Typography className="uppercase text-xs font-black">Quizdation</Typography>
+					<Badge visible={isConnected} color="#71f8ce" transform='translateX(8px) translateY(4px)'>
+						<Typography className="uppercase text-xs font-black">Quizdation</Typography>
+					</Badge>
 				</Anchor>
 			</div>
 			<div className="flex gap-8">
