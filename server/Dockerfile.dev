@@ -1,0 +1,10 @@
+FROM node:22
+
+WORKDIR /home/node/server/
+
+COPY .env package.json index.ts tsconfig.json ./src ./
+
+RUN npm install
+
+EXPOSE 8080
+# CMD [ "npm", "run", "dev" ]

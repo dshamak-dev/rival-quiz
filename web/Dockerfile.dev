@@ -1,0 +1,14 @@
+FROM node:22
+
+WORKDIR /home/node/root/
+
+COPY .env package.json tsconfig.json tailwind.config.ts remix.config.js vite.config.ts ./
+COPY ./app/ ./app
+COPY ./assets/ ./assets
+COPY ./src/ ./src
+
+RUN npm install
+
+EXPOSE 8080
+
+# CMD [ "npm", "run", "dev" ]
