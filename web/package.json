@@ -15,6 +15,7 @@
 	"engines": {
 		"node": ">=22.9.0"
 	},
+	"proxy": "http://localhost:3004",
 	"dependencies": {
 		"@remix-run/dev": "2.13.1",
 		"@remix-run/express": "2.13.1",

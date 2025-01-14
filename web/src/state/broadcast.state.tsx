@@ -58,7 +58,7 @@ export function BroadcastProvider({ children, env }: any) {
 
 			if (event?.wasClean === false) {
 				closeTimer = setTimeout(() => {
-					manager.connect();
+					manager.reconnect();
 				}, 3000);
 			}
 		});
@@ -103,9 +103,12 @@ class BroadcastManager {
 	static ws?: WebSocket;
 	url: string;
 	listeners: Map<ListenerType, (data: any) => void> = new Map();
+	attempts = 0;
+	maxAttempts = 3;
 
 	constructor(url: string) {
 		this.url = url;
+		this.attempts = 0;
 	}
 
 	get ws() {
@@ -118,6 +121,18 @@ class BroadcastManager {
 		}
 
 		BroadcastManager.ws = value;
+	}
+
+	reconnect() {
+		this.attempts++;
+
+		if (this.attempts >= this.maxAttempts) {
+			console.error('Failed to connect to WebSocket server');
+            return;
+        }
+
+		this.ws = undefined;
+        this.connect();
 	}
 
 	connect() {
@@ -138,6 +153,7 @@ class BroadcastManager {
 
 	close() {
 		if (this.ws) {
+			this.attempts = this.maxAttempts;
 			this.ws.close();
 			this.ws = undefined;
 		}

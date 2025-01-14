@@ -16,17 +16,17 @@ services:
   #     timeout: 3s
   #     retries: 5
   #   networks:
-  #     - rivals
+  #     - quizlo
 
   server:
-    image: server:${TAG:-latest}
+    image: server
     container_name: quizlo-server
     build:
       context: ./server/
       dockerfile: Dockerfile.dev
     command: npm run dev
     volumes:
-      - ./server/src:/home/node/server/src
+      - ./server/src:/www/src
     ports:
       - "3004:8080"
       - "3005:8081"
@@ -36,35 +36,41 @@ services:
       - MONGODB_URI=mongodb://quizlo-mongo:27017/quiz
       - JWT_SECRET=rival-secret
       - SECRET_SALT=rival-salt
-      - ALLOW_API_ACCESS=http://localhost:3003,http://localhost:3000
+      - ALLOW_API_ACCESS=http://localhost:3003,http://localhost:8080,http://127.0.0.1:3003,http://127.0.0.1:8080
     networks:
-      - rivals
+      - server
     # depends_on:
     #   mongo:
     #     condition: service_healthy
     #     restart: true
 
   web:
-    image: web:${TAG:-latest}
+    image: web
     container_name: quizlo-web
     build:
       context: ./web/
       dockerfile: Dockerfile.dev
     command: npm run dev
     volumes:
-      - ./web/src:/home/node/root/src
+      - ./web/app:/www/app
+      - ./web/src:/www/src
     ports:
       - "3003:8080"
     environment:
       - PORT=8080
+      - SERVER_API_URL=http://quizlo-server:8080
       - API_URL=http://localhost:3004
       - WS_URL=ws://localhost:3005
     networks:
-      - rivals
+      - web
+      - server
 
 networks:
-  rivals:
-    driver: bridge
+  quizlo:
+  server:
+  web:
+    # external: true
+    # driver: bridge
 
 volumes:
   node_modules:

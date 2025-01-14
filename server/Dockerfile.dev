@@ -1,8 +1,10 @@
 FROM node:22
 
-WORKDIR /home/node/server/
+RUN mkdir /www
+WORKDIR /www/
 
-COPY .env package.json index.ts tsconfig.json ./src ./
+# COPY .env  ./
+COPY package.json index.ts tsconfig.json ./src ./
 
 RUN npm install
 

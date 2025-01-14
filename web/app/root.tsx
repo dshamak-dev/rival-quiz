@@ -1,7 +1,7 @@
 import { LinksFunction, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { Links, Meta, Outlet, Scripts, useLoaderData, useNavigation } from '@remix-run/react';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import stylesheet from './style.css?url';
 import faviconIco from '@assets/favicon.ico';
@@ -25,13 +25,21 @@ import { BroadcastProvider } from '@state/broadcast.state';
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
 
-	WEB_API.setEnv(envVariables);
+	WEB_API.setEnv({...envVariables, API_URL: envVariables.SERVER_API_URL });
 
 	const token: string | null = await getAuthCookie(request);
 
 	if (token) {
 		WEB_API.setJWT(token);
 	}
+
+	WEB_API.get('/health')
+		.then((res) => {
+			console.log('API is up and running', res);
+		})
+		.catch((err) => {
+			console.error('API is not available', { err });
+		});
 
 	let user = null;
 
@@ -118,6 +126,26 @@ export default function App() {
 	if (initialData.token) {
 		WEB_API.setJWT(initialData.token);
 	}
+
+	useEffect(() => {
+		WEB_API.get('/health')
+			.then((res) => {
+				console.log('API is up and running', res);
+			})
+			.catch((err) => {
+				console.error('API is not up and running', { err, url: WEB_API.apiUrl });
+			});
+
+		// ['/quizloapi', 'http://localhost:3004'].forEach((origin) => {
+		// 	fetch(`${origin}/health`, { method: 'GET' })
+		// 		.then((res) => {
+		// 			console.log('API is up and running', res);
+		// 		})
+		// 		.catch((err) => {
+		// 			console.error('API is not up and running', { err, url: WEB_API.apiUrl });
+		// 		});
+		// });
+	}, []);
 
 	return (
 		<html suppressHydrationWarning={true}>
