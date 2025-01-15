@@ -9,7 +9,7 @@ app.use(express.static("build/client"));
 // and your app is "just a request handler"
 app.all("*", createRequestHandler({ build }));
 
-const PORT = 3001;
+const PORT = process.env.PORT || 80;
 
 app.listen(PORT, () => {
   console.log(`App listening on ${PORT} port`);

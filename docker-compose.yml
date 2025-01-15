@@ -1,14 +1,11 @@
-name: quizlo
+name: quizlo-prod
 services:
   mongo:
     image: mongo:latest
-    container_name: mongo
+    container_name: mongo-prod
     restart: unless-stopped
     ports:
-      - "27020:27017"
-    # environment:
-    #   - MONGO_INITDB_ROOT_USERNAME=admin
-    #   - MONGO_INITDB_ROOT_PASSWORD=password
+      - "27021:27017"
     volumes:
       - mongo-data:/data/db
     healthcheck:
@@ -21,23 +18,21 @@ services:
 
   server:
     image: server:${TAG:-latest}
-    container_name: api
+    container_name: api-prod
     build:
       context: ./server/
-      dockerfile: Dockerfile.dev
-    command: npm run dev
-    volumes:
-      - ./server/src:/www/src
+      dockerfile: Dockerfile.prod
+    command: npm start
     ports:
-      - "3004:8080"
-      - "3005:8081"
+      - "4001:8080"
+      - "4002:8081"
     environment:
       - PORT=8080
       - WS_PORT=8081
-      - MONGODB_URI=mongodb://mongo:27017/quiz
+      - MONGODB_URI=mongodb://mongo-prod:27017/quiz
       - JWT_SECRET=quizlo-secret
       - SECRET_SALT=quizlo-salt
-      - ALLOW_API_ACCESS=http://localhost:3003,http://localhost:8080,http://127.0.0.1:3003,http://127.0.0.1:8080
+      - ALLOW_API_ACCESS=http://localhost,http://localhost:80,http://127.0.0.1:80,http://127.0.0.1:8080
     networks:
       - server
     depends_on:
@@ -47,27 +42,23 @@ services:
 
   web:
     image: web:${TAG:-latest}
-    container_name: web
+    container_name: web-prod
     build:
       context: ./web/
-      dockerfile: Dockerfile.dev
-    command: npm run dev
-    volumes:
-      - ./web/app:/www/app
-      - ./web/src:/www/src
+      dockerfile: Dockerfile.prod
+    command: npm start
     ports:
-      - "3003:8080"
+      - "80:8080"
     environment:
       - PORT=8080
-      - SERVER_API_URL=http://api:8080
-      - API_URL=http://localhost:3004
-      - WS_URL=ws://localhost:3005
+      - SERVER_API_URL=http://api-prod:8080
+      - API_URL=http://localhost:4001
+      - WS_URL=ws://localhost:4002
     networks:
       - web
       - server
 
 networks:
-  quizlo:
   server:
   web:
 

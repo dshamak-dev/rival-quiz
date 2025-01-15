@@ -105,10 +105,12 @@ class BroadcastManager {
 	listeners: Map<ListenerType, (data: any) => void> = new Map();
 	attempts = 0;
 	maxAttempts = 3;
+	error = null;
 
 	constructor(url: string) {
 		this.url = url;
 		this.attempts = 0;
+		this.error = null;
 	}
 
 	get ws() {
@@ -136,17 +138,28 @@ class BroadcastManager {
 	}
 
 	connect() {
-		const ws = (this.ws = new WebSocket(this.url));
+		this.error = null;
 
-		ws.onopen = (event: Event) => {
+		try {
+			this.ws = new WebSocket(this.url);
+		} catch(error: any) {
+			this.error = error;
+			this.attempts = this.maxAttempts;
+		}
+
+		if (!this.ws || this.error) {
+			return;
+		}
+
+		this.ws.onopen = (event: Event) => {
 			this.dispatchListeners('open', event);
 		};
 
-		ws.onmessage = (event) => {
+		this.ws.onmessage = (event) => {
 			this.dispatchListeners('message', event);
 		};
 
-		ws.onclose = (event: CloseEvent) => {
+		this.ws.onclose = (event: CloseEvent) => {
 			this.dispatchListeners('close', event);
 		};
 	}
