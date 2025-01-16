@@ -9,7 +9,7 @@ on:
       env_vars:
         description: 'Environment variables (comma-separated key=value pairs)'
         required: true
-        default: 'APP_ENV=production;DEBUG=false;MONGODB_URI=mongodb://quizlo-db:27017/region_1;ALLOW_API_ACCESS=http://142.93.101.17/;API_URL=http://:8080;WS_URL=ws://:8081;'
+        default: 'APP_ENV=production;DEBUG=false;MONGODB_URI=mongodb://quizlo-db:27017/region_1;ALLOW_API_ACCESS=http://${{ secrets.APP_ADDRESS }};API_URL=http://${{ secrets.APP_ADDRESS }}:8080;WS_URL=ws://${{ secrets.DOMAIN }}:8081;'
 
 jobs:
   deploy-to-droplet:
@@ -86,9 +86,9 @@ jobs:
               exit 1
             fi
             # Pull Database
-            docker pull ${{ secrets.DOCKERHUB_DB_REPO }}
-            docker stop quizlo-db || true
-            docker rm quizlo-db || true
+            # docker pull ${{ secrets.DOCKERHUB_DB_REPO }}
+            # docker stop quizlo-db || true
+            # docker rm quizlo-db || true
             # Pull Server
             docker pull ${{ secrets.DOCKERHUB_SERVER_REPO }}
             docker stop quizlo-server || true

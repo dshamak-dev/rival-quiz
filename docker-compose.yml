@@ -1,7 +1,7 @@
 name: quizlo-prod
 services:
   db:
-    image: dshamak/quizlo-db:${TAG:-latest}
+    image: mongo:latest
     container_name: quizlo-db
     restart: unless-stopped
     ports:
@@ -31,6 +31,7 @@ services:
       - WS_PORT=8081
       - JWT_SECRET=quizlo-secret
       - SECRET_SALT=quizlo-salt
+      - MONGODB_URI=mongodb://quizlo-db:27017/region_1
  #     - ALLOW_API_ACCESS=http://localhost,http://localhost:80,http://127.0.0.1:80,http://127.0.0.1:8080
     networks:
       - server
