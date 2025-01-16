@@ -31,8 +31,8 @@ jobs:
       - name: Build and Push Docker Images
         run: |
           cat .env
-          docker compose build
-          docker compose push
+          docker compose --env-file .env build
+          docker compose --env-file .env push
         env:
           DOCKER_BUILDKIT: 1
 
