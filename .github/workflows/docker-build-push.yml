@@ -23,9 +23,14 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      
+      - name: Create a .env for build
+        run: |
+          echo "${{ secrets.ENV_VARS }}" | tr ';' '\n' > .env
 
       - name: Build and Push Docker Images
         run: |
+          cat .env
           docker compose build
           docker compose push
         env:
