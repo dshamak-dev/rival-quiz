@@ -26,13 +26,15 @@ services:
     ports:
       - "8080:8080"
       - "8081:8081"
+    env_file: 
+      - path: .env
     environment:
       - PORT=8080
       - WS_PORT=8081
       - JWT_SECRET=quizlo-secret
       - SECRET_SALT=quizlo-salt
-      - MONGODB_URI=mongodb://quizlo-db:27017/region_1
-      - ALLOW_API_ACCESS=http://142.93.101.17,http://127.0.0.1:80
+      # - MONGODB_URI=mongodb://quizlo-db:27017/region_1
+      # - ALLOW_API_ACCESS=http://142.93.101.17,http://127.0.0.1:80
     networks:
       - server
     depends_on:
@@ -49,11 +51,13 @@ services:
     command: npm start
     ports:
       - "80:8080"
+    env_file: 
+      - path: .env
     environment:
       - PORT=8080
       - SERVER_API_URL=http://quizlo-server:8080
-      - API_URL=http://142.93.101.17:8080
-      - WS_URL=ws://142.93.101.17:8081
+      # - API_URL=http://142.93.101.17:8080
+      # - WS_URL=ws://142.93.101.17:8081
     networks:
       - web
       - server
