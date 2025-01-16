@@ -1,11 +1,11 @@
 name: Deploy to Droplet
 on:
   workflow_dispatch:
-  inputs:
-      compose_directory:
-        description: 'Directory where docker-compose.yml is located'
-        required: true
-        default: '/'
+    inputs:
+        compose_directory:
+          description: 'Directory where docker-compose.yml is located'
+          required: true
+          default: '/'
 
 jobs:
   deploy-to-droplet:
