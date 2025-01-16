@@ -1,20 +1,20 @@
 name: quizlo-prod
 services:
-  mongo:
-    image: mongo:latest
-    container_name: mongo-prod
-    restart: unless-stopped
-    ports:
-      - "27021:27017"
-    volumes:
-      - mongo-data:/data/db
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://127.0.0.1:27017 --quiet
-      interval: 2s
-      timeout: 3s
-      retries: 5
-    networks:
-      - server
+  # mongo:
+  #   image: mongo:latest
+  #   container_name: mongo-prod
+  #   restart: unless-stopped
+  #   ports:
+  #     - "27021:27017"
+  #   volumes:
+  #     - mongo-data:/data/db
+  #   healthcheck:
+  #     test: echo 'db.runCommand("ping").ok' | mongosh mongodb://127.0.0.1:27017 --quiet
+  #     interval: 2s
+  #     timeout: 3s
+  #     retries: 5
+  #   networks:
+  #     - server
 
   server:
     image: server:${TAG:-latest}
@@ -24,21 +24,21 @@ services:
       dockerfile: Dockerfile.prod
     command: npm start
     ports:
-      - "4001:8080"
-      - "4002:8081"
+      - "8081:8080"
+      - "8082:8081"
     environment:
       - PORT=8080
       - WS_PORT=8081
-      - MONGODB_URI=mongodb://mongo-prod:27017/quiz
-      - JWT_SECRET=quizlo-secret
-      - SECRET_SALT=quizlo-salt
-      - ALLOW_API_ACCESS=http://localhost,http://localhost:80,http://127.0.0.1:80,http://127.0.0.1:8080
+    #   - MONGODB_URI=mongodb://mongo-prod:27017/quiz
+    #   - JWT_SECRET=quizlo-secret
+    #   - SECRET_SALT=quizlo-salt
+    #   - ALLOW_API_ACCESS=http://localhost,http://localhost:80,http://127.0.0.1:80,http://127.0.0.1:8080
     networks:
       - server
-    depends_on:
-      mongo:
-        condition: service_healthy
-        restart: true
+    # depends_on:
+    #   mongo:
+    #     condition: service_healthy
+    #     restart: true
 
   web:
     image: web:${TAG:-latest}
@@ -52,8 +52,8 @@ services:
     environment:
       - PORT=8080
       - SERVER_API_URL=http://api-prod:8080
-      - API_URL=http://localhost:4001
-      - WS_URL=ws://localhost:4002
+    #   - API_URL=http://localhost:4001
+    #   - WS_URL=ws://localhost:4002
     networks:
       - web
       - server

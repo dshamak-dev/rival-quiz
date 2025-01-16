@@ -13,7 +13,7 @@
 	"license": "ISC",
 	"description": "",
 	"engines": {
-		"node": ">=22.9.0"
+		"node": "22.x"
 	},
 	"proxy": "http://localhost:3004",
 	"dependencies": {
