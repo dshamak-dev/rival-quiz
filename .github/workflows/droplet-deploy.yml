@@ -1,8 +1,10 @@
 name: Deploy to Droplet
 on:
-  repository_dispatch:
+  workflow_run:
+    workflows:
+      - Build And Push
     types:
-      - on-build-success
+      - completed
 
 jobs:
   deploy-to-droplet:
