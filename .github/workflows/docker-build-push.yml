@@ -61,7 +61,7 @@ jobs:
           # docker run -d --name quizlo-server --network host -p 8081:8080 ${{ secrets.DOCKERHUB_SERVER_REPO }}
     
   finish-step:
-    needs: deploy-to-droplet
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Dependent Workflow

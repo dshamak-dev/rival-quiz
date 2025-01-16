@@ -18,7 +18,7 @@ services:
 
   server:
     image: dshamak/quizlo-server:${TAG:-latest}
-    container_name: api-prod
+    container_name: quizlo-server
     build:
       context: ./server/
       dockerfile: Dockerfile.prod
@@ -42,7 +42,7 @@ services:
 
   web:
     image: dshamak/quizlo-web:${TAG:-latest}
-    container_name: web-prod
+    container_name: quizlo-web
     build:
       context: ./web/
       dockerfile: Dockerfile.prod
@@ -51,7 +51,7 @@ services:
       - "80:8080"
     environment:
       - PORT=8080
-      - SERVER_API_URL=http://api-prod:8080
+      - SERVER_API_URL=http://quizlo-server:8080
     #   - API_URL=http://localhost:4001
     #   - WS_URL=ws://localhost:4002
     networks:
