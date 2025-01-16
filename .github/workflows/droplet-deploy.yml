@@ -1,10 +1,8 @@
 name: Deploy to Droplet
 on:
-  workflow_run:
-    workflows:
-      - Build And Push
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
   deploy-to-droplet:
