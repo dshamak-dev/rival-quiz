@@ -9,7 +9,7 @@ on:
       env_vars:
         description: 'Environment variables (comma-separated key=value pairs)'
         required: true
-        default: 'APP_ENV=production;DEBUG=false;MONGODB_URI=mongodb://quizlo-db:27017/region_1;ALLOW_API_ACCESS=http://142.93.101.17/;'
+        default: 'APP_ENV=production;DEBUG=false;MONGODB_URI=mongodb://quizlo-db:27017/region_1;ALLOW_API_ACCESS=http://142.93.101.17/;API_URL=http://:8080;WS_URL=ws://:8081;'
 
 jobs:
   deploy-to-droplet:

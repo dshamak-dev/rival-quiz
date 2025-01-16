@@ -24,8 +24,8 @@ services:
       dockerfile: Dockerfile.prod
     command: npm start
     ports:
-      - "8081:8080"
-      - "8082:8081"
+      - "8080:8080"
+      - "8081:8081"
     environment:
       - PORT=8080
       - WS_PORT=8081
@@ -35,7 +35,7 @@ services:
     networks:
       - server
     depends_on:
-      mongo:
+      db:
         condition: service_healthy
         restart: true
 
