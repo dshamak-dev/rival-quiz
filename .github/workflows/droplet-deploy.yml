@@ -1,4 +1,8 @@
 name: Deploy to Droplet
+on:
+  # Add manual trigger
+  workflow_dispatch:
+
 jobs:
   deploy-to-droplet:
     runs-on: ubuntu-latest
