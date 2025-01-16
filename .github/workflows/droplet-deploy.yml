@@ -1,19 +1,8 @@
 name: Deploy to Droplet
 on:
-  repository_dispatch:
-    types:
-      - on-build-success
-  workflow_run:
-    workflows:
-      - Build And Push
-    types:
-      - completed
-  workflow_dispatch:
-    inputs:
-      compose_directory:
-          description: 'Directory where docker-compose.yml is located'
-          required: true
-          default: '/'
+  push:
+    branches:
+      - monorepo
 
 jobs:
   deploy-to-droplet:
