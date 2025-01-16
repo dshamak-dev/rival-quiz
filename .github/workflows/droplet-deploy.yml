@@ -1,16 +1,15 @@
 name: Deploy to Droplet
 on:
-  # workflow_run:
-  #   workflows:
-  #     - Build And Push Docker Image
-  #   types:
-  #     - completed
   workflow_dispatch:
     inputs:
-      docker_compose_directory:
+      root_directory:
         description: "Directory where docker-compose.yml is located"
         required: true
         default: "/root"
+      env_vars:
+        description: 'Environment variables (comma-separated key=value pairs)'
+        required: true
+        default: 'APP_ENV=production;DEBUG=false;MONGODB_URI=mongodb://quizlo-db:27017/region_1;ALLOW_API_ACCESS=http://142.93.101.17/;'
 
 jobs:
   deploy-to-droplet:
@@ -40,9 +39,14 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: ${{ secrets.DROPLET_SSH_PORT }}
           script: |
-            if [ -f "${{ github.event.inputs.docker_compose_directory }}/docker-compose.yml" ]; then
+            if [ -f "${{ github.event.inputs.root_directory }}/.env" ]; then
+              echo "Deleting existing .env file..."
+              rm -f "${{ github.event.inputs.root_directory }}/.env"
+            fi
+
+            if [ -f "${{ github.event.inputs.root_directory }}/docker-compose.yml" ]; then
               echo "Deleting existing docker-compose.yml..."
-              rm -f "${{ github.event.inputs.docker_compose_directory }}/docker-compose.yml"
+              rm -f "${{ github.event.inputs.root_directory }}/docker-compose.yml"
             fi
 
       - name: Copy docker-compose.yml to the server
@@ -65,20 +69,34 @@ jobs:
           port: ${{ secrets.DROPLET_SSH_PORT }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           script: |
-            # Navigate to the directory containing docker-compose.yml
-            cd ${{ github.event.inputs.docker_compose_directory }} || { echo "Error: Directory ${{ github.event.inputs.docker_compose_directory }} does not exist"; exit 1; }
+            # Navigate to the root directory
+            cd ${{ github.event.inputs.root_directory }} || { echo "Error: Directory ${{ github.event.inputs.root_directory }} does not exist"; exit 1; }
+
+            # Split input into lines and write to .env file
+            echo "Creating .env file..."
+            echo "${{ github.event.inputs.env_vars }}" | tr ';' '\n' > .env
+
+            # Confirm the contents of the .env file
+            echo "Generated .env file contents:"
+            cat .env
 
             # Check if docker-compose.yml exists
             if [ ! -f "docker-compose.yml" ]; then
-              echo "Error: docker-compose.yml not found in directory ${{ github.event.inputs.docker_compose_directory }}" >&2
+              echo "Error: docker-compose.yml not found in directory ${{ github.event.inputs.root_directory }}" >&2
               exit 1
             fi
-
+            # Pull Database
+            docker pull ${{ secrets.DOCKERHUB_DB_REPO }}
+            docker stop quizlo-db || true
+            docker rm quizlo-db || true
+            # Pull Server
             docker pull ${{ secrets.DOCKERHUB_SERVER_REPO }}
             docker stop quizlo-server || true
             docker rm quizlo-server || true
+            # Pull Web
             docker pull ${{ secrets.DOCKERHUB_WEB_REPO }}
             docker stop quizlo-web || true
             docker rm quizlo-web || true
+            # Run containers
             docker compose down || true
             docker compose up -d || exit 1

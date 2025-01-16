@@ -1,20 +1,20 @@
 name: quizlo-prod
 services:
-  # mongo:
-  #   image: mongo:latest
-  #   container_name: mongo-prod
-  #   restart: unless-stopped
-  #   ports:
-  #     - "27021:27017"
-  #   volumes:
-  #     - mongo-data:/data/db
-  #   healthcheck:
-  #     test: echo 'db.runCommand("ping").ok' | mongosh mongodb://127.0.0.1:27017 --quiet
-  #     interval: 2s
-  #     timeout: 3s
-  #     retries: 5
-  #   networks:
-  #     - server
+  db:
+    image: dshamak/quizlo-db:${TAG:-latest}
+    container_name: quizlo-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://127.0.0.1:27017 --quiet
+      interval: 2s
+      timeout: 3s
+      retries: 5
+    networks:
+      - server
 
   server:
     image: dshamak/quizlo-server:${TAG:-latest}
@@ -29,16 +29,15 @@ services:
     environment:
       - PORT=8080
       - WS_PORT=8081
-    #   - MONGODB_URI=mongodb://mongo-prod:27017/quiz
-    #   - JWT_SECRET=quizlo-secret
-    #   - SECRET_SALT=quizlo-salt
-    #   - ALLOW_API_ACCESS=http://localhost,http://localhost:80,http://127.0.0.1:80,http://127.0.0.1:8080
+      - JWT_SECRET=quizlo-secret
+      - SECRET_SALT=quizlo-salt
+ #     - ALLOW_API_ACCESS=http://localhost,http://localhost:80,http://127.0.0.1:80,http://127.0.0.1:8080
     networks:
       - server
-    # depends_on:
-    #   mongo:
-    #     condition: service_healthy
-    #     restart: true
+    depends_on:
+      mongo:
+        condition: service_healthy
+        restart: true
 
   web:
     image: dshamak/quizlo-web:${TAG:-latest}
