@@ -58,7 +58,7 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: ${{ secrets.DROPLET_SSH_PORT }}
           source: ./docker-compose.yml
-          target: ${{ github.event.inputs.docker_compose_directory }}
+          target: ${{ github.event.inputs.root_directory }}
 
       - name: SSH into Droplet, pull image, and run container
         uses: appleboy/ssh-action@master
