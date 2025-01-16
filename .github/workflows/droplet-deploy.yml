@@ -1,7 +1,11 @@
 name: Deploy to Droplet
 on:
-  # Add manual trigger
   workflow_dispatch:
+  inputs:
+      compose_directory:
+        description: 'Directory where docker-compose.yml is located'
+        required: true
+        default: '/'
 
 jobs:
   deploy-to-droplet:
