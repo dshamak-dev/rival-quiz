@@ -17,7 +17,7 @@ services:
   #     - server
 
   server:
-    image: server:${TAG:-latest}
+    image: dshamak/quizlo-server:${TAG:-latest}
     container_name: api-prod
     build:
       context: ./server/
@@ -41,7 +41,7 @@ services:
     #     restart: true
 
   web:
-    image: web:${TAG:-latest}
+    image: dshamak/quizlo-web:${TAG:-latest}
     container_name: web-prod
     build:
       context: ./web/

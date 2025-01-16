@@ -20,3 +20,4 @@ COPY --from=deps /www/build/ ./build
 COPY package.json ./deploy/ ./
 
 EXPOSE 8080
+CMD [ "npm", "start" ]

@@ -17,4 +17,4 @@ COPY --from=deps /www/dist ./
 COPY package.json ./
 
 EXPOSE 8080
-# CMD [ "npm", "run", "dev" ]
+CMD [ "npm", "start" ]
