@@ -1,8 +1,14 @@
 name: Deploy to Droplet
 on:
-  push:
-    branches:
-      - main
+  repository_dispatch:
+    types:
+      - on-build-success
+  workflow_run:
+    workflows:
+      - Build And Push
+    types:
+      - completed
+  workflow_dispatch:
 
 jobs:
   deploy-to-droplet:
