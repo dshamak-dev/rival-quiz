@@ -1,10 +1,10 @@
 name: Deploy to Droplet
 on:
-  workflow_run:
-    workflows:
-      - Build And Push Docker Image
-    types:
-      - completed
+  # workflow_run:
+  #   workflows:
+  #     - Build And Push Docker Image
+  #   types:
+  #     - completed
   workflow_dispatch:
     inputs:
       compose_directory:
