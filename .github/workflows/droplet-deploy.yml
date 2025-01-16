@@ -1,19 +1,16 @@
 name: Deploy to Droplet
 on:
-  repository_dispatch:
+  workflow_run:
+    workflows:
+      - Build And Push Docker Image
     types:
-      - on-build-success
-  # workflow_run:
-  #   workflows:
-  #     - Build And Push Docker Image
-  #   types:
-  #     - completed
+      - completed
   workflow_dispatch:
     inputs:
       compose_directory:
-          description: 'Directory where docker-compose.yml is located'
-          required: true
-          default: '/'
+        description: "Directory where docker-compose.yml is located"
+        required: true
+        default: "/"
 
 jobs:
   deploy-to-droplet:
