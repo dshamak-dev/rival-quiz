@@ -7,7 +7,7 @@ on:
         required: true
         default: "/root"
       env_vars:
-        description: 'Environment variables (comma-separated key=value pairs)'
+        description: 'Environment variables (semicolon-separated key=value pairs)'
         required: true
         default: 'APP_ENV=production;DEBUG=false;MONGODB_URI=mongodb://quizlo-db:27017/region_1;ALLOW_API_ACCESS=http://142.93.101.17;API_URL=http://142.93.101.17:8080;WS_URL=ws://142.93.101.17:8081;'
 
