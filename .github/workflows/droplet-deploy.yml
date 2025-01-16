@@ -7,7 +7,7 @@ on:
   #     - completed
   workflow_dispatch:
     inputs:
-      compose_directory:
+      docker_compose_directory:
         description: "Directory where docker-compose.yml is located"
         required: true
         default: "/"
@@ -40,6 +40,15 @@ jobs:
           port: ${{ secrets.DROPLET_SSH_PORT }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           script: |
+            # Navigate to the directory containing docker-compose.yml
+            cd ${{ github.event.inputs.docker_compose_directory }} || { echo "Error: Directory ${{ github.event.inputs.docker_compose_directory }} does not exist"; exit 1; }
+
+            # Check if docker-compose.yml exists
+            if [ ! -f "docker-compose.yml" ]; then
+              echo "Error: docker-compose.yml not found in directory ${{ github.event.inputs.docker_compose_directory }}" >&2
+              exit 1
+            fi
+
             docker pull ${{ secrets.DOCKERHUB_SERVER_REPO }}
             docker stop quizlo-server || true
             docker rm quizlo-server || true
@@ -47,4 +56,4 @@ jobs:
             docker stop quizlo-web || true
             docker rm quizlo-web || true
             docker compose down || true
-            docker compose up -d
+            docker compose up -d || exit 1
