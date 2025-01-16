@@ -31,6 +31,17 @@ jobs:
       - name: Install SSH client
         run: sudo apt-get install -y openssh-client
 
+      - name: Copy docker-compose.yml to the server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DROPLET_SSH_HOST }}
+          username: ${{ secrets.DROPLET_SSH_USERNAME }}
+          key: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: ${{ secrets.DROPLET_SSH_PORT }}
+          source: ./docker-compose.yml
+          target: ${{ github.event.inputs.docker_compose_directory }}/docker-compose.yml
+
       - name: SSH into Droplet, pull image, and run container
         uses: appleboy/ssh-action@master
         with:
