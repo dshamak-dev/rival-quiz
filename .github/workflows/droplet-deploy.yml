@@ -1,8 +1,19 @@
 name: Deploy to Droplet
 on:
-  push:
-    branches:
-      - monorepo
+  repository_dispatch:
+    types:
+      - on-build-success
+  # workflow_run:
+  #   workflows:
+  #     - Build And Push Docker Image
+  #   types:
+  #     - completed
+  workflow_dispatch:
+    inputs:
+      compose_directory:
+          description: 'Directory where docker-compose.yml is located'
+          required: true
+          default: '/'
 
 jobs:
   deploy-to-droplet:
@@ -33,11 +44,11 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           script: |
             docker pull ${{ secrets.DOCKERHUB_SERVER_REPO }}
-            docker stop quizlo-server || true
-            docker rm quizlo-server || true
+            docker stop server || true
+            docker rm server || true
             docker pull ${{ secrets.DOCKERHUB_WEB_REPO }}
-            docker stop quizlo-web || true
-            docker rm quizlo-web || true
+            docker stop web || true
+            docker rm web || true
             docker compose down || true
             docker compose up -d
           # docker run -d --name quizlo-server --network host -p 8081:8080 ${{ secrets.DOCKERHUB_SERVER_REPO }}
