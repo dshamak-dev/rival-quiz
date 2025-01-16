@@ -30,12 +30,6 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
 
-      # - name: Build and Push Docker Image
-      #   uses: docker/compose-build-push-action@v2
-      #   run: |
-      #     docker compose build -t ${{ secrets.DOCKERHUB_REPO }} .
-      #     docker push ${{ secrets.DOCKERHUB_REPO }}
-
   deploy-to-droplet:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -53,8 +47,9 @@ jobs:
           username: ${{ secrets.DROPLET_SSH_USERNAME }}
           key: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
           port: ${{ secrets.DROPLET_SSH_PORT }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           script: |
             docker pull ${{ secrets.DOCKERHUB_SERVER_REPO }}
-            docker stop server || true
-            docker rm server || true
-            docker run -d --name server --network host -p 8081:8080 --env-file /root/.env ${{ secrets.DOCKERHUB_SERVER_REPO }}
+            docker stop quizlo-server || true
+            docker rm quizlo-server || true
+            docker run -d --name quizlo-server --network host -p 8081:8080 ${{ secrets.DOCKERHUB_SERVER_REPO }}
