@@ -1,20 +1,20 @@
 name: quizlo-prod
 services:
-  db:
-    image: mongo:latest
-    container_name: quizlo-db
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://127.0.0.1:27017 --quiet
-      interval: 2s
-      timeout: 3s
-      retries: 5
-    networks:
-      - server
+  # db:
+  #   image: mongo:latest
+  #   container_name: quizlo-db
+  #   restart: unless-stopped
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo-data:/data/db
+  #   healthcheck:
+  #     test: echo 'db.runCommand("ping").ok' | mongosh mongodb://127.0.0.1:27017 --quiet
+  #     interval: 2s
+  #     timeout: 3s
+  #     retries: 5
+  #   networks:
+  #     - server
 
   server:
     image: dshamak/quizlo-server:${TAG:-latest}
@@ -34,10 +34,10 @@ services:
       - SECRET_SALT=quizlo-salt
     networks:
       - server
-    depends_on:
-      db:
-        condition: service_healthy
-        restart: true
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    #     restart: true
 
   web:
     image: dshamak/quizlo-web:${TAG:-latest}
@@ -63,5 +63,5 @@ networks:
 
 volumes:
   node_modules:
-  mongo-data:
-    driver: local
+  # mongo-data:
+  #   driver: local

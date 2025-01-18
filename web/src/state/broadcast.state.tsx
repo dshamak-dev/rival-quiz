@@ -41,7 +41,9 @@ export function BroadcastProvider({ children, env }: any) {
 	}, []);
 
 	useEffect(() => {
-		const manager = new BroadcastManager(env.WS_URL);
+		const protocol = window.location.protocol === 'https:'? 'wss:' : 'ws:';
+		const WS_URL = `${protocol}//${window.location.hostname}:${env.WS_PORT}`;
+		const manager = new BroadcastManager(WS_URL);
 
 		manager.addEventListener('open', () => {
 			dispatch({ type: 'SET_CONNECTION_STATUS', payload: true });

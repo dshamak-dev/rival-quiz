@@ -25,6 +25,9 @@ import { BroadcastProvider } from '@state/broadcast.state';
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
 
+	// const { origin, host, protocol, port } = new URL(request.url);
+	// console.log('App initialData', { origin, host, protocol, port });
+
 	WEB_API.setEnv({...envVariables, API_URL: envVariables.SERVER_API_URL });
 
 	const token: string | null = await getAuthCookie(request);
@@ -121,17 +124,16 @@ export default function App() {
 		return deviceType != null && [DeviceType.Mobile].includes(deviceType);
 	}, [deviceType]);
 
-	WEB_API.setEnv(initialData.envVariables);
-
-	if (initialData.token) {
-		WEB_API.setJWT(initialData.token);
-	}
-
 	useEffect(() => {
+		const API_URL = `${window.location.protocol}//${window.location.hostname}:${initialData.envVariables.API_PORT}`;
+
+		WEB_API.setEnv({...initialData.envVariables, API_URL});
+
+		if (initialData.token) {
+			WEB_API.setJWT(initialData.token);
+		}
+
 		WEB_API.get('/health')
-			.then((res) => {
-				console.log('API is up and running', res);
-			})
 			.catch((err) => {
 				console.error('API is not up and running', { err, url: WEB_API.apiUrl });
 			});
