@@ -34,7 +34,8 @@ services:
     environment:
       - PORT=8080
       - WS_PORT=8081
-      - MONGODB_URI=mongodb://mongo:27017/quiz
+      - REGION=local
+      - MONGODB_URI=mongodb://mongo:27017
       - JWT_SECRET=quizlo-secret
       - SECRET_SALT=quizlo-salt
       - ALLOW_API_ACCESS=http://localhost:3003,http://localhost:8080,http://127.0.0.1:3003,http://127.0.0.1:8080

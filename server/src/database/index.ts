@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 
-const uri = process.env.MONGODB_URI;
+const MONGO_URI = process.env.MONGODB_URI;
+const REGION = process.env.REGION || "draft";
 
 export function connect() {
   // connect to the database
   //   console.log(`Connecting to ${process.env.MONGODB_URI}`);
+  const uri = `${MONGO_URI}/${REGION}/${REGION}`;
 
   mongoose.connection.on("connected", () =>
     console.log("Connected to Mongo DB")

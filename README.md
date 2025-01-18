@@ -1,0 +1,6 @@
+# ENV VARS
+API_URL=
+WS_URL=
+REGION=
+MONGODB_URI=mongodb://quizlo-db:27017
+ALLOW_API_ACCESS=
