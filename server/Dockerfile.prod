@@ -15,6 +15,7 @@ WORKDIR /www/
 COPY --from=deps /www/node_modules ./node_modules
 COPY --from=deps /www/dist ./
 COPY package.json ./
+COPY ../ssl ./ssl
 
 EXPOSE 8080
 CMD [ "npm", "start" ]

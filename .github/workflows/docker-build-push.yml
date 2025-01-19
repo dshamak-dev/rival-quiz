@@ -24,6 +24,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       
+      - name: Inject certificates into the build
+        run: |
+          cp -r ssl/ ./server/
+          cp -r ssl/ ./web/
+
       - name: Create a .env for build
         run: |
           echo "${{ secrets.ENV_VARS }}" | tr ';' '\n' > .env

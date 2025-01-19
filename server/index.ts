@@ -1,6 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
 import cookieParser from "cookie-parser";
 
 // microservices initialization
@@ -40,6 +44,15 @@ const corsOptionsDelegate = function (req: any, callback: any) {
 };
 
 app.use(cors(corsOptions));
+
+const HTTPS_ONLY = process.env.HTTPS_ONLY === 'true';
+
+app.use((req, res, next) => {
+  if (HTTPS_ONLY && req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+  next();
+});
 
 app.use(cookieParser());
 
@@ -93,8 +106,17 @@ app.use((req, res) => {
   res.status(404).send("Hello, World!");
 });
 
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
-app.listen(port, function () {
-  console.log(`Server is running on port ${port}`);
+const SSL_PATH = path.join(__dirname, './ssl');
+const httpsOptions = {
+  // key: fs.readFileSync('./public/ssl/private.key'),
+  cert: fs.readFileSync(path.join(SSL_PATH, 'certificate.crt')),
+  ca: fs.readFileSync(path.join(SSL_PATH, 'bundle.crt')),
+};
+
+const httpsServer = https.createServer(httpsOptions, app);
+
+httpsServer.listen(PORT, () => {
+  console.log(`Server listening on ${PORT} port`);
 });
