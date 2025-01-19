@@ -2,6 +2,7 @@
 	"name": "quizlo",
 	"version": "0.0.2",
 	"scripts": {
+		"dev": "docker compose -f docker-compose.dev.yml up --build -d",
 		"lint": "eslint --ignore-path .gitignore .",
 		"typecheck": "tsc"
 	},

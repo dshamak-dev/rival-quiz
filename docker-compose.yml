@@ -1,67 +1,58 @@
 name: quizlo-prod
 services:
-  # db:
-  #   image: mongo:latest
-  #   container_name: quizlo-db
-  #   restart: unless-stopped
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo-data:/data/db
-  #   healthcheck:
-  #     test: echo 'db.runCommand("ping").ok' | mongosh mongodb://127.0.0.1:27017 --quiet
-  #     interval: 2s
-  #     timeout: 3s
-  #     retries: 5
-  #   networks:
-  #     - server
-
-  server:
+  api:
     image: dshamak/quizlo-server:${TAG:-latest}
-    container_name: quizlo-server
+    container_name: api
     build:
       context: ./server/
       dockerfile: Dockerfile.prod
     command: npm start
     ports:
+      - "443"
+      - "80"
       - "8080:8080"
-      - "8081:8081"
     env_file: .env
     environment:
-      - PORT=8080
-      - WS_PORT=8081
+      - WS_PORT=8080
       - JWT_SECRET=quizlo-secret
       - SECRET_SALT=quizlo-salt
     networks:
-      - server
-    # depends_on:
-    #   db:
-    #     condition: service_healthy
-    #     restart: true
+      - api
 
   web:
     image: dshamak/quizlo-web:${TAG:-latest}
-    container_name: quizlo-web
+    container_name: web
     build:
       context: ./web/
       dockerfile: Dockerfile.prod
     command: npm start
     ports:
-      - "80:8080"
-      - "2222:8080"
+      - "443"
+      - "80"
     env_file: .env
     environment:
-      - PORT=8080
-      - SERVER_API_URL=http://quizlo-server:8080
+      - SERVER_API_URL=http://api:443
     networks:
       - web
-      - server
+      - api
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl/:/etc/ssl
+    depends_on:
+      - api
+      - web
+    networks:
+      - api
+      - web
 
 networks:
-  server:
+  api:
   web:
 
 volumes:
   node_modules:
-  # mongo-data:
-  #   driver: local
