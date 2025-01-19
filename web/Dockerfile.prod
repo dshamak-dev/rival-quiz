@@ -17,6 +17,7 @@ RUN mkdir /www
 WORKDIR /www/
 COPY --from=deps /www/node_modules ./node_modules
 COPY --from=deps /www/build/ ./build
+COPY ./public/ ./public
 COPY package.json ./deploy/ ./
 
 EXPOSE 8080

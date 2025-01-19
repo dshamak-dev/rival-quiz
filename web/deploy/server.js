@@ -4,6 +4,9 @@ import express from "express";
 import * as build from "./build/server/index.js";
 
 const app = express();
+
+app.use(express.static('public'));
+
 app.use(express.static("build/client"));
 
 // and your app is "just a request handler"
