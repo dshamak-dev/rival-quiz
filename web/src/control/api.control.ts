@@ -11,7 +11,7 @@ export class WEB_API {
 	}
 
 	static joinUrl(path: string) {
-		return [this.apiUrl?.replace(/$\//, '') || '', 'api', path.replace(/^\//, '')].join('/');
+		return [this.apiUrl?.replace(/$\//, '') || '', path.replace(/^\//, '')].join('/');
 	}
 
 	static getAuthHeaders() {

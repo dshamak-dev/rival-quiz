@@ -1,19 +1,29 @@
 import WebSocket, { WebSocketServer } from "ws";
 import dotenv from "dotenv";
 
-export const BroadcastMessageTypeEnum = {
-  INFO: "info",
-  WARNING: "warning",
-  ERROR: "error",
-  SYSTEM: "system",
+export enum BroadcastMessageTypeEnum {
+  INFO = "info",
+  WARNING = "warning",
+  ERROR = "error",
+  SYSTEM = "system",
 };
 
-export const BroadcastEntityEnum = {
-  USER: "user",
-  QUIZ: "quiz",
-  ANSWER: "answer",
-  COMMENT: "comment",
-  TRANSACTION: "transaction",
+export enum BroadcastEntityEnum {
+  OTHER = "other",
+  USER = "user",
+  QUIZ = "quiz",
+  ANSWER = "answer",
+  COMMENT = "comment",
+  TRANSACTION = "transaction",
+  WALLET = "wallet",
+};
+
+export type BroadcastData = {
+  entity: BroadcastEntityEnum;
+  message: string | Object;
+  userId?: string;
+  timestamp?: string | number;
+  payload?: any;
 };
 
 dotenv.config();
@@ -25,8 +35,10 @@ class BroadcastProvider {
     const self = this;
     const wss = (this.wss = new WebSocketServer({ port: port }));
 
+    console.log(`WebSocket server is running at port: ${port}`);
+
     wss.on("open", () => {
-      console.log(`WebSocket server is running at ws://localhost:${port}`);
+      console.log(`WebSocket server is opened`);
     });
 
     wss.on("connection", (connection) => self.onConnect(connection));
@@ -51,7 +63,7 @@ class BroadcastProvider {
           entity: BroadcastEntityEnum.USER,
           message: parseMessage(message),
           userId: connection?.upgradeReq?.socket?.remoteAddress,
-          timestamp: new Date(),
+          timestamp: Date.now(),
         },
         [connection]
       );
@@ -62,18 +74,18 @@ class BroadcastProvider {
 
   sendMessageToConnection(connection, message, props = null) {
     this.sendToConnection(connection, {
-      entity: BroadcastMessageTypeEnum.SYSTEM,
+      entity: BroadcastEntityEnum.OTHER,
       message: message,
     });
   }
 
-  sendToConnection(connection, broadcast) {
+  sendToConnection(connection, broadcast: BroadcastData) {
     if (connection) {
       connection.send(JSON.stringify(broadcast) + "\n");
     }
   }
 
-  send(broadcast, ignore: WebSocket[] = []) {
+  send(broadcast: BroadcastData, ignore: WebSocket[] = []) {
     if (this.wss) {
       console.log("Broadcast to clients", { size: this.wss.clients.size });
 

@@ -3,7 +3,7 @@
 	"version": "0.0.2",
 	"scripts": {
 		"build": "remix vite:build",
-		"dev": "remix vite:dev --port=8080 --host",
+		"dev": "remix vite:dev --port=80 --host",
 		"prod": "dotenv -e .env remix-serve ./build/server/index.js",
 		"start": "node ./server.js"
 	},

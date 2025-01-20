@@ -2,9 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import https from "https";
-import http from "http";
-import fs from "fs";
-import path from "path";
 import cookieParser from "cookie-parser";
 
 // microservices initialization
@@ -103,12 +100,7 @@ app.listen(80, () => {
   console.log(`Server listening on express ${80} port`);
 });
 
-// const SSL_PATH = path.join(__dirname, "./ssl");
-const httpsOptions = {
-  // key: fs.readFileSync('./public/ssl/private.key'),
-  // cert: fs.readFileSync(path.join(SSL_PATH, "certificate.crt")),
-  // ca: fs.readFileSync(path.join(SSL_PATH, "bundle.crt")),
-};
+const httpsOptions = {};
 
 const httpsServer = https.createServer(httpsOptions, app);
 

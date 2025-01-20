@@ -1,4 +1,4 @@
-import { broadcastManager } from "../broadcast/model";
+import { BroadcastEntityEnum, broadcastManager } from "../broadcast/model";
 import { create, findByIdAndUpdate, findOne, findById } from "./api";
 
 export async function createWallet(userId, payload = {}) {
@@ -43,7 +43,7 @@ export async function addWalletBalance(id, value) {
     $inc: { balance: amount },
   }).then((wallet) => {
     broadcastManager.send({
-      entity: "wallet",
+      entity: BroadcastEntityEnum.WALLET,
       payload: {
         id: wallet.id,
         userId: wallet.userId,

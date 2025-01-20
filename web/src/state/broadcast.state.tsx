@@ -42,7 +42,7 @@ export function BroadcastProvider({ children, env }: any) {
 
 	useEffect(() => {
 		const protocol = window.location.protocol === 'https:'? 'wss:' : 'ws:';
-		const WS_URL = `${protocol}//${window.location.hostname}:${env.WS_PORT}`;
+		const WS_URL = `${protocol}//${window.location.hostname}/ws`;
 		const manager = new BroadcastManager(WS_URL);
 
 		manager.addEventListener('open', () => {

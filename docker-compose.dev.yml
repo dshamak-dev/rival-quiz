@@ -17,9 +17,9 @@ services:
       timeout: 3s
       retries: 5
     networks:
-      - server
+      - api-local
 
-  server:
+  api-local:
     image: server:${TAG:-latest}
     container_name: api
     build:
@@ -29,25 +29,25 @@ services:
     volumes:
       - ./server/src:/www/src
     ports:
-      - "3004:8080"
-      - "3005:8081"
+      - "80"
+      - "8080:8080"
     environment:
       - NODE_ENV=development
-      - PORT=8080
-      - WS_PORT=8081
-      - REGION=local
+      - PORT=80
+      - WS_PORT=8080
+      - REGION=region0
       - MONGODB_URI=mongodb://mongo:27017
       - JWT_SECRET=quizlo-secret
       - SECRET_SALT=quizlo-salt
-      - ALLOW_API_ACCESS=http://localhost:3003,http://localhost:8080,http://127.0.0.1:3003,http://127.0.0.1:8080
+      - ALLOW_API_ACCESS=http://localhost:3003
     networks:
-      - server
+      - api-local
     depends_on:
       mongo:
         condition: service_healthy
         restart: true
 
-  web:
+  web-local:
     image: web:${TAG:-latest}
     container_name: web
     build:
@@ -58,23 +58,32 @@ services:
       - ./web/app:/www/app
       - ./web/src:/www/src
     ports:
-      - "3003:8080"
+      - "80"
     environment:
       - NODE_ENV=development
-      - PORT=8080
-      - WS_PORT=3005
-      - API_PORT=3004
-      - SERVER_API_URL=http://api:8080
-      - API_URL=http://localhost:3004
-      - WS_URL=ws://localhost:3005
+      - PORT=80
+      - API_SERVICE=api-local
+      - WS_PORT=8080
     networks:
-      - web
-      - server
+      - web-local
+      - api-local
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-local.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api-local
+      - web-local
+    networks:
+      - api-local
+      - web-local
 
 networks:
-  quizlo:
-  server:
-  web:
+  api-local:
+  web-local:
 
 volumes:
   node_modules:

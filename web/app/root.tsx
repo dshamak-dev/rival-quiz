@@ -25,10 +25,12 @@ import { BroadcastProvider } from '@state/broadcast.state';
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
 
-	// const { origin, host, protocol, port } = new URL(request.url);
-	// console.log('App initialData', { origin, host, protocol, port });
+	const { origin, host, protocol, port } = new URL(request.url);
 
-	WEB_API.setEnv({ ...envVariables, API_URL: envVariables.SERVER_API_URL });
+	const service = envVariables.API_SERVICE;
+	const API_URL = service ? `${protocol}//${envVariables.API_SERVICE}` : `${protocol}//${host}/api`;
+
+	WEB_API.setEnv({ ...envVariables, API_URL });
 
 	const token: string | null = await getAuthCookie(request);
 
@@ -125,9 +127,9 @@ export default function App() {
 	}, [deviceType]);
 
 	useEffect(() => {
-		const API_URL = `${window.location.protocol}//${window.location.hostname}:${initialData.envVariables.API_PORT}`;
+		// const API_URL = `${window.location.protocol}//${window.location.hostname}:${initialData.envVariables.API_PORT}`;
 
-		WEB_API.setEnv({ ...initialData.envVariables, API_URL });
+		WEB_API.setEnv({ ...initialData.envVariables, API_URL: '/api' });
 
 		if (initialData.token) {
 			WEB_API.setJWT(initialData.token);
@@ -139,7 +141,7 @@ export default function App() {
 	}, []);
 
 	return (
-		<html suppressHydrationWarning={true}>
+		<html suppressHydrationWarning={false}>
 			<head>
 				<link rel="icon" href="data:image/x-icon;base64,AA" />
 				<meta charSet="utf-8" />
