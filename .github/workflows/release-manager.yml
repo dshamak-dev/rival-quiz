@@ -1,0 +1,57 @@
+name: Release Manager
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  trigger-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Build
+        run: |
+          curl -X POST -H "Accept: application/vnd.github+json" \
+               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Content-Type: application/json" \
+               --data '{"ref": "develop"}' \
+               https://api.github.com/repos/${{ github.repository }}/actions/workflows/docker-build-push.yml/dispatches
+
+  wait-for-build:
+    needs: trigger-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Build to Complete
+        run: |
+          WORKFLOW_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                          "https://api.github.com/repos/${{ github.repository }}/actions/workflows/docker-build-push.yml" | jq -r '.id')
+
+          while true; do
+            STATUS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                          "https://api.github.com/repos/${{ github.repository }}/actions/runs?workflow_id=$WORKFLOW_ID&branch=develop&status=completed" \
+                          | jq -r '.workflow_runs[0].conclusion')
+
+            if [[ "$STATUS" == "success" ]]; then
+              echo "Build succeeded!"
+              break
+            elif [[ "$STATUS" == "failure" || "$STATUS" == "cancelled" ]]; then
+              echo "Build failed or was cancelled. Exiting."
+              exit 1
+            else
+              echo "Waiting for Build to finish..."
+              sleep 10
+            fi
+          done
+
+  trigger-deploy:
+    needs: wait-for-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Deploy
+        run: |
+          curl -X POST -H "Accept: application/vnd.github+json" \
+               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Content-Type: application/json" \
+               --data '{"ref": "develop"}' \
+               https://api.github.com/repos/${{ github.repository }}/actions/workflows/droplet-deploy.yml/dispatches

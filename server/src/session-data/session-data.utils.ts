@@ -1,35 +1,51 @@
-export async function calculateUserSummaryFromVotes(votes) {
+import { QuestionDataDTO, QuiestionVoteDTO } from "../question/quistion.model";
+import { SessionDataDTO } from "./session-data.model";
+
+export type CalculateStatsDTO = {
+  maxScore: number;
+  byQuestion: Record<string, Record<string, QuiestionVoteDTO>>;
+};
+type VoteEntries = [string, QuestionDataDTO];
+
+export async function calculateUserSummaryFromVotes(
+  votes: Record<string, QuestionDataDTO>
+): Promise<SessionDataDTO["userScores"]> {
   if (!votes) {
     return null;
   }
 
-  const stats = await Object.entries(votes)
-    .filter(([questionId, questionData]: any) => {
+  const stats: CalculateStatsDTO = await Object.entries(votes)
+    .filter(([questionId, questionData]: VoteEntries): boolean => {
       return !!questionId && questionData?.votes != null;
     })
     .reduce(
-      async (accum, [questionId, questionData]: any) => {
-        const totalVotes = questionData.votes.reduce(
-          (sum, vote) => sum + vote.value,
-          0
-        );
-        const byQuestion = await calculateUserScoresFromQuestionVotes(questionData);
+      (accum, item) => {
+        const [questionId, questionData] = item;
+        const byQuestion: Record<string, QuiestionVoteDTO> =
+          calculateUserScoresFromQuestionVotes(questionData);
 
-        accum.maxScore += 1;
+        accum.maxScore += questionData.totalVotes ?? 1;
 
         accum.byQuestion[questionId] = byQuestion;
 
         return accum;
       },
-      { maxScore: 0, byQuestion: {} } as any
+      { maxScore: 0, byQuestion: {} } as CalculateStatsDTO
     );
 
-  const summary = Object.entries(stats.byQuestion).reduce(
+  const rates: Record<string, number> = Object.entries(stats.byQuestion).reduce(
     (accum, [questionId, usersData]: [any, any]) => {
+      const quiestion = votes[questionId];
+      const questionTotal = quiestion.totalVotes;
+
       Object.entries(usersData).forEach(([userId, userData]: [any, any]) => {
         const summ = accum[userId] || 0;
+        const userValue = userData.value || 0;
+        let rate = userValue === 0 ? 0 : userValue / questionTotal;
 
-        accum[userId] = (summ + (userData.value || 0 )) || 0;
+        rate = rate ? Number(rate.toFixed(2)) : 0;
+
+        accum[userId] = summ + Math.max(0, rate);
       });
 
       return accum;
@@ -37,10 +53,20 @@ export async function calculateUserSummaryFromVotes(votes) {
     {}
   );
 
-  return { ...stats, summary };
+  const total = stats.maxScore;
+
+  const summary = Object.entries(rates).reduce((accum, [userId, rate]) => {
+    accum[userId] = total * rate;
+
+    return accum;
+  }, {});
+
+  return { ...stats, rates, summary };
 }
 
-export async function calculateUserScoresFromQuestionVotes(questionData) {
+export function calculateUserScoresFromQuestionVotes(
+  questionData: QuestionDataDTO
+): Record<string, QuiestionVoteDTO> {
   const { totalVotes, totalByAnswers, votes } = questionData;
 
   return votes.reduce(
@@ -59,6 +85,6 @@ export async function calculateUserScoresFromQuestionVotes(questionData) {
   );
 }
 
-export function normalizeSessionData(data) {
-	return data?.json;
+export function normalizeSessionData(data): SessionDataDTO {
+  return data?.json;
 }

@@ -17,7 +17,7 @@ import {
   findQuestionDataAndSync,
   syncQuestionData,
 } from "../services/question-data/actions";
-import { SessionDataStateTypes } from "../session-data/model";
+import { SessionDataDTO, SessionDataStateTypes } from "../session-data/session-data.model";
 import { findSessionData } from "../session-data/session-data.api";
 import { SessionStateType } from "./session.model";
 
@@ -240,14 +240,14 @@ export async function completeSession(sessionId) {
     sessionId,
     state: SessionDataStateTypes.Active,
   })
-    .then((result) => {
+    .then((result): Promise<[SessionDataDTO | null, any]> => {
       if (!result?.id) {
-        return createSessionData(session, true).then((result) => [result, null]);
+        return createSessionData(session, true).then((result) => [result as SessionDataDTO, null]);
       }
 
-      return completeSessionData(result.id, session).then((result) => [result, null]);
+      return completeSessionData(result.id, session).then((result) => [result as SessionDataDTO, null]);
     })
-    .catch((error) => {
+    .catch((error): [null, string] => {
       return [null, error];
     });
 
@@ -257,6 +257,7 @@ export async function completeSession(sessionId) {
   }
 
   const prizePool = sessionData?.userScores?.summary;
+
   //  Distribute prize pool among users
   const [ok, error] = await distributePrizePool(session, prizePool)
     .then((res) => [res, null])
