@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-color: white;
+}
+
 @media (max-width:580px) {
   .form-field:where(.css-dev-only-do-not-override-1uq9j6g).ant-form-item-vertical .ant-form-item-row {
     flex-direction: unset;

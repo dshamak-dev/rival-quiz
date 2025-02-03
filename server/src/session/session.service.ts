@@ -16,7 +16,7 @@ import { createQuestion } from "../question/question.action";
 import { getUserActions } from "../user-action/user-action.action";
 import { SessionStateType } from "./session.model";
 import { findSessionData } from "../session-data/session-data.api";
-import { SessionDataStateTypes } from "../session-data/model";
+import { SessionDataStateTypes } from "../session-data/session-data.model";
 import {
   findQuestionData,
   syncQuestionDataAndUpdate,

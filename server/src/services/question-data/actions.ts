@@ -3,7 +3,7 @@ import { getUserActions } from "../../user-action/user-action.action";
 import { UserActionTypes } from "../../user-action/user-action.model";
 import { findQuestionById } from "../../question/question.action";
 import { QuestionDataStatusTypes } from "./model";
-import { SessionDataStateTypes } from "../../session-data/model";
+import { SessionDataStateTypes } from "../../session-data/session-data.model";
 
 export async function createQuestionData(sessionId, questionId) {
   const question = await findQuestionById(sessionId, questionId).catch(

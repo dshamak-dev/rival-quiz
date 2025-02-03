@@ -30,7 +30,7 @@ services:
       - ./server/src:/www/src
     ports:
       - "80"
-      - "8080:8080"
+      - "8080"
     environment:
       - NODE_ENV=development
       - PORT=80

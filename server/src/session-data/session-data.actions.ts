@@ -5,7 +5,7 @@ import {
   calculateUserSummaryFromVotes,
   normalizeSessionData,
 } from "./session-data.utils";
-import { SessionDataStateTypes } from "./model";
+import { SessionDataStateTypes } from "./session-data.model";
 import { getSessionById } from "../session/session.action";
 import { findSessionData } from "./session-data.api";
 import { findManyQuestionData } from "../services/question-data/actions";
