@@ -1,0 +1,35 @@
+name: Before Merge
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Server dependencies
+        working-directory: server
+        run: npm install
+
+      - name: Run Server tests
+        working-directory: server
+        run: npm test
+
+      - name: Upload Test Results (Optional)
+        if: failure()
+        working-directory: server
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
