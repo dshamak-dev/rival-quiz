@@ -64,7 +64,7 @@ export function findMany(model, query, normalizer: Function | null = null) {
 export function findAndUpdate(model, query, payload, normalizer : Function | null= null) {
   return model.updateMany(query, payload, { new: true }).then((res) => {
     if (normalizer) {
-      return res.map(normalizer);
+      return res?.map(normalizer);
     }
 
     return res;

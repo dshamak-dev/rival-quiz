@@ -1,4 +1,4 @@
-name: quizlo
+name: quizlo-local
 services:
   mongo:
     image: mongo:latest
@@ -25,6 +25,8 @@ services:
     build:
       context: ./server/
       dockerfile: Dockerfile.dev
+    env_file:
+      - .env
     command: npm run dev
     volumes:
       - ./server/src:/www/src

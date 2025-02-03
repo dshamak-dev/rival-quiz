@@ -1,5 +1,5 @@
 import { addWalletBalanceByUserId } from "../wallet/actions";
-import { create, findMany, findById, findByIdAndUpdate, model } from "./api";
+import { create, findById, findByIdAndUpdate, model } from "./api";
 import { TransactionStatusEnum } from "./model";
 
 export async function createTransaction(from, to, payload) {
