@@ -9,35 +9,18 @@ import { SessionList } from '@view/session/session.list';
 import classNames from 'classnames';
 import { useUI } from '@control/ui.control';
 import { SessionStateType } from '@model/session.model';
-import { useAuth } from '@state/auth.hook';
 
 export default function LandingPage() {
-	const { user } = useAuth();
 	const { isMobile } = useUI();
 	const { data, loading, dispatch } = useAPI({
-		initialState: null,
+		initialState: undefined,
 		request: () =>
-			findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).catch(() => []),
+			findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).catch(() => undefined),
 	});
 
 	useEffect(() => {
 		dispatch();
 	}, []);
-
-	const availableSessions = useMemo(() => {
-		return data || [];
-		// return (
-		// 	data?.filter((session) => {
-		// 		if (user?.id && (session.users?.includes(user?.id) || session.ownerId === user?.id)) {
-		// 			return ![SessionStateType.Archived, SessionStateType.Canceled, SessionStateType.Completed].includes(
-		// 				session.state
-		// 			);
-		// 		}
-
-		// 		return [SessionStateType.Published].includes(session.state);
-		// 	}) || []
-		// );
-	}, [data, user]);
 
 	return (
 		<div
@@ -52,7 +35,7 @@ export default function LandingPage() {
 					<Typography className="">Quizdation starts here</Typography>
 				</div>
 			) : (
-				<SessionList sessions={availableSessions} />
+				<SessionList sessions={data} />
 			)}
 		</div>
 	);

@@ -3,9 +3,9 @@ import { SessionDTO } from '@model/session.model';
 import { SessionPreview } from './session.preview';
 import { LinkButton } from '@view/anchor/link.button';
 
-export function SessionList({ sessions = [] }: { sessions: SessionDTO[] }) {
+export function SessionList({ sessions }: { sessions?: SessionDTO[] }) {
 	const content = useMemo(() => {
-		return sessions.map((item) => {
+		return sessions?.map((item) => {
 			return <SessionPreview key={item.id} session={item} />;
 		});
 	}, [sessions]);

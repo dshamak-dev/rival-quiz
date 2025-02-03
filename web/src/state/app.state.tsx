@@ -1,5 +1,6 @@
 import { UserDTO } from '@model/user.model';
 import { WalletDTO } from '@model/wallet.model';
+import { ClientComponent } from '@view/client/client.component';
 import { createContext, useEffect, useState } from 'react';
 
 interface IState {
@@ -17,5 +18,5 @@ export function AppContextProvider({ value, children }: any) {
 		setState(value);
 	}, [value]);
 
-	return <AppContext.Provider value={state}>{children}</AppContext.Provider>;
+	return <AppContext.Provider value={state}><ClientComponent>{children}</ClientComponent></AppContext.Provider>;
 }

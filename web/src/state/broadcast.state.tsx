@@ -50,7 +50,7 @@ export function BroadcastProvider({ children, env }: any) {
 		});
 
 		manager.addEventListener('message', (event) => {
-			console.log(`Message from server: ${event.data}`);
+			// console.log(`Message from server: ${event.data}`);
 		});
 
 		let closeTimer: NodeJS.Timeout | null = null;
