@@ -31,5 +31,11 @@ export async function findUserById(id: UserDTO['id']): Promise<UserDTO> {
 // }
 
 export function normalizeUserDTO(payload: UserDTO): UserDTO {
-	return { ...payload, id: payload._id as UserDTO['id'] };
+	const user = {...payload };
+
+	if (!user.id && user._id){
+		user.id = user._id;
+	}
+
+	return user;
 }

@@ -40,10 +40,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	WEB_API.get('/health')
 		.then((res) => {
-			console.log('API is up and running', res);
+			// console.log('API is up and running', res);
 		})
 		.catch((err) => {
-			console.error('API is not available', { err });
+			// console.error('API is not available', { err });
 		});
 
 	let user = null;
@@ -136,7 +136,7 @@ export default function App() {
 		}
 
 		WEB_API.get('/health').catch((err) => {
-			console.error('API is not up and running', { err, url: WEB_API.apiUrl });
+			// console.error('API is not up and running', { err, url: WEB_API.apiUrl });
 		});
 	}, []);
 

@@ -13,6 +13,7 @@ import { AuthDTO } from '@model/user.model';
 import { FormField } from '@view/form/form.field';
 import { Button } from '@view/button/button';
 import { useUI } from '@control/ui.control';
+import { APP_NAME } from 'src/constants/config.constants';
 
 type AuthPayload = {
 	email?: string;
@@ -172,7 +173,7 @@ export default function LoginPage() {
 					>
 						<div className="flex flex-col justify-center items-center">
 							<Typography className="text-xl font-semibold">
-								{isSignUp ? 'Sign up' : 'Log in'} to Quizdation
+								{isSignUp ? 'Sign up' : 'Log in'} to {APP_NAME}
 							</Typography>
 							{actionError ? <p className="text-red-600">{actionError}</p> : null}
 						</div>
@@ -194,6 +195,9 @@ export default function LoginPage() {
 								// rules={[{ required: true, message: 'Please input your password!' }]}
 								required
 								className="flex flex-col"
+								inputProps={{
+									autocomplete: 'password',
+								}}
 							/>
 
 							{isSignUp && (

@@ -1,7 +1,8 @@
-import { useAPI } from '@api/api.hook';
 import { findSessions } from '@api/session.api';
+import { findUserByToken } from '@api/user.api';
 import { useUI } from '@control/ui.control';
-import { useNavigate } from '@remix-run/react';
+import { json, LoaderFunctionArgs } from '@remix-run/node';
+import { useLoaderData, useNavigate } from '@remix-run/react';
 import { useAuth } from '@state/auth.hook';
 import { Anchor } from '@view/anchor';
 import { Button } from '@view/button/button';
@@ -10,25 +11,41 @@ import { Icon } from '@view/icon';
 import { MobileSupportPlaceholder } from '@view/page/mobile.support-placeholder';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
-import { useEffect, useMemo } from 'react';
+import {  useMemo } from 'react';
 import { sessionStateLabels } from 'src/constants/session.constant';
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	const user = await findUserByToken().catch((err) => null);
+
+	if (!user?.id) {
+		return null;
+	}
+
+	const query = `ownerId=${user?.id}`;
+
+	const sessions = await findSessions(query).catch((err) => null);
+
+	return json(sessions);
+}
 
 export default function ProfileSessionListPage() {
 	const { isLoggedIn, user } = useAuth();
+	const sessions = useLoaderData<typeof loader>();
+
 	const navigate = useNavigate();
 	const { deviceType, isMobile } = useUI();
-	const { data, loading, dispatch } = useAPI({
-		initialState: undefined,
-		request: (query: string) => findSessions(query).catch((err) => null),
-	});
+	// const { data, loading, dispatch } = useAPI({
+	// 	initialState: undefined,
+	// 	request: (query: string) => findSessions(query).catch((err) => null),
+	// });
 
-	useEffect(() => {
-		if (!user?.id) {
-			return;
-		}
+	// useEffect(() => {
+	// 	if (!user?.id) {
+	// 		return;
+	// 	}
 
-		setTimeout(() => dispatch(`ownerId=${user.id}`), 1000);
-	}, [user?.id]);
+	// 	setTimeout(() => dispatch(`ownerId=${user.id}`), 1000);
+	// }, [user?.id]);
 
 	const content = useMemo(() => {
 		if (!isLoggedIn) {
@@ -41,7 +58,7 @@ export default function ProfileSessionListPage() {
 			);
 		}
 
-		if (data === undefined || loading) {
+		if (sessions == null) {
 			return (
 				<div className="h-full flex flex-col items-center justify-center justify-self-center align-self-center">
 					<Icon size={48} name="Grid" className="relative -top-6 animate-bounce" />
@@ -50,13 +67,13 @@ export default function ProfileSessionListPage() {
 			);
 		}
 
-		if (!data?.length) {
+		if (!sessions?.length) {
 			return <Typography>No sessions found</Typography>;
 		}
 
 		return (
 			<div className="w-full flex flex-col gap-4">
-				{data.map((session) => {
+				{sessions.map((session) => {
 					return (
 						<div
 							key={session.id}
@@ -93,14 +110,18 @@ export default function ProfileSessionListPage() {
 					// 	'border hover:border-sky-600 cursor-pointer'
 					// )}
 				>
-					<Button layout="primary" size="small" className={classNames('w-full flex justify-center items-center gap-2')}>
+					<Button
+						layout="primary"
+						size="small"
+						className={classNames('w-full flex justify-center items-center gap-2')}
+					>
 						<Icon name="PlusCircle" />
 						<span>Create New Session</span>
 					</Button>
 				</Anchor>
 			</div>
 		);
-	}, [isLoggedIn, loading, data]);
+	}, [isLoggedIn, sessions]);
 
 	return (
 		<div className="grid w-full min-h-full p-4">

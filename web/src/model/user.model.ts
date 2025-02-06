@@ -3,6 +3,10 @@ import { ID } from "./api.model";
 export type UserDTO = {
 	id: ID;
 	_id?: ID;
+	name: string;
+	email?: string;
+	authType?: string;
+	meta?: any;
 };
 
 export type AuthDTO = {
