@@ -12,6 +12,7 @@ import logoImage from '@assets/logo.png';
 import { WalletBalance } from '@view/wallet/wallet.balance';
 import { Anchor } from '@view/anchor';
 import { useBroadcast } from '@state/broadcast.state';
+import { APP_NAME } from 'src/constants/config.constants';
 
 export function HeaderMobile() {
 	const location = useLocation();
@@ -21,7 +22,8 @@ export function HeaderMobile() {
 	const { isConnected } = useBroadcast();
 
 	const canGoBack = useMemo(() => {
-		return !['', '/'].includes(location.pathname);
+		return false;
+		// return !['', '/'].includes(location.pathname);
 	}, [location.pathname]);
 
 	if (deviceType !== DeviceType.Mobile) {
@@ -39,7 +41,7 @@ export function HeaderMobile() {
 					<div className="flex gap-2 items-center">
 						<Image src={logoImage} style={{ width: 24 }} />
 						<Badge visible={isConnected} color="#71f8ce" transform="translateX(8px) translateY(4px)">
-							<Typography className="uppercase text-xs font-black">Quizdation</Typography>
+							<Typography className="uppercase text-xs font-black">{APP_NAME}</Typography>
 						</Badge>
 					</div>
 				)}

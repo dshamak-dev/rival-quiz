@@ -9,6 +9,7 @@ import { SessionList } from '@view/session/session.list';
 import classNames from 'classnames';
 import { useUI } from '@control/ui.control';
 import { SessionStateType } from '@model/session.model';
+import { APP_NAME } from 'src/constants/config.constants';
 
 export default function LandingPage() {
 	const { isMobile } = useUI();
@@ -32,7 +33,7 @@ export default function LandingPage() {
 			{loading || !data ? (
 				<div className="h-screen max-h-full flex flex-col items-center justify-center">
 					<Image src={logoImage} style={{ width: 48 }} className="relative -top-6 animate-bounce" />
-					<Typography className="">Quizdation starts here</Typography>
+					<Typography className="">{APP_NAME} starts here</Typography>
 				</div>
 			) : (
 				<SessionList sessions={data} />

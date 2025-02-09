@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { ChangeEvent, useCallback, useMemo } from 'react';
+import { ChangeEvent, ComponentProps, HTMLInputTypeAttribute, useCallback, useMemo } from 'react';
 import { FormLabel } from './form.label';
 import { getRandomId } from '@control/random';
 
@@ -20,6 +20,7 @@ export type TextInputProps = {
 	size?: TextInputSizeType;
 	disabled?: boolean;
 	onChange?: (e: ChangeEvent<HTMLInputElement>, value: any) => void;
+	inputProps?: Record<string, any>;
 };
 
 export function TextInput({
@@ -53,8 +54,11 @@ export function TextInput({
 	}, [sizeClassName, className, props.disabled]);
 
 	const inputProps = useMemo(() => {
+		const { inputProps, ...other } = props;
+
 		const nextProps = {
-			...props,
+			...inputProps,
+			...other,
 			defaultValue,
 			type,
 			required: props.required,
@@ -81,12 +85,7 @@ export function TextInput({
 	return (
 		<div className="grid w-full">
 			{props.label && (
-				<FormLabel
-					required={props.required}
-					id={props.id}
-					postfix={postfix}
-					className="flex items-center"
-				>
+				<FormLabel required={props.required} id={props.id} postfix={postfix} className="flex items-center">
 					{props.label}
 				</FormLabel>
 			)}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BOT Manager</title>
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+	  <link rel="stylesheet" href="./index.css">
+  </head>
+  <body>
+    <main>
+      <div id="loader">
+        <h2>Loading..</h2>
+      </div>
+      <div id="bot">
+        <h2>Bot Manager</h1>
+        <form id="bot-form">
+          <div class="columns-2">
+            <div class="form-group">
+              <label for="token">Bot Token:</label>
+              <input type="text" id="token" name="token" required />
+            </div>
+            <div class="form-group">
+              <label for="web-app">Wep App:</label>
+              <input type="text" id="web-app" name="web-app" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <button type="submit">Launch Bot</button>
+          </div>
+        </form>
+      </div>
+
+      <div>
+        <button id="stop-bot">Stop Bot</button>
+      </div>
+      
+      <div id="message">
+        <h2>Message Manager</h1>
+        <form id="message-form">
+          <div class="columns-2">
+            <div class="form-group">
+              <label for="id">Chat Id:</label>
+              <input type="text" id="id" name="id" />
+            </div>
+            <div class="form-group">
+              <label for="markup">Markup Type:</label>
+              <select type="text" id="markup" name="markup"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+          </div>
+          <div class="form-group">
+            <button type="submit">Send Bot Message</button>
+          </div>
+        </form>
+      </div>
+    </main>
+    <script defer src="./index.js"></script>
+  </body>
+</html>

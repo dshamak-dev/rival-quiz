@@ -13,6 +13,7 @@ import { useUI } from '@control/ui.control';
 import { DeviceType } from '@model/ui.model';
 import { WalletBalance } from '@view/wallet/wallet.balance';
 import { useBroadcast } from '@state/broadcast.state';
+import { APP_NAME } from 'src/constants/config.constants';
 
 export function Navigation() {
 	const { deviceType } = useUI();
@@ -81,7 +82,7 @@ export function Navigation() {
 				<Anchor end href="/" className="relative -left-4 flex gap-2 items-center" activeClassName="">
 					<Image src={logoImage} style={{ width: 24 }} />
 					<Badge visible={isConnected} color="#71f8ce" transform='translateX(8px) translateY(4px)'>
-						<Typography className="uppercase text-xs font-black">Quizdation</Typography>
+						<Typography className="uppercase text-xs font-black">{APP_NAME}</Typography>
 					</Badge>
 				</Anchor>
 			</div>

@@ -12,6 +12,7 @@ import transactionService from "./src/services/transaction";
 import walletService from "./src/services/wallet";
 import questionDataService from "./src/services/question-data";
 import broadcastService from "./src/services/broadcast";
+import telegramBotService from "./src/services/telegram-bot";
 import { connect } from "./src/database";
 
 dotenv.config();
@@ -75,6 +76,9 @@ app.use("/question-datas", questionDataService().router);
 
 // Broadcast service initialization
 app.use("/broadcasts", broadcastService().router);
+
+// Telegram Bot service initialization
+app.use("/telegram", telegramBotService().router);
 
 app.get("/health", (req, res) => {
   res

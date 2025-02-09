@@ -50,24 +50,29 @@ router.get("/:id", async (req: any, res: any) => {
   res.status(200).json(wallet);
 });
 
-router.post("/", async (req: any, res: any) => {  
-	const user = await getRequestUser(req);
-  
-	const userId = user?.id;
-  
-	if (!user || !userId) {
-	  res.statusMessage = "Invalid user";
-	  return res.status(401).end();
-	}
+router.post("/", async (req: any, res: any) => {
+  const user = await getRequestUser(req);
 
-	const payload = req.body;
-  
-	const wallet = await createWallet(userId, payload);
-  
-	res.status(201).json(wallet);
-  });
+  const userId = user?.id;
 
-router.use(function (request, response, next:any) {
+  if (!user || !userId) {
+    res.statusMessage = "Invalid user";
+    return res.status(401).end();
+  }
+
+  const payload = req.body;
+
+  const wallet = await createWallet(userId, payload).catch((err) => null);
+
+  if (!wallet) {
+    res.statusMessage = "Error creating wallet";
+    return res.status(400).end();
+  }
+
+  res.status(201).json(wallet);
+});
+
+router.use(function (request, response, next: any) {
   next();
 });
 

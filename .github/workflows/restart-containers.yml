@@ -1,0 +1,54 @@
+name: Restart Containers
+on:
+  workflow_dispatch:
+    inputs:
+      root_directory:
+        description: "Directory where docker-compose.yml is located"
+        required: true
+        default: "/root"
+      restart_api:
+        description: "Restart api (yes / no)?"
+        required: true
+        default: "no"
+      restart_web:
+        description: "Restart web (yes / no)?"
+        required: true
+        default: "no"
+
+jobs:
+  deploy-to-droplet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH client
+        run: sudo apt-get install -y openssh-client
+
+      - name: SSH into Droplet, restart containers
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_SSH_HOST }}
+          username: ${{ secrets.DROPLET_SSH_USERNAME }}
+          key: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.DROPLET_SSH_PORT }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          script: |
+            # Navigate to the root directory
+            cd ${{ github.event.inputs.root_directory }} || { echo "Error: Directory ${{ github.event.inputs.root_directory }} does not exist"; exit 1; }
+
+            # Check if docker-compose.yml exists
+            if [ ! -f "docker-compose.yml" ]; then
+              echo "Error: docker-compose.yml not found in directory ${{ github.event.inputs.root_directory }}" >&2
+              exit 1
+            fi
+            const restartApi = "${{ inputs.restart_api }}" === "yes";
+
+            if (restartApi) {
+              echo "Restarting API..."
+              docker restart quizlo-server || true
+            }
+
+            const restartWeb = "${{ inputs.restart_web }}" === "yes";
+
+            if (restartWeb) {
+              echo "Restarting web..."
+              docker restart quizlo-web || true
+            }

@@ -1,9 +1,5 @@
 import express from "express";
-import {
-  authorizeUser,
-  createUserWithPassword,
-  findUserByQuery,
-} from "./user.action";
+import { authorizeUser, createUser, findUserByQuery } from "./user.action";
 import {
   encryptPassword,
   generateToken,
@@ -11,41 +7,35 @@ import {
   parseToken,
 } from "./user.utils";
 import { createWallet } from "../services/wallet/actions";
+import { findUserByToken } from "./api";
 
 const useRouter = express.Router();
 
 useRouter.use(express.json());
 
-useRouter.post("/create", async (req: any, res: any, next:any) => {
+useRouter.post("/create", async (req: any, res: any, next: any) => {
   const body = req.body || null;
 
-  if (!body || !body.email || !body.password) {
-    res.statusMessage = "Invalid email or password";
-    return res.status(400).end();
-  }
-
-  const [user, error] = await createUserWithPassword(body.email, body.password)
+  const [user, error] = await createUser(body)
     .then((res) => {
       return [res, null];
     })
     .catch((err) => {
-      console.error(err);
-
-      return [null, err.message];
+      return [null, err];
     });
 
-  if (error) {
+  if (!user || error) {
     res.statusMessage = error || "Something went wrong. Please try again later";
     return res.status(400).end();
   }
 
-  await createWallet(user.id);
+  await createWallet(user.id).catch(err => null);
 
-  authorizeUser(user, res);
+  const token = authorizeUser(user, res);
 
   res.status(201).json({
     user,
-    token: generateToken(user),
+    token,
   });
 });
 
@@ -75,22 +65,7 @@ useRouter.post("/login", async (req: any, res: any) => {
 useRouter.get("/current", async (req: any, res: any) => {
   const token = getAuthToken(req);
 
-  if (!token) {
-    res.statusMessage = "No token provided";
-    return res.status(401).end();
-  }
-
-  const decoded = parseToken(token);
-
-  if (!decoded) {
-    res.statusMessage = "Invalid token";
-    return res.status(403).end();
-  }
-
-  const user = await findUserByQuery({
-    email: decoded.email,
-    password: decoded.password,
-  }).catch((err) => null);
+  const user = await findUserByToken(token).catch((err) => null);
 
   if (!user) {
     res.statusMessage = "Wrong username or password";
@@ -100,7 +75,7 @@ useRouter.get("/current", async (req: any, res: any) => {
   res.status(200).json(user).end();
 });
 
-useRouter.use(function (request, response, next:any) {
+useRouter.use(function (request, response, next: any) {
   next();
 });
 

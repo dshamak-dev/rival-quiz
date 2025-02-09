@@ -355,7 +355,7 @@ _router.post("/:id/users", async (req: any, res: any) => {
 
   const user = await getRequestUser(req);
 
-  const userId = user.id;
+  const userId = user?.id;
 
   if (!user || !userId) {
     res.statusMessage = "Invalid user";
@@ -383,7 +383,7 @@ _router.delete("/:id/user", async (req: any, res: any) => {
 
   const user = await getRequestUser(req);
 
-  const userId = user.id;
+  const userId = user?.id;
 
   if (!user || !userId) {
     res.statusMessage = "Invalid user";

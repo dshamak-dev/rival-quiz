@@ -5,7 +5,8 @@ const NODE_ENV = process.env.NODE_ENV;
 const isProd = NODE_ENV === 'production';
 const isSecure = !!process.env.SECURE;
 
-const secret = process.env.COOKIE_SECRET || 'default';
+// const secret = process.env.COOKIE_SECRET || 'default';
+const secInDay = 60 * 60 * 24;
 
 export const authCookie = createCookie('authToken', {
 	// httpOnly: true,
@@ -13,7 +14,7 @@ export const authCookie = createCookie('authToken', {
 	sameSite: 'lax',
 	secure: isProd && isSecure,
 	// secrets: [secret],
-	maxAge: 60 * 60 * 24 * 0.5, //sec * min * hour * days
+	maxAge: secInDay * 5, //sec * min * hour * days
 });
 
 // const { getSession, commitSession, destroySession } =
@@ -44,10 +45,18 @@ export async function requireAuthCookie(req: Request) {
 	const url = req.url;
 
 	if (!cookie) {
-		throw await logOut(url);
+		throw await logOut(getContinueUrl(req));
 	}
 
 	return cookie;
+}
+
+export function getContinueUrl(req: Request) {
+	if (req?.url) {
+		return new URL(req.url)?.pathname || '/';
+	}
+
+	return '/';
 }
 
 export async function logOut(fromUrl: string | null) {
