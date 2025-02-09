@@ -1,4 +1,4 @@
-name: Build And Push Docker Image
+name: Build And Push
 on:
   push:
     branches:
@@ -36,13 +36,4 @@ jobs:
           docker compose --env-file .env push
         env:
           DOCKER_BUILDKIT: 1
-
-  trigger-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Deploy
-        run: |
-          curl -X POST -H "Accept: application/vnd.github+json" \
-               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: application/json" \
-               https://api.github.com/repos/${{ github.repository }}/actions/workflows/droplet-deploy.yml/dispatches
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

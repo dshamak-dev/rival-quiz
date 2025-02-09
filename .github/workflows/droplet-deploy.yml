@@ -1,5 +1,9 @@
 name: Deploy to Droplet
 on:
+  workflow_run:
+    workflows: ["Build And Push"]
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       root_directory:
