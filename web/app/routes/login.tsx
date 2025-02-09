@@ -1,6 +1,6 @@
 import { authCookie, getAuthCookie } from '@/auth';
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { Form, useActionData, useLocation, useSearchParams, useSubmit } from '@remix-run/react';
+import { Form, useActionData, useSearchParams, useSubmit } from '@remix-run/react';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
 import cookie from 'cookie';
@@ -14,12 +14,10 @@ import { FormField } from '@view/form/form.field';
 import { Button } from '@view/button/button';
 import { useUI } from '@control/ui.control';
 import { APP_NAME } from 'src/constants/config.constants';
-
-type AuthPayload = {
-	email?: string;
-	password?: string;
-	isSignUp?: boolean;
-};
+import { useTelegram } from 'src/hooks/telegram.hook';
+import { getAuthFormPayload } from '@control/auth.utils';
+import { UserAuthPayloadDTO } from '@model/user.role';
+import { isNullOrEmpty } from '@control/validate.utils';
 
 export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData();
@@ -27,30 +25,16 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	const isSignUp = searchActionProps === 'create';
 
-	const payload: AuthPayload = {
-		email: formData.get('email') as string,
-		password: formData.get('password') as string,
-	};
+	const [payload, payloadError] = await getAuthFormPayload(formData, isSignUp)
+		.then((res: UserAuthPayloadDTO): [UserAuthPayloadDTO, null] => {
+			return [res, null];
+		})
+		.catch((err): [null, any] => [null, getErrorMessage(err)]);
 
-	if (isSignUp && payload.password !== formData.get('confirmPassword')) {
+	if (isNullOrEmpty(payload) || payloadError) {
 		return {
-			user: null,
-			error: 'Pasword is not matching confirmation password',
-			payload: {
-				email: payload.email,
-				isSignUp,
-			},
-		};
-	}
-
-	if (!payload.email || !payload.password) {
-		return {
-			email: null,
-			error: 'Email and password required',
-			payload: {
-				email: payload?.email,
-				isSignUp,
-			},
+			error: payloadError || 'Invalid form data.',
+			payload: null,
 		};
 	}
 
@@ -93,7 +77,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			user: null,
 			error,
 			payload: {
-				email: payload.email,
+				...payload,
 				isSignUp,
 			},
 		};
@@ -126,6 +110,9 @@ export default function LoginPage() {
 	const [searchParams] = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
 	const actionData = useActionData<typeof action>();
+
+	const { isTelegram, metadata } = useTelegram();
+
 	const actionError = useMemo(() => {
 		return actionData?.error || null;
 	}, [actionData?.error]);
@@ -136,6 +123,49 @@ export default function LoginPage() {
 	const continueUrl = useMemo(() => {
 		return searchParams.get('continue') || '/';
 	}, []);
+
+	const telegramAuthLink = useMemo(() => {
+		if (!isTelegram || !metadata) {
+			return null;
+		}
+
+		const telegramFormData = new FormData();
+		telegramFormData.append('authType', 'telegram');
+		telegramFormData.append('id', metadata.id.toString());
+		telegramFormData.append('username', metadata.username);
+		telegramFormData.append('photoUrl', metadata.photoUrl);
+
+		const handleAuthWithTelegram = (e: any) => {
+			e.stopPropagation();
+			e.preventDefault();
+
+			fetch(`/login?action=create&continue=${continueUrl}`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				body: new URLSearchParams({
+					authType: 'telegram',
+					id: metadata.id.toString(),
+					username: metadata.username,
+					photoUrl: metadata.photoUrl,
+				}),
+			}).then((res) => {
+				if (res.ok) {
+					window.location.href = `/`;
+				}
+			});
+
+			// handleSubmit(telegramFormData, { replace: true });
+		};
+
+		return (
+			<Button type="reset" className="w-full" onClick={handleAuthWithTelegram}>
+				Auth as @{metadata.username}
+			</Button>
+		);
+	}, [isTelegram, metadata, handleSubmit, continueUrl]);
 
 	const [isSignUp, setIsSignUp] = useState(actionData?.payload?.isSignUp || false);
 
@@ -153,7 +183,7 @@ export default function LoginPage() {
 						// disabled={isLoading}
 						defaultValue={
 							{
-								email: actionData?.payload?.email,
+								email: (actionData?.payload as any)?.email ?? '',
 							} as any
 						}
 						method="POST"
@@ -167,6 +197,7 @@ export default function LoginPage() {
 							}
 						)}
 						onSubmitCapture={(ev) => {
+							console.log('Form submitted:', ev.currentTarget);
 							setIsLoading(true);
 							handleSubmit(ev.currentTarget, { replace: true });
 						}}
@@ -182,7 +213,7 @@ export default function LoginPage() {
 								label="Email"
 								id="email"
 								type="email"
-								defaultValue={actionData?.payload?.email || undefined}
+								defaultValue={(actionData?.payload as any)?.email || undefined}
 								required
 
 								// rules={[{ required: true, message: 'Please input your email!' }]}
@@ -220,7 +251,7 @@ export default function LoginPage() {
 								{isSignUp ? 'I have account' : "I don't have account"}
 							</Typography>
 						</div>
-						<div>
+						<div className="flex flex-col gap-4">
 							<Button
 								// type='primary'
 								type="submit"
@@ -231,6 +262,7 @@ export default function LoginPage() {
 							>
 								{isSignUp ? 'Create account' : 'Log in'}
 							</Button>
+							{telegramAuthLink}
 						</div>
 					</Form>
 				</ClientComponent>

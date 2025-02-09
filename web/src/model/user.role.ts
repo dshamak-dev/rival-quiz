@@ -1,8 +1,8 @@
-import { ID } from "./api.model";
+import { ID } from './api.model';
 
 export const SUPER_ADMIN_ROLE: UserRole = {
 	id: '0000-0000-0000-0000',
-    name: 'Super Admin',
+	name: 'Super Admin',
 	isFullAccess: true,
 };
 
@@ -11,3 +11,9 @@ export type UserRole = {
 	name: string;
 	isFullAccess: boolean;
 };
+
+export type UserAuthPayloadDTO =
+	| UserEmailAuthPayloadDTO
+	| { authType: 'telegram'; id: string; username: string; photoUrl?: string };
+
+export type UserEmailAuthPayloadDTO = { authType: 'email'; email: string; password: string };

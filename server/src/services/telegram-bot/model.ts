@@ -3,6 +3,8 @@ import { getChatIds, rememberTelegramChatId } from "./actions";
 import { delay } from "../../tools/async.utils";
 import { ExtraReplyMessage } from "telegraf/typings/telegram-types";
 
+export type MessageExtraProps = ExtraReplyMessage;
+
 export class TelegramBot {
   static instance: TelegramBot;
   bot?: Telegraf;
@@ -13,13 +15,10 @@ export class TelegramBot {
   static get health() {
     const health = !!TelegramBot.instance?.bot;
 
-    console.log(`TelegramBot health: ${health}`, TelegramBot.instance);
-
     return health;
   }
 
   constructor() {
-    console.log('Initializing TelegramBot...');
     TelegramBot.instance = this;
 
     return this;
@@ -33,7 +32,7 @@ export class TelegramBot {
     return TelegramBot.instance;
   }
 
-  async sendChatMessage(id: string, message, params: ExtraReplyMessage = {}) {
+  async sendChatMessage(id: string, message, params: MessageExtraProps = {}) {
     const messageParams: ExtraReplyMessage = {
       ...this.getInitialMessageProps(),
       ...params,
@@ -42,7 +41,7 @@ export class TelegramBot {
     return this.bot?.telegram?.sendMessage(id, message, messageParams);
   }
 
-  async broadcastMessage(message, params = undefined) {
+  async broadcastMessage(message, params: MessageExtraProps) {
     let counter = 0;
 
     for (const chatId of this.chats) {
@@ -75,7 +74,6 @@ export class TelegramBot {
     this.webAppUrl = webAppUrl;
     this.chats = await getChatIds();
 
-    console.log("Chats:", this.chats[0]);
     const bot = (this.bot = new Telegraf(token));
 
     bot.telegram.setChatMenuButton({

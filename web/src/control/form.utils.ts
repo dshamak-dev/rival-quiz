@@ -1,10 +1,16 @@
 export function getFormFields<T>(data: FormData, fields: string[] = []): T {
 	if (!fields?.length) {
-		const values = {};
+		const values: Record<string, any> = {};
 		const entries = data.entries();
 
 		const getNextField = () => {
 			const field = entries.next();
+			const entrie: [string, any] | undefined = field?.value;
+
+			if (entrie && entrie?.length) {
+				const key: string = entrie[0];
+				values[key] = entrie[1];
+			}
 
 			return field;
 		};

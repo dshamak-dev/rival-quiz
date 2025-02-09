@@ -1,13 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
-import { TelegramBot } from "./model";
+import { MessageExtraProps, TelegramBot } from "./model";
 
 dotenv.config();
 
 const router = express.Router();
 
-const PUBLIC_PATH = path.join(__dirname, "public");
+const PUBLIC_PATH = path.join(process.cwd(), "public/telegram");
 
 router.use(express.static(PUBLIC_PATH));
 
@@ -49,7 +49,7 @@ router.put("/state", (req, res) => {
 });
 
 router.post("/message", (req, res) => {
-  const { id, message } = req.body;
+  const { id, message, markup } = req.body;
 
   const bot = TelegramBot.instance;
 
@@ -60,9 +60,22 @@ router.post("/message", (req, res) => {
     return;
   }
 
+  let parse_mode: MessageExtraProps['parse_mode'] | undefined = undefined;
+
+  switch (markup) {
+    case 'markdown': {
+      parse_mode ='MarkdownV2';
+      break;
+    }
+    case 'html': {
+      parse_mode = 'HTML';
+      break;
+    }
+  }
+
   if (!id) {
     bot
-      .broadcastMessage(message)
+      .broadcastMessage(message, { parse_mode })
       .then((payload) => {
         res.status(200).json({ data: payload });
       })

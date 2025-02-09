@@ -1,15 +1,13 @@
-import { useAPI } from '@api/api.hook';
 import { findUserByToken } from '@api/user.api';
 import { UserDTO } from '@model/user.model';
 import { LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { useAuth } from '@state/auth.hook';
-import { LinkButton } from '@view/anchor/link.button';
 import { Button } from '@view/button/button';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 
 const fieldsMap: (keyof UserDTO)[] = ['authType', 'name', 'email'];
 

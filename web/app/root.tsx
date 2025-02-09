@@ -7,7 +7,7 @@ import stylesheet from './style.css?url';
 import faviconIco from '@assets/favicon.ico';
 import faviconPng from '@assets/favicon.png';
 import { ClientComponent } from '@view/client/client.component';
-import { getAuthCookie, logOut } from '@/auth';
+import { getAuthCookie, getContinueUrl, logOut } from '@/auth';
 import { AppContextProvider } from 'src/state/app.state';
 import { WEB_API } from '@control/api.control';
 import { findUserByToken } from '@api/user.api';
@@ -52,9 +52,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		user = await findUserByToken().catch((err) => null);
 
 		if (!user) {
-			const url = request.url;
 			WEB_API.setJWT(null);
-			throw await logOut(url);
+			throw await logOut(getContinueUrl(request));
 		}
 	}
 
@@ -146,6 +145,7 @@ export default function App() {
 				<link rel="icon" href="data:image/x-icon;base64,AA" />
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
+				<script src="https://telegram.org/js/telegram-web-app.js"></script>
 				<Meta />
 				<Links />
 			</head>

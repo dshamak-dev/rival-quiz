@@ -1,4 +1,4 @@
-import { logOut, requireAuthCookie } from '@/auth';
+import { getContinueUrl, logOut, requireAuthCookie } from '@/auth';
 import { useUI } from '@control/ui.control';
 import { DeviceType } from '@model/ui.model';
 import { LoaderFunctionArgs } from '@remix-run/node';
@@ -11,7 +11,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const token: String | null = await requireAuthCookie(request);
 
 	if (!token) {
-		throw logOut(request.url);
+		throw logOut(getContinueUrl(request));
 	}
 
 	return { token };

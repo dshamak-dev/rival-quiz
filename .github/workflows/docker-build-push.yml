@@ -1,5 +1,9 @@
 name: Build And Push Docker Image
 on:
+  push:
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 jobs:
@@ -33,42 +37,12 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
 
-  # deploy-to-droplet:
-  #   needs: build-and-push
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
-
-  #     - name: Install SSH client
-  #       run: sudo apt-get install -y openssh-client
-
-  #     - name: SSH into Droplet, pull image, and run container
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ secrets.DROPLET_SSH_HOST }}
-  #         username: ${{ secrets.DROPLET_SSH_USERNAME }}
-  #         key: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
-  #         port: ${{ secrets.DROPLET_SSH_PORT }}
-  #         passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-  #         script: |
-  #           docker pull ${{ secrets.DOCKERHUB_SERVER_REPO }}
-  #           docker stop quizlo-server || true
-  #           docker rm quizlo-server || true
-  #           docker pull ${{ secrets.DOCKERHUB_WEB_REPO }}
-  #           docker stop quizlo-web || true
-  #           docker rm quizlo-web || true
-  #           docker compose down || true
-  #           docker compose up -d
-          # docker run -d --name quizlo-server --network host -p 8081:8080 ${{ secrets.DOCKERHUB_SERVER_REPO }}    
-  # finish-step:
-  #   needs: build-and-push
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Trigger Dependent Workflow
-  #       run: |
-  #         curl -X POST \
-  #         -H "Accept: application/vnd.github.everest-preview+json" \
-  #         -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-  #         https://api.github.com/repos/${{ github.repository }}/dispatches \
-  #         -d '{"event_type": "on-build-success"}'
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Deploy
+        run: |
+          curl -X POST -H "Accept: application/vnd.github+json" \
+               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Content-Type: application/json" \
+               https://api.github.com/repos/${{ github.repository }}/actions/workflows/droplet-deploy.yml/dispatches

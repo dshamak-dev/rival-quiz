@@ -5,14 +5,16 @@ export const UserSchema = new mongoose.Schema({
   email: String,
   password: String,
   originPass: String,
-  firstName: String,
-  lastName: String,
+  name: String,
+  authType: { type: String, enum: ["email", "telegram"], default: "email" },
+  photoUrl: String,
+  meta: Object,
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
 });
 
 UserSchema.virtual("json").get(function () {
-  const { id, originPass, ...other } = normalizeRecord(this);
+  const { id, originPass, _id, ...other } = normalizeRecord(this);
 
-  return { ...other, id };
+  return { ...other, id: _id };
 });

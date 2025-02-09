@@ -24,6 +24,5 @@ export const resetChatIds = (chatIds: string[]) =>
   model.findOneAndUpdate({}, { chats: chatIds }).then(normalize);
 
 function normalize(dto): string[] {
-  console.log(dto);
   return dto?.json?.chats;
 }

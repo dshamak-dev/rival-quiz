@@ -88,11 +88,19 @@ async function toggleBotStatus(payload) {
 }
 
 function initMessageForm(el) {
+  const markupEl = document.getElementById("markup");
+  if (markupEl){
+    markupEl.innerHTML = ['markdown', 'html'].map((type) => {
+      return `<option value="${type}">${type}</option>`;
+    }).join('');
+  }
+
   el.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
 
     const id = formData.get("id");
+    const markup = formData.get("markup");
     const message = formData.get("message");
 
     try {
@@ -101,7 +109,7 @@ function initMessageForm(el) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id, message }),
+        body: JSON.stringify({ id, message, markup }),
       });
 
       if (!response.ok) {
