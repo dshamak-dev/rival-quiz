@@ -9,10 +9,9 @@ import { SessionUserActionPayload, SessionUserActionTypes } from '@model/session
 import { postSessionUserAction, fetchSessionUserActions } from '@api/session.user.api';
 import { ID } from '@model/api.model';
 import { useSession } from '@state/session.state';
-import { ProgressStage, SessionDTO, SessionStateType } from '@model/session.model';
+import { ProgressStage, SessionStateType } from '@model/session.model';
 import { RadioList } from '@view/form/form.radio';
 import { useAuth } from '@state/auth.hook';
-import { addSessionUser } from '@api/session.api';
 import { SingleQuestionSession } from '@model/session/single-question';
 import { Icon } from '@view/icon';
 import { LinkButton } from '@view/anchor/link.button';

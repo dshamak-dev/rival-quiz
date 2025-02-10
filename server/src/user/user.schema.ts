@@ -14,7 +14,7 @@ export const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.virtual("json").get(function () {
-  const { id, originPass, _id, ...other } = normalizeRecord(this);
+  const { id, originPass, originId, _id, ...other } = normalizeRecord(this);
 
-  return { ...other, id: _id };
+  return { ...other, id: id || _id };
 });

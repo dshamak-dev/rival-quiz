@@ -43,13 +43,7 @@ export function encryptPassword(value) {
 }
 
 export function getAuthToken(request) {
-  // const cookies = request.cookies || request.headers.cookie;
-
   const token = request.headers.authorization?.split(" ")[1];
-
-  // if (!token) {
-  // 	token = request.headers.authorization?.split(' ')[1];
-  // }
 
   return token;
 }

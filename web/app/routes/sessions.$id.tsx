@@ -37,9 +37,7 @@ export default function SessionPage() {
 					<Typography className="">Loading data</Typography>
 				</div>
 			) : (
-				<Suspense fallback={<div>Session is loading...</div>}>
-					<SessionView session={session as SessionDTO} />
-				</Suspense>
+				<SessionView session={session as SessionDTO} />
 			)}
 		</div>
 	);

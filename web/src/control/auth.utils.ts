@@ -10,11 +10,8 @@ export async function getAuthFormPayload(formData: FormData, isNewUser = false):
 	);
 
 	if (isNullOrEmpty(payload)) {
-		console.log('getAuthFormPayload: Invalid form data', payload);
 		return Promise.reject('Invalid form data');
 	}
-
-	console.log('getAuthFormPayload:', authType, payload);
 
 	if (authType == 'telegram') {
 		return payload;
