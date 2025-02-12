@@ -23,7 +23,7 @@ export function generateEmailToken(user) {
 export function generateTelegramToken(user) {
   return generateToken({
     id: user.meta?.id,
-    username: user.meta?.username,
+    name: user.meta?.name,
     authType: "telegram",
   });
 }

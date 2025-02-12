@@ -67,7 +67,7 @@ export async function createUserWithPassword({ email, password }) {
 export async function createUserWithTelegram(
   payload: { authType } & TelegramMetaDTO
 ) {
-  if (!payload.id || !payload.username) {
+  if (!payload.id || !payload.name) {
     return Promise.reject("Invalid telegram data");
   }
 
@@ -81,8 +81,8 @@ export async function createUserWithTelegram(
 
   return userDBModel
     .create({
-      name: metadata.username,
-      authType: 'telegram',
+      name: metadata.name,
+      authType: "telegram",
       photoUrl: metadata.photoUrl,
       meta: metadata,
     })
@@ -131,6 +131,7 @@ export function authorizeUser(user: UserDTO, response: any) {
   switch (user.authType) {
     case "telegram": {
       token = generateTelegramToken(user);
+      break;
     }
     case "email":
     default: {
@@ -153,12 +154,12 @@ export function authorizeUser(user: UserDTO, response: any) {
   // });
 }
 
-export function authorizeWithTelegram(user: UserDTO, response: Response) {
-  const token = generateTelegramToken(user);
+// export function authorizeWithTelegram(user: UserDTO, response: Response) {
+//   const token = generateTelegramToken(user);
 
-  response.cookie("authToken", token, {
-    httpOnly: false,
-  });
+//   response.cookie("authToken", token, {
+//     httpOnly: false,
+//   });
 
-  return token;
-}
+//   return token;
+// }

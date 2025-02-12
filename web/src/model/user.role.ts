@@ -14,6 +14,6 @@ export type UserRole = {
 
 export type UserAuthPayloadDTO =
 	| UserEmailAuthPayloadDTO
-	| { authType: 'telegram'; id: string; username: string; photoUrl?: string };
+	| { authType: 'telegram'; id: string; name: string; photoUrl?: string };
 
 export type UserEmailAuthPayloadDTO = { authType: 'email'; email: string; password: string };

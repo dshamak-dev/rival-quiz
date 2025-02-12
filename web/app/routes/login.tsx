@@ -129,12 +129,6 @@ export default function LoginPage() {
 			return null;
 		}
 
-		const telegramFormData = new FormData();
-		telegramFormData.append('authType', 'telegram');
-		telegramFormData.append('id', metadata.id.toString());
-		telegramFormData.append('username', metadata.username);
-		telegramFormData.append('photoUrl', metadata.photoUrl);
-
 		const handleAuthWithTelegram = (e: any) => {
 			e.stopPropagation();
 			e.preventDefault();
@@ -147,8 +141,8 @@ export default function LoginPage() {
 				},
 				body: new URLSearchParams({
 					authType: 'telegram',
-					id: metadata.id.toString(),
-					username: metadata.username,
+					id: metadata.id,
+					name: metadata.name,
 					photoUrl: metadata.photoUrl,
 				}),
 			}).then((res) => {
@@ -156,13 +150,11 @@ export default function LoginPage() {
 					window.location.href = `/`;
 				}
 			});
-
-			// handleSubmit(telegramFormData, { replace: true });
 		};
 
 		return (
 			<Button type="reset" className="w-full" onClick={handleAuthWithTelegram}>
-				Auth as @{metadata.username}
+				Login with Telegram
 			</Button>
 		);
 	}, [isTelegram, metadata, handleSubmit, continueUrl]);

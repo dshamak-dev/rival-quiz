@@ -17,6 +17,10 @@ export async function findUserByToken(token: string): Promise<UserDTO | null> {
 
   switch (decoded?.authType) {
     case "telegram": {
+      if (!decoded.id) {
+        return Promise.reject("Invalid Telegram user ID");
+      }
+
       query = {
         "meta.id": decoded.id,
       };
@@ -24,6 +28,10 @@ export async function findUserByToken(token: string): Promise<UserDTO | null> {
     }
     case "email":
     default: {
+      if (!decoded.email || !decoded.password) {
+        return Promise.reject("Invalid Token");
+      }
+
       query = { email: decoded.email, password: decoded.password };
     }
   }

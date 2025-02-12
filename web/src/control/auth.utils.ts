@@ -6,7 +6,7 @@ export async function getAuthFormPayload(formData: FormData, isNewUser = false):
 	const authType = formData.get('authType');
 	const payload = getFormFields<UserAuthPayloadDTO>(
 		formData,
-		authType === 'telegram' ? ['authType', 'id', 'username', 'photoUrl'] : ['email', 'password', 'confirmPassword']
+		authType === 'telegram' ? ['authType', 'id', 'name', 'photoUrl'] : ['email', 'password', 'confirmPassword']
 	);
 
 	if (isNullOrEmpty(payload)) {
