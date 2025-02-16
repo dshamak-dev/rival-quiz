@@ -35,9 +35,9 @@ export async function findUserById(id: UserDTO['id']): Promise<UserDTO> {
 export function normalizeUserDTO(payload: UserDTO): UserDTO {
 	const user = { ...payload };
 
-	if (!user.id && user._id) {
-		user.id = user._id;
-	}
+	// if (!user.id) {
+	// 	user.id = user._id;
+	// }
 
 	return user;
 }
@@ -73,8 +73,6 @@ export async function signupUser(payload: UserAuthPayloadDTO) {
 }
 
 async function setUserAuth(response: Response) {
-	console.log('Set-Cookie:', response.headers.get('Set-Cookie'));
-
 	if (!response.ok) {
 		return validateJSONResponse(response);
 	}

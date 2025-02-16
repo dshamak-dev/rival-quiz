@@ -1,6 +1,6 @@
 import { authCookie, getAuthCookie } from '@/auth';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { Form, useNavigate, useSearchParams } from '@remix-run/react';
+import { Form, useLoaderData, useNavigate } from '@remix-run/react';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
 import { useMemo, useState } from 'react';
@@ -16,11 +16,11 @@ import { useTelegram } from 'src/hooks/telegram.hook';
 import { useAPI } from '@api/api.hook';
 import { UserAuthPayloadDTO } from '@model/user.role';
 import { loginUser, signupUser } from '@api/user.api';
+import { getRedirectUrl } from '@control/auth.utils';
 
 export async function action({ request }: ActionFunctionArgs) {
 	const payload = await request.json();
 	const url = new URL(request.url);
-
 	const urlSearchParams = new URLSearchParams(url.search);
 
 	const isSignUp = urlSearchParams.get('action') === 'create';
@@ -34,7 +34,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		const token = auth.token;
 
-		const redirectUrl = urlSearchParams.get('continue') || '/';
+		const redirectUrl = getRedirectUrl(request.url);
 
 		return redirect(redirectUrl, {
 			status: 200,
@@ -50,26 +50,23 @@ export async function action({ request }: ActionFunctionArgs) {
 export async function loader({ request }: LoaderFunctionArgs) {
 	const authToken = await getAuthCookie(request);
 
+	const continueUrl = getRedirectUrl(request.url);
+
 	if (!authToken) {
-		return json(null);
+		return json({
+			continueUrl,
+		});
 	}
 
-	const urlParts = new URL(request.url);
-	const redirectUrl = urlParts.searchParams.get('continue') || '/';
-
-	return redirect(redirectUrl);
+	return redirect(continueUrl);
 }
 
 export default function LoginPage() {
-	const [searchParams] = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
-	const novigate = useNavigate();
+	const navigate = useNavigate();
+	const { continueUrl } = useLoaderData<typeof loader>();
 
 	const [authResponse, setAuthResponse] = useState<{ user?: UserDTO; error?: string; payload: any } | null>(null);
-
-	const continueUrl = useMemo(() => {
-		return searchParams.get('continue') || '/';
-	}, []);
 
 	const { dispatch } = useAPI<{ action: string; payload: UserAuthPayloadDTO }, any>({
 		request: ({ action, payload }) => {
@@ -83,7 +80,7 @@ export default function LoginPage() {
 			})
 				.then(validateJSONResponse)
 				.then(() => {
-					novigate(continueUrl || '/');
+					navigate(continueUrl || '/');
 				});
 		},
 	});

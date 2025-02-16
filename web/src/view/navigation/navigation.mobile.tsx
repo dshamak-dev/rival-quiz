@@ -30,18 +30,17 @@ export function NavigationMobile() {
 		return ref.current?.offsetHeight;
 	}, [ref.current]);
 
-	if (!isLoggedIn){
+	if (!isLoggedIn) {
 		return null;
 	}
 
 	return (
 		<nav
 			ref={ref}
-			className={classNames(
-				`flex items-center py-4 px-8`,
-				links.length < 4 ? 'justify-center gap-6' : 'justify-between',
-				'text-sm font-light border-t'
-			)}
+			className={classNames(`flex items-center py-4 px-8`, 'text-sm font-light border-t', {
+				'justify-center gap-8': links.length < 3,
+				'justify-between': links.length >= 3,
+			})}
 		>
 			{links.map(({ end, link, text, icon }, index) => {
 				if (!link) {
