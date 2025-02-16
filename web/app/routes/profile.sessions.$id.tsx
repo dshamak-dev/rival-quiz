@@ -23,8 +23,14 @@ import { SessionparticipantsForm } from '@view/session/session.participants-form
 import { Session } from '@model/session';
 import classNames from 'classnames';
 import { useAuth } from '@state/auth.hook';
+import { LoaderFunctionArgs } from '@remix-run/node';
+import { authProtectedRoute } from '@/auth';
 
 type StateType = SessionDTO | undefined;
+
+export async function loader({ request, params }: LoaderFunctionArgs) {
+	return authProtectedRoute(request);
+}
 
 export default function ProfileSessionPage() {
 	const { user } = useAuth();

@@ -29,7 +29,7 @@ useRouter.post("/create", async (req: any, res: any, next: any) => {
     return res.status(400).end();
   }
 
-  await createWallet(user.id).catch(err => null);
+  await createWallet(user.id).catch((err) => null);
 
   const token = authorizeUser(user, res);
 
@@ -47,12 +47,17 @@ useRouter.post("/login", async (req: any, res: any) => {
     return res.status(400).end();
   }
 
+  console.log("Search user", { body });
   const user = await findUserByQuery({
     email: body.email,
     password: encryptPassword(body.password),
-  }).catch((err) => null);
+  }).catch((err) => {
+    console.log("Failed to find user", err);
+    return null;
+  });
 
   if (!user) {
+    console.log("No user found", { body });
     res.statusMessage = "Wrong username or password";
     return res.status(400).end();
   }

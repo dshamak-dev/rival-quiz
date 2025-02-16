@@ -49,6 +49,11 @@ app.use((req, res, next) => {
   if (HTTPS_ONLY && req.headers["x-forwarded-proto"] !== "https") {
     return res.redirect(301, `https://${req.headers.host}${req.url}`);
   }
+
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Expose-Headers', 'Set-Cookie');
+
   next();
 });
 

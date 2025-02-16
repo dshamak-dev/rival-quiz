@@ -10,11 +10,13 @@ export const SessionSchema = new mongoose.Schema(
     hash: {
       type: String,
       unique: true,
-      default: randomString(),
+      default: function () {
+        return randomString();
+      },
     },
     ownerId: { type: String, required: true },
     state: { type: Number, default: SessionStateType.Draft },
-    questions: { type: [QuestionSchema] },
+    questions: { type: [QuestionSchema], default: [] },
     hasNextQuestion: { type: Boolean, default: true },
     activeQuestionId: { type: String },
     allowBids: { type: Boolean, default: false },
@@ -34,13 +36,13 @@ SessionSchema.virtual("json").get(function () {
   return { ...other, id: _id };
 });
 
-export const SessionParticipantSchema = new mongoose.Schema(
-  {
-    sessionID: String,
-    userID: String,
-    score: Number,
-    answers: { type: [String] },
-    transaction: String,
-  },
-  { timestamps: true }
-);
+// export const SessionParticipantSchema = new mongoose.Schema(
+//   {
+//     sessionID: String,
+//     userID: String,
+//     score: Number,
+//     answers: { type: [String] },
+//     transaction: String,
+//   },
+//   { timestamps: true }
+// );

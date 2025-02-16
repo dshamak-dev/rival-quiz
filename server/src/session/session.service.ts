@@ -24,6 +24,7 @@ import {
 import { QuestionDataStatusTypes } from "../services/question-data/model";
 import { findManySessions } from "./api";
 import { formatSessionQueryValue } from "./session.utils";
+import { randomString } from "../tools/random.utils";
 
 const _router = express.Router();
 
@@ -134,14 +135,11 @@ _router.delete("/:id", async (req: any, res: any) => {
 });
 
 _router.post("/", async (req: any, res: any) => {
-  const payload = req.body;
 
-  if (!payload || !payload.title) {
-    res.statusMessage = "Title is required.";
-    return res.status(400).end();
-  }
+  const owner = await getRequestUser(req).catch(err => {
 
-  const owner = await getRequestUser(req);
+    return null;
+  });
 
   const ownerId = owner?.id;
 
@@ -150,9 +148,13 @@ _router.post("/", async (req: any, res: any) => {
     return res.status(401).end();
   }
 
+  const hash = req.body?.hash ?? randomString();
+
   createSession({
     ownerId: ownerId,
-    ...req.body,
+    title: '',
+    hash,
+    ...(req.body ?? {}),
   })
     .then((session) => {
       res.status(201).json(session);

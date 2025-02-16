@@ -13,8 +13,8 @@ export async function calculatePrizePool(sessionData, answer) {
   };
 }
 
-export function normalizeSession(mSession) {
-  return mSession?.json;
+export function normalizeSession(data) {
+  return data?.json;
 }
 
 export function formatSessionQueryValue(name, query) {

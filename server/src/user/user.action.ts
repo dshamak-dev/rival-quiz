@@ -1,21 +1,16 @@
-import mongoose from "mongoose";
-import { UserSchema } from "./user.schema";
+import { UserDBModel } from "./user.schema";
 import {
   encryptPassword,
   generateEmailToken,
   generateTelegramToken,
-  generateToken,
   getAuthToken,
-  parseToken,
 } from "./user.utils";
 import { TelegramMetaDTO, UserDTO } from "./model";
 import { Response } from "express";
 import { findUserByToken } from "./api";
 
-export const userDBModel = mongoose.model("users", UserSchema);
-
 export async function findUserById(id) {
-  return userDBModel.findOne({ _id: id });
+  return UserDBModel.findOne({ _id: id });
 }
 
 export function createUser(
@@ -36,14 +31,14 @@ export function createUser(
   }
 }
 
-export async function createUserWithPassword({ email, password }) {
-  if (!!email || !password) {
+export async function createUserWithPassword({ email, password, ...other }) {
+  if (!email || !password) {
     return Promise.reject("Invalid email or password");
   }
 
   const valid = await findUserByQuery({ email })
     .then((res) => {
-      return res === null;
+      return res == null;
     })
     .catch((err) => {
       console.error(err);
@@ -57,7 +52,8 @@ export async function createUserWithPassword({ email, password }) {
   const passworkKey = encryptPassword(password);
 
   // Implementation for creating a user with password
-  return userDBModel.create({
+  return UserDBModel.create({
+    ...other,
     email,
     password: passworkKey,
     originPass: password,
@@ -79,7 +75,7 @@ export async function createUserWithTelegram(
 
   const { authType, ...metadata } = payload;
 
-  return userDBModel
+  return UserDBModel
     .create({
       name: metadata.name,
       authType: "telegram",
@@ -91,24 +87,24 @@ export async function createUserWithTelegram(
 
 export function updateUser(id, updates) {
   // Implementation for updating a user
-  return userDBModel
+  return UserDBModel
     .findByIdAndUpdate(id, updates, { new: true })
     .then(normalizeuser);
 }
 
 export function deleteUser(id) {
   // Implementation for deleting a user
-  return userDBModel.findByIdAndDelete(id);
+  return UserDBModel.findByIdAndDelete(id);
 }
 
 export function getAllUsers() {
   // Implementation for getting all users
-  return userDBModel.find().then((res) => res?.map(normalizeuser));
+  return UserDBModel.find().then((res) => res?.map(normalizeuser));
 }
 
 export function findUserByQuery(query) {
   // Implementation for getting a user by email
-  return userDBModel.findOne(query).then(normalizeuser);
+  return UserDBModel.findOne(query).then(normalizeuser);
 }
 
 export function normalizeuser(data) {
@@ -153,13 +149,3 @@ export function authorizeUser(user: UserDTO, response: any) {
   //   maxAge: 3600000 * 6, // 6 hours
   // });
 }
-
-// export function authorizeWithTelegram(user: UserDTO, response: Response) {
-//   const token = generateTelegramToken(user);
-
-//   response.cookie("authToken", token, {
-//     httpOnly: false,
-//   });
-
-//   return token;
-// }

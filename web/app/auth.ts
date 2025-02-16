@@ -1,5 +1,5 @@
 import { WEB_API } from '@control/api.control';
-import { createCookie, redirect } from '@remix-run/node';
+import { createCookie, json, redirect } from '@remix-run/node';
 
 const NODE_ENV = process.env.NODE_ENV;
 const isProd = NODE_ENV === 'production';
@@ -32,12 +32,28 @@ export const authCookie = createCookie('authToken', {
 
 // export { getSession, commitSession, destroySession };
 
+export async function getCookie(req: Request) {
+	const cookieString = req.headers.get('Cookie');
+
+	return cookieString;
+}
+
 export async function getAuthCookie(req: Request) {
 	const cookieString = req.headers.get('Cookie');
 
 	const userId = await authCookie.parse(cookieString);
 
 	return userId;
+}
+
+export async function authProtectedRoute(req: Request) {
+	const cookie = await getAuthCookie(req);
+
+	if (!cookie) {
+		throw await logOut(getContinueUrl(req));
+	}
+
+	return json({ ok: true, message: 'Authenticated' }, { status: 200 });
 }
 
 export async function requireAuthCookie(req: Request) {

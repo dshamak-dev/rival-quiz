@@ -5,8 +5,9 @@ export const QuestionSchema = new mongoose.Schema(
     _id: false,
     id: {
       type: String,
-      unique: true,
-      default: new mongoose.Types.ObjectId().toHexString(),
+      default: function () {
+        return new mongoose.Types.ObjectId().toHexString();
+      },
     },
     title: String,
     description: String,

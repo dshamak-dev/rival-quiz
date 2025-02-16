@@ -132,7 +132,11 @@ export async function validateJSONResponse(response: Response) {
 
 			const errorMessage = errorBody['Message'] || errorBody.message;
 
-			return Promise.reject(errorMessage);
+			return Promise.reject({
+				message: errorMessage,
+				body: errorBody,
+				statusCode: response.status,
+			});
 		} catch (err) {
 			const message: string =
 				typeof err === 'object' && err
