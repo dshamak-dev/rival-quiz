@@ -90,7 +90,7 @@ export default function ProfileSessionListPage() {
 									date={session.updatedAt ?? session.createdAt}
 									className="text-sm text-gray-500 min-w-[80px]"
 								/>
-								<Typography className="min-w-[30%]">{session.title}</Typography>
+								<Typography className="min-w-[30%]">{session.title || 'No title'}</Typography>
 								<div className="flex gap-12 items-center text-gray-500">
 									<Typography className="min-w-[80px] text-sm">
 										{sessionStateLabels[session.state]}
@@ -113,15 +113,5 @@ export default function ProfileSessionListPage() {
 		);
 	}, [isLoggedIn, sessions]);
 
-	return (
-		<div className="grid w-full min-h-full p-4">
-			{isMobile ? (
-				<div className="grid items-center justify-center">
-					<MobileSupportPlaceholder />
-				</div>
-			) : (
-				content
-			)}
-		</div>
-	);
+	return <div className="grid w-full min-h-full p-4">{content}</div>;
 }
