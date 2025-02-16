@@ -1,4 +1,4 @@
-import { ID } from "./api.model";
+import { DateType, ID } from "./api.model";
 import { USER_ROLE_TYPE } from "./user.role";
 
 export type UserDTO = {

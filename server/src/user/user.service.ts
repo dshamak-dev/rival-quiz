@@ -8,10 +8,13 @@ import {
 } from "./user.utils";
 import { createWallet } from "../services/wallet/actions";
 import { findUserByToken } from "./api";
+import { appendUserRoutes } from "./user.router";
 
 const useRouter = express.Router();
 
 useRouter.use(express.json());
+
+appendUserRoutes(useRouter);
 
 useRouter.post("/create", async (req: any, res: any, next: any) => {
   const body = req.body || null;

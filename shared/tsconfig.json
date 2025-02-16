@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "target": "ES2022",
+    "strict": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    // Vite takes care of building everything, not tsc.
+    "noEmit": true
+  },
+  "include": ["**/*.ts"]
+}

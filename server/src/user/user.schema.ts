@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { normalizeRecord } from "../database/database.utils";
 import { randomString } from "../tools/random.utils";
+import * as dbUtils from "../database/database.utils";
 
 export const UserSchema = new mongoose.Schema({
   email: String,
@@ -53,3 +54,20 @@ async function generateUniqueTag() {
 
   return tag;
 }
+
+export const UserHistorySchema = new mongoose.Schema(
+  {
+    userId: String,
+    type: String,
+    data: Object,
+  },
+  { timestamps: true }
+);
+
+UserHistorySchema.virtual("json").get(function () {
+  const { originId, ...json } = dbUtils.normalizeRecord(this);
+
+  return json;
+});
+
+export const UserHistoryDB = mongoose.model("user-history", UserHistorySchema);

@@ -25,6 +25,8 @@ import { QuestionDataStatusTypes } from "../services/question-data/model";
 import { findManySessions } from "./api";
 import { formatSessionQueryValue } from "./session.utils";
 import { randomString } from "../tools/random.utils";
+import { addUserHistory, removeUserHistory } from "../user/api";
+import { USER_HISTORY_TYPE } from "../user/constants";
 
 const _router = express.Router();
 
@@ -135,9 +137,7 @@ _router.delete("/:id", async (req: any, res: any) => {
 });
 
 _router.post("/", async (req: any, res: any) => {
-
-  const owner = await getRequestUser(req).catch(err => {
-
+  const owner = await getRequestUser(req).catch((err) => {
     return null;
   });
 
@@ -152,7 +152,7 @@ _router.post("/", async (req: any, res: any) => {
 
   createSession({
     ownerId: ownerId,
-    title: '',
+    title: "",
     hash,
     ...(req.body ?? {}),
   })
@@ -375,9 +375,23 @@ _router.post("/:id/users", async (req: any, res: any) => {
     return res.status(200).json(session);
   }
 
-  const updated = await addSessionUser(sessionId, userId);
+  addSessionUser(sessionId, userId)
+    .then(async (updated) => {
+      const history = await addUserHistory(
+        userId,
+        USER_HISTORY_TYPE.JOIN_SESSION,
+        {
+          sessionId,
+        }
+      );
 
-  res.status(200).json(updated);
+      res.status(200).json(updated);
+    })
+    .catch((err) => {
+      res.statusMessage =
+        err ?? "Failed to add user to session. Please try again later.";
+      return res.status(400).end();
+    });
 });
 
 _router.delete("/:id/user", async (req: any, res: any) => {
@@ -404,12 +418,26 @@ _router.delete("/:id/user", async (req: any, res: any) => {
     return res.status(404).end();
   }
 
-  const updated = await removeSessionUser(sessionId, userId);
+  removeSessionUser(sessionId, userId)
+    .then(async (updated) => {
+      const history = await removeUserHistory(
+        userId,
+        USER_HISTORY_TYPE.JOIN_SESSION,
+        {
+          sessionId,
+        }
+      );
 
-  res.status(200).json(updated);
+      res.status(200).json(updated);
+    })
+    .catch((err) => {
+      res.statusMessage =
+        err ?? "Failed to remove user from session. Please try again later.";
+      return res.status(400).end();
+    });
 });
 
-_router.use(function (request, response, next:any) {
+_router.use(function (request, response, next: any) {
   next();
 });
 

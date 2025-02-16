@@ -22,7 +22,8 @@
       "@model/*": ["src/model/*"],
       "@control/*": ["src/control/*"],
       "@mock/*": ["src/mock/*"],
-      "@assets/*": ["assets/*"]
+      "@assets/*": ["assets/*"],
+      "@shared/*": ["../shared/*"]
     },
     // Vite takes care of building everything, not tsc.
     "noEmit": true

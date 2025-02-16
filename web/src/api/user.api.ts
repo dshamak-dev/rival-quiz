@@ -3,6 +3,7 @@ import { getErrorMessage, validateJSONResponse, WEB_API } from '@control/api.con
 import { ID } from '@model/api.model';
 import { AuthDTO, UserDTO } from '@model/user.model';
 import { UserAuthPayloadDTO } from '@model/user.role';
+import { UserHistoryDTO } from '@shared/user/model';
 import cookie from 'cookie';
 
 // export async function findMany(): Promise<IUser[]> {
@@ -92,4 +93,9 @@ async function setUserAuth(response: Response) {
 		token,
 		user,
 	});
+}
+
+// start region: User History
+export async function getUserHistory() {
+	return WEB_API.get<UserHistoryDTO[]>('/users/history', {});
 }
