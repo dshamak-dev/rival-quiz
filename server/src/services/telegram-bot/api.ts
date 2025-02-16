@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import * as dbUtils from "../../database/database.utils";
 
 const schema = new mongoose.Schema({
-  chats: [{ type: [String], default: [] }],
+  chats: { type: [String], default: [] },
 });
 
 schema.virtual("json").get(function () {
