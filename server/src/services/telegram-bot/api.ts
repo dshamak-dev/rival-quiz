@@ -15,7 +15,7 @@ export const model = mongoose.model("telegram", schema);
 
 export const create = (payload) => dbUtils.createOne(model, payload, normalize);
 
-export const getChats = () => model.findOne({}).then(normalize);
+export const getChats = () => model.findOne({}).then(normalize).catch(err => []);
 
 export const addChat = (chatId: string): Promise<string[]> =>
   model.findOneAndUpdate({}, { $push: { chats: chatId } }).then(normalize);

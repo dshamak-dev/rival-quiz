@@ -4,8 +4,7 @@ import {
   archiveSessionData,
   completeSessionData,
   createSessionData,
-  findActiveSessionDataBySessionId,
-  findSessionDataAndComplete,
+  findActiveSessionDataBySessionId
 } from "../session-data/session-data.actions";
 import { normalizeSession } from "./session.utils";
 import {
@@ -17,7 +16,10 @@ import {
   findQuestionDataAndSync,
   syncQuestionData,
 } from "../services/question-data/actions";
-import { SessionDataDTO, SessionDataStateTypes } from "../session-data/session-data.model";
+import {
+  SessionDataDTO,
+  SessionDataStateTypes,
+} from "../session-data/session-data.model";
 import { findSessionData } from "../session-data/session-data.api";
 import { SessionStateType } from "./session.model";
 
@@ -83,11 +85,11 @@ export async function patchSession(id, payload) {
 
   switch (entity) {
     case "questions": {
-      const questionIndex = session.questions.findIndex(
+      const questionIndex = session.questions?.findIndex(
         (q) => (q._id || q.id).toString() === param
       );
 
-      if (questionIndex >= 0) {
+      if (session.questions && questionIndex && questionIndex >= 0) {
         session.questions[questionIndex] = payload.value;
       }
       break;
@@ -226,7 +228,7 @@ export async function completeSession(sessionId) {
     return Promise.reject("Invalid session or session is not active");
   }
 
-  const allQuestionsAnswered = session.questions.every(
+  const allQuestionsAnswered = session.questions?.every(
     (question) => question.hasAnswer
   );
 
@@ -242,10 +244,16 @@ export async function completeSession(sessionId) {
   })
     .then((result): Promise<[SessionDataDTO | null, any]> => {
       if (!result?.id) {
-        return createSessionData(session, true).then((result) => [result as SessionDataDTO, null]);
+        return createSessionData(session, true).then((result) => [
+          result as SessionDataDTO,
+          null,
+        ]);
       }
 
-      return completeSessionData(result.id, session).then((result) => [result as SessionDataDTO, null]);
+      return completeSessionData(result.id, session).then((result) => [
+        result as SessionDataDTO,
+        null,
+      ]);
     })
     .catch((error): [null, string] => {
       return [null, error];
@@ -253,7 +261,9 @@ export async function completeSession(sessionId) {
 
   if (!sessionData || sessionDataError) {
     console.log(sessionDataError);
-    return Promise.reject(sessionDataError || "Failed to find active session data");
+    return Promise.reject(
+      sessionDataError || "Failed to find active session data"
+    );
   }
 
   const prizePool = sessionData?.userScores?.summary;

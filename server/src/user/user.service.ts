@@ -50,7 +50,6 @@ useRouter.post("/login", async (req: any, res: any) => {
     return res.status(400).end();
   }
 
-  console.log("Search user", { body });
   const user = await findUserByQuery({
     email: body.email,
     password: encryptPassword(body.password),

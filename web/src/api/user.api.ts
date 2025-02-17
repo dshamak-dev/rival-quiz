@@ -1,6 +1,5 @@
 // import { pushStoreItem } from "@control/storage.control";
 import { getErrorMessage, validateJSONResponse, WEB_API } from '@control/api.control';
-import { ID } from '@model/api.model';
 import { AuthDTO, UserDTO } from '@model/user.model';
 import { UserAuthPayloadDTO } from '@model/user.role';
 import { UserHistoryDTO } from '@shared/user/model';

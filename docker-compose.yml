@@ -4,8 +4,8 @@ services:
     image: dshamak/quizlo-server:${TAG:-latest}
     container_name: api
     build:
-      context: ./server/
-      dockerfile: Dockerfile.prod
+      context: ./
+      dockerfile: ./server/Dockerfile.prod
     command: npm start
     ports:
       - "443"
@@ -23,8 +23,8 @@ services:
     image: dshamak/quizlo-web:${TAG:-latest}
     container_name: web
     build:
-      context: ./web/
-      dockerfile: Dockerfile.prod
+      context: ./
+      dockerfile: ./web/Dockerfile.prod
     command: npm start
     ports:
       - "443"

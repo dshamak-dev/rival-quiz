@@ -90,7 +90,7 @@ _router.get("/:id", async (req: any, res: any) => {
           : SessionDataStateTypes.Active,
     }).catch((err) => null);
 
-    payload.data = data;
+    payload.data = data ?? undefined;
   }
 
   const questionDataQuery = {
@@ -216,7 +216,7 @@ _router.post("/:id/answer", async (req: any, res: any) => {
   }
 
   const questions =
-    check.session.questions?.map((question) => {
+    check.session?.questions?.map((question) => {
       if (questionId === question.id) {
         return { ...question, answer, hasAnswer: true };
       }
@@ -224,7 +224,7 @@ _router.post("/:id/answer", async (req: any, res: any) => {
       return question;
     }) || [];
 
-  const hasNextQuestion = check.session.hasNextQuestion;
+  const hasNextQuestion = check.session?.hasNextQuestion;
 
   const updates = await updateSession(sessionId, {
     questions,
@@ -254,7 +254,7 @@ _router.post("/:id/resolve", async (req: any, res: any) => {
 
   const session = check.session;
 
-  if (!session.hasNextQuestion) {
+  if (!session?.hasNextQuestion) {
     await completeSession(sessionId)
       .then((payload) => {
         res.statusMessage = "Session completed successfully.";
@@ -318,7 +318,7 @@ _router.post("/:id/questions", async (req: any, res: any) => {
 
   // TODO: Create a separate Question in Questions table?
   const question = await createQuestion(req.body || { sessionId });
-  const questions = [...(check.session.questions || []), question];
+  const questions = [...(check.session?.questions || []), question];
 
   const payload = {
     ...check.session,
@@ -371,7 +371,7 @@ _router.post("/:id/users", async (req: any, res: any) => {
     return res.status(404).end();
   }
 
-  if (session.users.includes(userId)) {
+  if (session.users?.includes(userId)) {
     return res.status(200).json(session);
   }
 

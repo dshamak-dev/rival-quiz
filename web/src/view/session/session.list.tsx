@@ -17,7 +17,6 @@ export function SessionList({ sessions }: { sessions?: SessionDTO[] }) {
 			<div className="mt-[20vh] flex flex-col gap-4 items-center justify-center">
 				<div>
 					<p className="text-center text-sm text-gray-500">No sessions found.</p>
-					<p className="text-center text-sm text-gray-500">Add a new session to get started.</p>
 				</div>
 				<div>
 					<SessionCreateButton className="w-full flex justify-center items-center gap-2">

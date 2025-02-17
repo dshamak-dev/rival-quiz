@@ -23,14 +23,15 @@ services:
     image: server:${TAG:-latest}
     container_name: api
     build:
-      context: ./server/
-      dockerfile: Dockerfile.dev
+      context: ./
+      dockerfile: ./server/Dockerfile.dev
     env_file:
       - .env
     command: npm run dev
     volumes:
       - ./server/src:/www/src
       - ./server/public:/www/public
+      - ./shared:/shared
     ports:
       - "80"
       - "8080"
@@ -60,6 +61,7 @@ services:
     volumes:
       - ./web/app:/www/app
       - ./web/src:/www/src
+      - ./server/shared:/server/shared
     ports:
       - "80"
     environment:

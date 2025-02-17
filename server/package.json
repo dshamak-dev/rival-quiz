@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon index.ts",
     "build": "tsc",
+    "build-es": "esbuild index.ts --bundle --outfile=dist/index.js --target=esnext --platform=node",
     "start": "node index.js",
     "test": "jest"
   },
@@ -36,6 +37,7 @@
     "cookie": "^1.0.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
+    "esbuild": "^0.25.0",
     "express": "^4.21.2",
     "jest": "^29.7.0",
     "nodemon": "^3.1.9",

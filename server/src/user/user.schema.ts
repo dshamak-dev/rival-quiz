@@ -59,6 +59,7 @@ export const UserHistorySchema = new mongoose.Schema(
   {
     userId: String,
     type: String,
+    metadata: Object,
     data: Object,
   },
   { timestamps: true }

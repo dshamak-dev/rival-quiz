@@ -5,6 +5,7 @@ WORKDIR /www/
 
 COPY package.json index.ts tsconfig.json ./src ./
 COPY ./public ./public
+COPY ./shared ./shared
 
 RUN npm install
 

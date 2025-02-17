@@ -67,7 +67,7 @@ export function Drawer({ open = false, offsetTop = 0, offsetBottom = 0, onClose,
 					'h-full overflow-hidden',
 					'bg-white',
 					// 'grid grid-rows-[auto_1fr]',
-					isMobile ? 'w-[90vw]' : 'min-w-[200px] max-w-full',
+					isMobile ? 'w-[90vw]' : 'min-w-[400px] max-w-full',
 					{
 						[styles.visible]: open,
 					}

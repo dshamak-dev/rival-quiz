@@ -1,5 +1,6 @@
 import { useUI } from '@control/ui.control';
 import { validateUserPermissions } from '@control/user.control';
+import { isNullOrEmpty } from '@control/validate.utils';
 import { USER_ROLE_TYPE } from '@model/user.role';
 import { useAuth } from '@state/auth.hook';
 import { Anchor } from '@view/anchor';
@@ -99,17 +100,20 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 			<div className="h-full grid grid-rows-[1fr_auto] gap-6 p-4">
 				<div className="flex flex-col gap-6">
 					<div>
-						<div className="grid grid-cols-[auto_1fr] gap-4">
-							<div className="flex min-h-full items-center ">
-								{user.photoUrl ? (
+						<div
+							className={classNames('grid gap-4', {
+								'grid-cols-[auto_1fr]': !isNullOrEmpty(user.photoUrl),
+								'grid-cols-[1fr]': isNullOrEmpty(user.photoUrl),
+							})}
+						>
+							{!isNullOrEmpty(user.photoUrl) && (
+								<div className="flex min-h-full items-center">
 									<Image
 										src={user.photoUrl}
 										className="w-[48px] h-[48px] rounded-full overflow-hidden object-cover"
 									/>
-								) : (
-									<Icon name="Person" size={32} />
-								)}
-							</div>
+								</div>
+							)}
 							<div>
 								{userInfoContent}
 								<Typography className="flex gap-2 items-center uppercase text-xs">

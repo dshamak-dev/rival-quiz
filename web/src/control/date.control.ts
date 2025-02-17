@@ -11,11 +11,12 @@ export function getGreetingText() {
 	}
 }
 
-export type DateFormatType = 'MM/DD/YYYY' | 'DD/MM/YYYY h:m:s' | undefined;
+export type DateFormatType = 'MM/DD/YYYY' | 'DD/MM/YYYY h:m:s' | 'DD/MM/YY' | undefined;
 const datePartsFilters: Record<string, RegExp> = {
 	day: /DD/g,
 	month: /MM/g,
 	year: /YYYY/g,
+	yearShort: /YY/g,
 	hours: /h/g,
 	minutes: /m/g,
 	seconds: /s/g,
@@ -45,11 +46,12 @@ function parseDate(date: Date): DateParts {
 	const day = date.getDate();
 	const month = String(date.getMonth() + 1);
 	const year = date.getFullYear();
+	const yearShort = year.toString().slice(-2);
 	const hours = String(date.getHours());
 	const minutes = String(date.getMinutes());
 	const seconds = String(date.getSeconds());
 
-	return Object.entries({ day, month, year, hours, minutes, seconds }).reduce((accum, [key, value]) => {
+	return Object.entries({ day, month, year, hours, minutes, seconds, yearShort }).reduce((accum, [key, value]) => {
 		accum[key] = prettyDateNumber(value);
 
 		return accum;

@@ -3,6 +3,7 @@ import { UserDTO } from "./model";
 import { findUserByQuery } from "./user.action";
 import { UserHistoryDB } from "./user.schema";
 import { parseToken } from "./user.utils";
+import { getSessionById } from "../session/session.action";
 
 export async function findUserByToken(token: string): Promise<UserDTO | null> {
   if (!token) {
@@ -44,12 +45,12 @@ export async function findUserByToken(token: string): Promise<UserDTO | null> {
 export async function addUserHistory(
   userId: string,
   type: USER_HISTORY_TYPE,
-  data: any
+  metadata: any
 ) {
   const userHistory = new UserHistoryDB({
     userId,
     type,
-    data,
+    metadata,
   });
 
   return userHistory
@@ -67,7 +68,7 @@ export async function removeUserHistory(
 
   switch (type) {
     case USER_HISTORY_TYPE.JOIN_SESSION: {
-      query = { userId, type, "data.sessionId": data?.sessionId };
+      query = { userId, type, "metadata.sessionId": data?.sessionId };
       break;
     }
   }
@@ -85,5 +86,38 @@ export async function removeUserHistory(
 export async function getUserHistory(userId: string, query = {}) {
   return UserHistoryDB.find({ userId, ...query })
     .sort({ created: -1 })
-    .then((res) => res.map((it: any) => it.json)).catch(err => null);
+    .then((res) => res.map((it: any) => it.json))
+    .then(async (items) => {
+      console.log("Draft", items);
+      // Note: Populate item with session data
+
+      let data: any[] = [];
+
+      for (const item of items) {
+        if (!item) {
+          continue;
+        }
+
+        const sessionId = item.metadata?.sessionId;
+
+        if (sessionId) {
+          const session = await getSessionById(sessionId).catch((err) => null);
+
+          if (!session) {
+            data.push(item);
+            continue;
+          }
+
+          data.push({
+            ...item,
+            data: { title: session.title, state: session.state },
+          });
+        } else {
+          data.push(item);
+        }
+      }
+
+      return data;
+    })
+    .catch((err) => null);
 }
