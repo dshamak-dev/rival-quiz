@@ -55,13 +55,13 @@ services:
     image: web:${TAG:-latest}
     container_name: web
     build:
-      context: ./web/
-      dockerfile: Dockerfile.dev
+      context: ./
+      dockerfile: ./web/Dockerfile.dev
     command: npm run dev
     volumes:
       - ./web/app:/www/app
       - ./web/src:/www/src
-      - ./server/shared:/server/shared
+      - ./shared:/shared
     ports:
       - "80"
     environment:

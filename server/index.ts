@@ -13,6 +13,9 @@ import walletService from "./src/services/wallet";
 import questionDataService from "./src/services/question-data";
 import broadcastService from "./src/services/broadcast";
 import telegramBotService from "./src/services/telegram-bot";
+
+import { services } from "./src/services";
+
 import { connect } from "./src/database";
 
 dotenv.config();
@@ -50,9 +53,9 @@ app.use((req, res, next) => {
     return res.redirect(301, `https://${req.headers.host}${req.url}`);
   }
 
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Expose-Headers', 'Set-Cookie');
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Expose-Headers", "Set-Cookie");
 
   next();
 });
@@ -60,6 +63,16 @@ app.use((req, res, next) => {
 app.use(cookieParser());
 
 // TODO: apply microservices to application
+
+services.forEach((init) => {
+  const service = init();
+
+  if (service.name) {
+    console.log(`Initializing ${service.name}`);
+  }
+
+  app.use(service.route, service.router);
+});
 
 // User routes initialization
 app.use("/users", userService);
