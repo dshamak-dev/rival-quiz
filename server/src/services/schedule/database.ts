@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
 import * as dbUtils from "../../database/database.utils";
-import { ScheduleActionEnum, ScheduleStageEnum } from "./constants";
+import { ScheduleStageEnum } from "./constants";
 
 const schema = new mongoose.Schema(
   {
     stage: {
-      type: ScheduleStageEnum,
+      type: String,
       required: true,
       default: ScheduleStageEnum.WAITING,
     },
-    action: { type: ScheduleActionEnum, required: true },
+    action: { type: String, required: true },
 	repeatRule: String,
     endAt: { type: String, required: true },
     data: Object,

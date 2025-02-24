@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import https from "https";
@@ -17,6 +17,7 @@ import telegramBotService from "./src/services/telegram-bot";
 import { services } from "./src/services";
 
 import { connect } from "./src/database";
+import { addLog } from "@/services/logger/api";
 
 dotenv.config();
 
@@ -62,8 +63,6 @@ app.use((req, res, next) => {
 
 app.use(cookieParser());
 
-// TODO: apply microservices to application
-
 services.forEach((init) => {
   const service = init();
 
@@ -108,14 +107,29 @@ app.get("/health", (req, res) => {
 });
 
 // default route path
-app.use((req, res) => {
-  res.cookie("timelog", Date.now(), {
-    // path: "./",
-    httpOnly: false,
-    maxAge: 1000000,
+// app.use((req, res) => {
+//   res.cookie("timelog", Date.now(), {
+//     // path: "./",
+//     httpOnly: false,
+//     maxAge: 1000000,
+//   });
+
+//   res.status(404).send("Hello, World!");
+// });
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(`ERROR: ${err.message}`);
+
+  addLog({
+    source: req.url || "express",
+    message: err.message,
+    data: req.body,
   });
 
-  res.status(404).send("Hello, World!");
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+  });
 });
 
 app.listen(80, () => {

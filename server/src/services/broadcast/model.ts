@@ -6,7 +6,7 @@ export enum BroadcastMessageTypeEnum {
   WARNING = "warning",
   ERROR = "error",
   SYSTEM = "system",
-};
+}
 
 export enum BroadcastEntityEnum {
   OTHER = "other",
@@ -16,7 +16,7 @@ export enum BroadcastEntityEnum {
   COMMENT = "comment",
   TRANSACTION = "transaction",
   WALLET = "wallet",
-};
+}
 
 export type BroadcastData = {
   entity: BroadcastEntityEnum;
@@ -33,6 +33,10 @@ class BroadcastProvider {
 
   constructor(port) {
     const self = this;
+
+    if (!port) {
+      return;
+    }
     const wss = (this.wss = new WebSocketServer({ port: port }));
 
     console.log(`WebSocket server is running at port: ${port}`);

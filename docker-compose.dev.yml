@@ -21,7 +21,7 @@ services:
 
   api-local:
     image: server:${TAG:-latest}
-    container_name: api
+    container_name: api-local
     build:
       context: ./
       dockerfile: ./server/Dockerfile.dev
@@ -53,7 +53,7 @@ services:
 
   web-local:
     image: web:${TAG:-latest}
-    container_name: web
+    container_name: web-local
     build:
       context: ./
       dockerfile: ./web/Dockerfile.dev
