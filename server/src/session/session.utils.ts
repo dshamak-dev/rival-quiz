@@ -1,3 +1,5 @@
+import { SessionDTO } from "@shared/session/model";
+
 export async function calculatePrizePool(sessionData, answer) {
   const total = sessionData.pool || sessionData.totalUsers;
   // { userId, rate, value }
@@ -13,8 +15,8 @@ export async function calculatePrizePool(sessionData, answer) {
   };
 }
 
-export function normalizeSession(mSession) {
-  return mSession?.json;
+export function normalizeSession(data): SessionDTO {
+  return data?.json;
 }
 
 export function formatSessionQueryValue(name, query) {

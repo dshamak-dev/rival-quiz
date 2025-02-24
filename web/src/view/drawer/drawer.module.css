@@ -1,0 +1,10 @@
+.container {
+	&:not(.visible) {
+		pointer-events: none;
+		opacity: 0;
+	}	
+}
+
+.visible {
+
+}

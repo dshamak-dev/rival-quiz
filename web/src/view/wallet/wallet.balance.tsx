@@ -20,7 +20,7 @@ export function WalletBalance() {
 	}, [wallet?.currency]);
 
 	return (
-		<Anchor activeClassName='' href="/profile/wallet" className="flex gap-1 items-center">
+		<Anchor activeClassName='' href="/wallet" className="flex gap-1 items-center">
 			<span>{balance}</span>
 			<Icon name={currencyIcon} size={16} />
 		</Anchor>

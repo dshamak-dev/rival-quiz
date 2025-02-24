@@ -1,128 +1,121 @@
 import { authCookie, getAuthCookie } from '@/auth';
-import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { Form, useActionData, useSearchParams, useSubmit } from '@remix-run/react';
+import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
+import { Form, useLoaderData, useNavigate } from '@remix-run/react';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
-import cookie from 'cookie';
-
 import { useMemo, useState } from 'react';
 import { ClientComponent } from '@view/client/client.component';
 import { Icon } from '@view/icon';
-import { getErrorMessage, getRequestSearchField, WEB_API } from '@control/api.control';
-import { AuthDTO } from '@model/user.model';
+import { getErrorMessage, validateJSONResponse } from '@control/api.control';
+import { UserDTO } from '@model/user.model';
 import { FormField } from '@view/form/form.field';
 import { Button } from '@view/button/button';
 import { useUI } from '@control/ui.control';
 import { APP_NAME } from 'src/constants/config.constants';
 import { useTelegram } from 'src/hooks/telegram.hook';
-import { getAuthFormPayload } from '@control/auth.utils';
+import { useAPI } from '@api/api.hook';
 import { UserAuthPayloadDTO } from '@model/user.role';
-import { isNullOrEmpty } from '@control/validate.utils';
+import { loginUser, signupUser } from '@api/user.api';
+import { getRedirectUrl } from '@control/auth.utils';
 
 export async function action({ request }: ActionFunctionArgs) {
-	const formData = await request.formData();
-	const searchActionProps = getRequestSearchField(request, 'action');
+	const payload = await request.json();
+	const url = new URL(request.url);
+	const urlSearchParams = new URLSearchParams(url.search);
 
-	const isSignUp = searchActionProps === 'create';
+	const isSignUp = urlSearchParams.get('action') === 'create';
 
-	const [payload, payloadError] = await getAuthFormPayload(formData, isSignUp)
-		.then((res: UserAuthPayloadDTO): [UserAuthPayloadDTO, null] => {
-			return [res, null];
-		})
-		.catch((err): [null, any] => [null, getErrorMessage(err)]);
+	try {
+		const auth = await (isSignUp ? signupUser : loginUser)(payload);
 
-	if (isNullOrEmpty(payload) || payloadError) {
-		return {
-			error: payloadError || 'Invalid form data.',
-			payload: null,
-		};
-	}
+		if (!auth) {
+			return json(null, { status: 401 });
+		}
 
-	const [auth, error]: [AuthDTO | null, string | null] = await WEB_API.post<Response>(
-		isSignUp ? 'users/create' : 'users/login',
-		{
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload),
-		},
-		true
-	)
-		.then(async (res): Promise<[AuthDTO, string | null]> => {
-			const cookies = res.headers.get('Set-Cookie');
-			const cookieEntries = cookies ? cookie.parse(cookies) : null;
+		const token = auth.token;
 
-			const token = cookieEntries?.authToken;
+		const redirectUrl = getRedirectUrl(request.url);
 
-			if (token) {
-				WEB_API.setJWT(token);
-			}
-
-			return res.json();
-		})
-		.then((user: any): [AuthDTO, string | null] => {
-			return [
-				{
-					user,
-					token: WEB_API.JWT || undefined,
-				},
-				null,
-			];
-		})
-		.catch((err): [null, string | null] => {
-			return [null, getErrorMessage(err)];
-		});
-
-	if (!auth?.user || !auth.token || error) {
-		return {
-			user: null,
-			error,
-			payload: {
-				...payload,
-				isSignUp,
+		return redirect(redirectUrl, {
+			status: 200,
+			headers: {
+				'Set-Cookie': await authCookie.serialize(token),
 			},
-		};
+		});
+	} catch (err) {
+		return json(getErrorMessage(err), { status: 400 });
 	}
-
-	const urlParts = new URL(request.url);
-	const redirectUrl = urlParts.searchParams.get('continue') || '/';
-
-	return redirect(redirectUrl, {
-		headers: {
-			'Set-Cookie': await authCookie.serialize(auth.token),
-		},
-	});
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const authToken = await getAuthCookie(request);
 
+	const continueUrl = getRedirectUrl(request.url);
+
 	if (!authToken) {
-		return null;
+		return json({
+			continueUrl,
+		});
 	}
 
-	const urlParts = new URL(request.url);
-	const redirectUrl = urlParts.searchParams.get('continue') || '/';
-
-	return redirect(redirectUrl);
+	return redirect(continueUrl);
 }
 
 export default function LoginPage() {
-	const [searchParams] = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
-	const actionData = useActionData<typeof action>();
+	const navigate = useNavigate();
+	const { continueUrl } = useLoaderData<typeof loader>();
+
+	const [authResponse, setAuthResponse] = useState<{ user?: UserDTO; error?: string; payload: any } | null>(null);
+
+	const { dispatch } = useAPI<{ action: string; payload: UserAuthPayloadDTO }, any>({
+		request: ({ action, payload }) => {
+			return fetch(`/login?action=${action}&continue=${continueUrl}`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(payload),
+			})
+				.then(validateJSONResponse)
+				.then(() => {
+					navigate(continueUrl || '/');
+				});
+		},
+	});
 
 	const { isTelegram, metadata } = useTelegram();
 
 	const actionError = useMemo(() => {
-		return actionData?.error || null;
-	}, [actionData?.error]);
+		return authResponse?.error || null;
+	}, [authResponse?.error]);
 	const { deviceType, isMobile } = useUI();
 
-	const handleSubmit = useSubmit();
+	const handleSubmitForm = (action = 'enter', payload: UserAuthPayloadDTO) => {
+		setIsLoading(true);
 
-	const continueUrl = useMemo(() => {
-		return searchParams.get('continue') || '/';
-	}, []);
+		dispatch({ action, payload })
+			// .then(res => res.json())
+			.then((res) => {
+				console.log('Auth Response:', res);
+
+				// fetch(`/login?continue=${continueUrl}`, {
+				// 	method: 'POST',
+				//     credentials: 'include',
+				// });
+			})
+			.catch((err) => {
+				console.error('Auth error:', err);
+				setAuthResponse({
+					error: getErrorMessage(err),
+					payload,
+				});
+			})
+			.finally(() => {
+				setIsLoading(false);
+			});
+	};
 
 	const telegramAuthLink = useMemo(() => {
 		if (!isTelegram || !metadata) {
@@ -133,22 +126,11 @@ export default function LoginPage() {
 			e.stopPropagation();
 			e.preventDefault();
 
-			fetch(`/login?action=create&continue=${continueUrl}`, {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
-				},
-				body: new URLSearchParams({
-					authType: 'telegram',
-					id: metadata.id,
-					name: metadata.name,
-					photoUrl: metadata.photoUrl,
-				}),
-			}).then((res) => {
-				if (res.ok) {
-					window.location.href = `/`;
-				}
+			handleSubmitForm('create', {
+				authType: 'telegram',
+				id: metadata.id,
+				name: metadata.name,
+				photoUrl: metadata.photoUrl,
 			});
 		};
 
@@ -157,9 +139,9 @@ export default function LoginPage() {
 				Login with Telegram
 			</Button>
 		);
-	}, [isTelegram, metadata, handleSubmit, continueUrl]);
+	}, [isTelegram, metadata, continueUrl]);
 
-	const [isSignUp, setIsSignUp] = useState(actionData?.payload?.isSignUp || false);
+	const [isSignUp, setIsSignUp] = useState(authResponse?.payload?.isSignUp || false);
 
 	return (
 		<div className="bg-contain bg-center">
@@ -175,7 +157,7 @@ export default function LoginPage() {
 						// disabled={isLoading}
 						defaultValue={
 							{
-								email: (actionData?.payload as any)?.email ?? '',
+								email: (authResponse?.payload as any)?.email ?? '',
 							} as any
 						}
 						method="POST"
@@ -188,10 +170,21 @@ export default function LoginPage() {
 								'py-12 px-12 min-w-[520px]': deviceType && !isMobile,
 							}
 						)}
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
 						onSubmitCapture={(ev) => {
-							console.log('Form submitted:', ev.currentTarget);
-							setIsLoading(true);
-							handleSubmit(ev.currentTarget, { replace: true });
+							ev.preventDefault();
+							ev.stopPropagation();
+
+							const formData = new FormData(ev.currentTarget);
+							const payload = Object.fromEntries(formData.entries());
+
+							handleSubmitForm(isSignUp ? 'create' : 'enter', {
+								...payload,
+								authType: 'email',
+							} as UserAuthPayloadDTO);
 						}}
 					>
 						<div className="flex flex-col justify-center items-center">
@@ -205,11 +198,11 @@ export default function LoginPage() {
 								label="Email"
 								id="email"
 								type="email"
-								defaultValue={(actionData?.payload as any)?.email || undefined}
+								defaultValue={(authResponse?.payload as any)?.email || undefined}
 								required
-
-								// rules={[{ required: true, message: 'Please input your email!' }]}
 							/>
+
+							{isSignUp && <FormField label="Name" id="name" className="flex flex-col" />}
 
 							<FormField
 								label="Password"
@@ -230,7 +223,6 @@ export default function LoginPage() {
 									type="password"
 									// rules={[{ required: true, message: 'Please input your password!' }]}
 									required
-									size="large"
 									className="flex flex-col"
 								/>
 							)}
@@ -240,12 +232,12 @@ export default function LoginPage() {
 								className="cursor-pointer hover:text-sky-500 underline"
 								onClick={() => setIsSignUp(!isSignUp)}
 							>
-								{isSignUp ? 'I have account' : "I don't have account"}
+								{isSignUp ? 'I have an account' : "I don't have account"}
 							</Typography>
 						</div>
 						<div className="flex flex-col gap-4">
 							<Button
-								// type='primary'
+								layout="primary"
 								type="submit"
 								size="base"
 								// loading={isLoading}

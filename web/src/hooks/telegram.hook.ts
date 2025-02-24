@@ -14,6 +14,11 @@ export function useTelegram() {
 			const tgData = window.Telegram?.WebApp;
 
 			const tgUser =  tgData?.initDataUnsafe?.user;
+			// || {
+			// 	id: '01',
+            //     username: 'local',
+            //     photoUrl: 'https://i.pinimg.com/474x/57/c4/58/57c45882fc7c7452d2c1ec6444f48f0d.jpg',
+			// };
 
 			if (!tgUser || tgUser?.id == null){
 				return null;

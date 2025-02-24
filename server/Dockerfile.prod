@@ -3,8 +3,9 @@ FROM node:22 AS deps
 RUN mkdir /www
 WORKDIR /www/
 
-COPY package.json index.ts tsconfig.json ./
-COPY ./src ./src
+COPY ./server/package.json ./server/index.ts ./server/tsconfig.json ./server/esbuild.config.js ./
+COPY ./server/src ./src
+COPY ./shared /shared
 
 RUN npm install
 RUN npm run build
@@ -13,11 +14,10 @@ FROM node:22 AS runner
 RUN mkdir /www
 WORKDIR /www/
 
-COPY ./public/ ./public
+COPY ./server/public/ ./public
 COPY --from=deps /www/node_modules ./node_modules
 COPY --from=deps /www/dist ./
-COPY package.json ./
-# COPY ../ssl ./ssl
+COPY ./server/package.json ./
 
 EXPOSE 80 443 8080
 CMD [ "npm", "start" ]

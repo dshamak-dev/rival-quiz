@@ -1,0 +1,13 @@
+export enum ScheduleStageEnum {
+	WAITING = 'WAITING',
+    ACTIVE = 'ACTIVE',
+    COMPLETED = 'COMPLETED',
+	ERROR = 'ERROR',
+    ABORTED = 'ABORTED',
+}
+
+export enum ScheduleActionEnum {
+	CHANGE_SESSION_STATE = 'CHANGE_SESSION_STATE',
+	START_SESSION = 'START_SESSION',
+	RESOLVE_SESSION = 'RESOLVE_SESSION',
+}

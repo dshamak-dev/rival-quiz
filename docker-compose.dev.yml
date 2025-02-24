@@ -21,16 +21,17 @@ services:
 
   api-local:
     image: server:${TAG:-latest}
-    container_name: api
+    container_name: api-local
     build:
-      context: ./server/
-      dockerfile: Dockerfile.dev
+      context: ./
+      dockerfile: ./server/Dockerfile.dev
     env_file:
       - .env
     command: npm run dev
     volumes:
       - ./server/src:/www/src
       - ./server/public:/www/public
+      - ./shared:/shared
     ports:
       - "80"
       - "8080"
@@ -52,14 +53,15 @@ services:
 
   web-local:
     image: web:${TAG:-latest}
-    container_name: web
+    container_name: web-local
     build:
-      context: ./web/
-      dockerfile: Dockerfile.dev
+      context: ./
+      dockerfile: ./web/Dockerfile.dev
     command: npm run dev
     volumes:
       - ./web/app:/www/app
       - ./web/src:/www/src
+      - ./shared:/shared
     ports:
       - "80"
     environment:

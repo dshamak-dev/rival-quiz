@@ -13,10 +13,17 @@ import { WalletBalance } from '@view/wallet/wallet.balance';
 import { Anchor } from '@view/anchor';
 import { useBroadcast } from '@state/broadcast.state';
 import { APP_NAME } from 'src/constants/config.constants';
+import { LinkButton } from '@view/anchor/link.button';
+import classNames from 'classnames';
 
 export function HeaderMobile() {
 	const location = useLocation();
 	const navigate = useNavigate();
+
+	const isLogin = useMemo(() => {
+		return location.pathname.includes('/login');
+	}, [location.pathname]);
+
 	const { deviceType } = useUI();
 	const { isLoggedIn, user } = useAuth();
 	const { isConnected } = useBroadcast();
@@ -38,29 +45,30 @@ export function HeaderMobile() {
 						<Icon name="ArrowLeft" size={22} />
 					</div>
 				) : (
-					<div className="flex gap-2 items-center">
+					<Anchor href="/" className="flex gap-2 items-center text-black">
 						<Image src={logoImage} style={{ width: 24 }} />
 						<Badge visible={isConnected} color="#71f8ce" transform="translateX(8px) translateY(4px)">
 							<Typography className="uppercase text-xs font-black">{APP_NAME}</Typography>
 						</Badge>
-					</div>
+					</Anchor>
 				)}
 			</div>
 			<div></div>
-			{isLoggedIn && (
-				<>
-					<div className="flex items-center justify-end gap-6">
-						<Anchor href="/sessions/create">
-							<Icon name="PlusCircle" size={16} />
-						</Anchor>
+			<div className="flex items-center justify-end gap-6">
+				{isLoggedIn ? (
+					<>
 						<Badge>
 							<Icon name="Bell" size={16} className="animate-bounce" />
 						</Badge>
 
 						<WalletBalance />
-					</div>
-				</>
-			)}
+					</>
+				) : (
+					<LinkButton className={classNames('px-6', isLogin ? 'hidden' : '')} layout="primary" href="/login">
+						Login
+					</LinkButton>
+				)}
+			</div>
 		</div>
 	);
 }

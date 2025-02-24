@@ -20,7 +20,7 @@ export async function deleteSession(id: SessionDTO['id']): Promise<SessionDTO> {
 	return WEB_API.delete<SessionDTO>(`${rootPath}/${id}`, {});
 }
 
-export async function createSession(payload: any): Promise<SessionDTO> {
+export async function createSession(payload: Object): Promise<SessionDTO> {
 	return WEB_API.post<SessionDTO>(`${rootPath}`, {
 		headers: {
 			'Content-Type': 'application/json',

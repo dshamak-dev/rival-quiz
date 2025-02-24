@@ -4,10 +4,10 @@ RUN mkdir /www
 
 WORKDIR /www/
 
-COPY package.json tsconfig.json postcss.config.js tailwind.config.ts remix.config.js vite.config.ts ./
-COPY ./app/ ./app
-COPY ./assets/ ./assets
-COPY ./src/ ./src
+COPY ./web/package.json ./web/tsconfig.json ./web/postcss.config.js ./web/tailwind.config.ts ./web/remix.config.js ./web/vite.config.ts ./
+COPY ./web/app/ ./app
+COPY ./web/assets/ ./assets
+COPY ./web/src/ ./src
 
 RUN npm install
 

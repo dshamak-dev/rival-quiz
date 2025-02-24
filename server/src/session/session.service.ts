@@ -24,6 +24,9 @@ import {
 import { QuestionDataStatusTypes } from "../services/question-data/model";
 import { findManySessions } from "./api";
 import { formatSessionQueryValue } from "./session.utils";
+import { randomString } from "../tools/random.utils";
+import { addUserHistory, removeUserHistory } from "../user/api";
+import { USER_HISTORY_TYPE } from "../user/constants";
 
 const _router = express.Router();
 
@@ -87,7 +90,7 @@ _router.get("/:id", async (req: any, res: any) => {
           : SessionDataStateTypes.Active,
     }).catch((err) => null);
 
-    payload.data = data;
+    payload.data = data ?? undefined;
   }
 
   const questionDataQuery = {
@@ -134,14 +137,9 @@ _router.delete("/:id", async (req: any, res: any) => {
 });
 
 _router.post("/", async (req: any, res: any) => {
-  const payload = req.body;
-
-  if (!payload || !payload.title) {
-    res.statusMessage = "Title is required.";
-    return res.status(400).end();
-  }
-
-  const owner = await getRequestUser(req);
+  const owner = await getRequestUser(req).catch((err) => {
+    return null;
+  });
 
   const ownerId = owner?.id;
 
@@ -150,9 +148,13 @@ _router.post("/", async (req: any, res: any) => {
     return res.status(401).end();
   }
 
+  const hash = req.body?.hash ?? randomString();
+
   createSession({
     ownerId: ownerId,
-    ...req.body,
+    title: "",
+    hash,
+    ...(req.body ?? {}),
   })
     .then((session) => {
       res.status(201).json(session);
@@ -214,7 +216,7 @@ _router.post("/:id/answer", async (req: any, res: any) => {
   }
 
   const questions =
-    check.session.questions?.map((question) => {
+    check.session?.questions?.map((question) => {
       if (questionId === question.id) {
         return { ...question, answer, hasAnswer: true };
       }
@@ -222,7 +224,7 @@ _router.post("/:id/answer", async (req: any, res: any) => {
       return question;
     }) || [];
 
-  const hasNextQuestion = check.session.hasNextQuestion;
+  const hasNextQuestion = check.session?.hasNextQuestion;
 
   const updates = await updateSession(sessionId, {
     questions,
@@ -252,7 +254,7 @@ _router.post("/:id/resolve", async (req: any, res: any) => {
 
   const session = check.session;
 
-  if (!session.hasNextQuestion) {
+  if (!session?.hasNextQuestion) {
     await completeSession(sessionId)
       .then((payload) => {
         res.statusMessage = "Session completed successfully.";
@@ -316,7 +318,7 @@ _router.post("/:id/questions", async (req: any, res: any) => {
 
   // TODO: Create a separate Question in Questions table?
   const question = await createQuestion(req.body || { sessionId });
-  const questions = [...(check.session.questions || []), question];
+  const questions = [...(check.session?.questions || []), question];
 
   const payload = {
     ...check.session,
@@ -369,13 +371,27 @@ _router.post("/:id/users", async (req: any, res: any) => {
     return res.status(404).end();
   }
 
-  if (session.users.includes(userId)) {
+  if (session.users?.includes(userId)) {
     return res.status(200).json(session);
   }
 
-  const updated = await addSessionUser(sessionId, userId);
+  addSessionUser(sessionId, userId)
+    .then(async (updated) => {
+      const history = await addUserHistory(
+        userId,
+        USER_HISTORY_TYPE.JOIN_SESSION,
+        {
+          sessionId,
+        }
+      );
 
-  res.status(200).json(updated);
+      res.status(200).json(updated);
+    })
+    .catch((err) => {
+      res.statusMessage =
+        err ?? "Failed to add user to session. Please try again later.";
+      return res.status(400).end();
+    });
 });
 
 _router.delete("/:id/user", async (req: any, res: any) => {
@@ -402,12 +418,26 @@ _router.delete("/:id/user", async (req: any, res: any) => {
     return res.status(404).end();
   }
 
-  const updated = await removeSessionUser(sessionId, userId);
+  removeSessionUser(sessionId, userId)
+    .then(async (updated) => {
+      const history = await removeUserHistory(
+        userId,
+        USER_HISTORY_TYPE.JOIN_SESSION,
+        {
+          sessionId,
+        }
+      );
 
-  res.status(200).json(updated);
+      res.status(200).json(updated);
+    })
+    .catch((err) => {
+      res.statusMessage =
+        err ?? "Failed to remove user from session. Please try again later.";
+      return res.status(400).end();
+    });
 });
 
-_router.use(function (request, response, next:any) {
+_router.use(function (request, response, next: any) {
   next();
 });
 

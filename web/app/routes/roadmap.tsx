@@ -80,8 +80,15 @@ type RoadmapItem = {
 const getRoadmapItems = (): RoadmapItem[] => [
 	{
 		date: null,
-		title: 'Add Single-Bet quiz',
-		description: 'Design and Development',
+		title: 'Alpha testing',
+		description: 'First internal testing',
+		icon: 'CalendarHeart',
+		progress: false,
+	},
+	{
+		date: null,
+		title: 'Wallet Integration',
+		description: 'DevOps and Development',
 		icon: 'PiggyBank',
 		progress: false,
 	},
@@ -93,11 +100,18 @@ const getRoadmapItems = (): RoadmapItem[] => [
 		progress: false,
 	},
 	{
+		date: '2025-03-01',
+		title: 'Add Telegram Integration',
+		description: 'Development',
+		icon: 'Telegram',
+		progress: true,
+	},
+	{
 		date: '2025-01-15',
 		title: 'Add Broadcasting System',
 		description: 'Development',
 		icon: 'Broadcast',
-		progress: true,
+		progress: false,
 	},
 	{
 		date: '2024-12-30',

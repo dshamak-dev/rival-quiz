@@ -5,6 +5,8 @@ export type UserDTO = {
   photoUrl?: string;
   meta?: TelegramMetaDTO;
   authType: "email" | "telegram";
+  role?: string;
+  tag?: string;
 };
 
 export type TelegramMetaDTO = {

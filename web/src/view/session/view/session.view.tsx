@@ -65,6 +65,10 @@ export function SessionView({ session }: SessionViewProps) {
 		}
 	}, [session, question]);
 
+	if (!session){
+		return null;
+	}
+
 	return (
 		<SessionContextProvider value={session}>
 			<div className="sticky top-0 z-10 bg-white grid grid-rows-[auto_1fr_auto] gap-2 w-full" data-testid="session-cover">

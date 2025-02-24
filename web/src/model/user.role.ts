@@ -12,6 +12,13 @@ export type UserRole = {
 	isFullAccess: boolean;
 };
 
+export enum USER_ROLE_TYPE {
+	SUPER_ADMIN = 'SUPER_ADMIN',
+    ADMIN = 'ADMIN',
+	CREATOR = 'CREATOR',
+    USER = 'USER',
+}
+
 export type UserAuthPayloadDTO =
 	| UserEmailAuthPayloadDTO
 	| { authType: 'telegram'; id: string; name: string; photoUrl?: string };
