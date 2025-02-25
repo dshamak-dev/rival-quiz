@@ -89,7 +89,7 @@ export async function patchSession(id, payload) {
         (q) => (q._id || q.id).toString() === param
       );
 
-      if (session.questions && questionIndex && questionIndex >= 0) {
+      if (session.questions && questionIndex >= 0) {
         session.questions[questionIndex] = payload.value;
       }
       break;

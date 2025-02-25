@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { SessionStateType } from "./session.model";
 import { QuestionSchema } from "../question/question.schema";
 import { randomString } from "../tools/random.utils";
+import { SessionTypes } from "@shared/session/type";
 
 export const SessionSchema = new mongoose.Schema(
   {
@@ -22,9 +23,9 @@ export const SessionSchema = new mongoose.Schema(
     allowBids: { type: Boolean, default: false },
     type: {
       type: String,
-      enum: ["single", "multiple", "claw"],
-      default: "single",
+      enum: SessionTypes,
     },
+    image: String,
     users: { type: [String], default: [] },
   },
   { timestamps: true }

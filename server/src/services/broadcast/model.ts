@@ -52,7 +52,7 @@ class BroadcastProvider {
     const self = this;
 
     this.sendMessageToConnection(connection, {
-      text: "Welcome to the Quizlo broadcast!",
+      text: "Welcome to the Quizlov broadcast!",
     });
 
     connection.isAlive = true;

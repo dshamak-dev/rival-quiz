@@ -87,7 +87,7 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 			)}
 			<Typography className="absolute left-2 top-2 text-white py-1 px-2 rounded bg-black text-xs ">{sessionStateLabels[session.state]}</Typography>
 			<div className="flex flex-col gap-2 justify-between text-center">
-				<Image className="h-[120px] object-cover" src={session.image} placeholderImage={placeholderImage} />
+				<Image className="h-[160px] object-cover" src={session.image} placeholderImage={placeholderImage} />
 				<Typography className="text-4xl font-bold text-center">{session.title}</Typography>
 			</div>
 			<div className="grid items-end">{controlContent}</div>

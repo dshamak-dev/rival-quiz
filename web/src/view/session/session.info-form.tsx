@@ -1,3 +1,4 @@
+import { compareObjects } from '@control/object.utils';
 import { SessionDTO, SessionStateType } from '@model/session.model';
 import { Button } from '@view/button/button';
 import { Select } from '@view/form/form.select';
@@ -45,6 +46,12 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 		setFormState(initialValue);
 	}, [initialValue]);
 
+	const handleSubmit = () => {
+		if (!compareObjects(formState, initialValue)) {
+			onSubmit(formState);
+		}
+	};
+
 	return (
 		<div className="flex flex-col gap-4 p-4">
 			<div className="flex items-center gap-2">
@@ -60,25 +67,39 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 				value={formState?.title}
 				defaultValue={initialValue?.title || ''}
 				onChange={(e, value) => handleChange(e.target.name, value)}
+				onBlur={(e) => handleSubmit()}
 			/>
 			<TextInput
 				id="description"
 				label="description"
-				disabled={[SessionStateType.LockedForReview, SessionStateType.Archived, SessionStateType.Completed, SessionStateType.Canceled].includes(
-					state
-				)}
+				disabled={[
+					SessionStateType.LockedForReview,
+					SessionStateType.Archived,
+					SessionStateType.Completed,
+					SessionStateType.Canceled,
+				].includes(state)}
 				value={formState?.description}
 				defaultValue={initialValue?.description || ''}
 				onChange={(e, value) => handleChange(e.target.name, value)}
+				onBlur={(e) => handleSubmit()}
 			/>
-			<Select
+			<TextInput
+				id="image"
+				label="Preview URL"
+				value={formState?.image || ''}
+				defaultValue={initialValue?.image || ''}
+				onChange={(e, value) => handleChange(e.target.name, value)}
+				onBlur={(e) => handleSubmit()}
+				disabled={disabled}
+			/>
+			{/* <Select
 				id="bet-type"
 				label="Bet Type"
 				disabled={![SessionStateType.Draft, SessionStateType.Published].includes(state)}
 				options={sessionBetOptions}
 				defaultValue={formState.betType}
 				className="flex flex-col"
-			/>
+			/> */}
 
 			<div className="flex justify-end gap-4">
 				<Button

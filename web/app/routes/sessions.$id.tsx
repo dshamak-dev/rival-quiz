@@ -1,7 +1,7 @@
 // import { useAPI } from '@api/api.hook';
 import { findSessionById } from '@api/session.api';
 import { SessionDTO } from '@model/session.model';
-import { json, LoaderFunctionArgs } from '@remix-run/node';
+import { json, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { useLoaderData, useParams } from '@remix-run/react';
 import { Icon } from '@view/icon';
 import { SessionView } from '@view/session/view/session.view';
@@ -19,6 +19,26 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 	return json(session);
 }
+
+export const meta: MetaFunction<typeof loader> = ({ params, data }) => {
+	if (!data) {
+		return [];
+	}
+
+	const title = data?.title || 'Quizlov';
+	const description = data?.description;
+	const imageUrl = data?.image || '';
+
+	return [
+		{ title: title },
+		{ name: 'description', content: 'description' },
+		{ property: 'og:title', content: title },
+		{ property: 'og:description', content: description },
+		{ property: 'og:image', content: imageUrl },
+		{ name: 'twitter:card', content: 'summary_large_image' },
+		{ name: 'twitter:image', content: imageUrl },
+	];
+};
 
 export default function SessionPage() {
 	// const params = useParams();

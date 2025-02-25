@@ -151,7 +151,9 @@ export default function App() {
 				<Links />
 			</head>
 			<body>
-				<main className="min-h-screen">
+				<main className={classNames('min-h-screen', {
+					'overflow-hidden': isMobileView,
+				})}>
 					{isLoading ? (
 						<ClientComponent>
 							<div className="h-screen max-h-full flex items-center justify-center">

@@ -8,20 +8,29 @@ import { findSessions } from '@api/session.api';
 import { SessionList } from '@view/session/session.list';
 import classNames from 'classnames';
 import { useUI } from '@control/ui.control';
-import { SessionStateType } from '@model/session.model';
+import { SessionDTO, SessionStateType } from '@model/session.model';
 import { APP_NAME } from 'src/constants/config.constants';
+import { LoaderFunctionArgs } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
+
+export async function loader({ request }: LoaderFunctionArgs): Promise<SessionDTO[]> {
+	const data = await findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).catch(() => undefined);
+
+	return data || [];
+}
 
 export default function LandingPage() {
 	const { isMobile } = useUI();
-	const { data, loading, dispatch } = useAPI({
-		initialState: undefined,
-		request: () =>
-			findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).catch(() => undefined),
-	});
+	const data = useLoaderData<typeof loader>();
+	// const { data, loading, dispatch } = useAPI({
+	// 	initialState: undefined,
+	// 	request: () =>
+	// 		findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).catch(() => undefined),
+	// });
 
-	useEffect(() => {
-		dispatch();
-	}, []);
+	// useEffect(() => {
+	// 	dispatch();
+	// }, []);
 
 	return (
 		<div
@@ -30,13 +39,13 @@ export default function LandingPage() {
 				'h-fit': !isMobile,
 			})}
 		>
-			{loading || !data ? (
+			{!data ? (
 				<div className="h-screen max-h-full flex flex-col items-center justify-center">
 					<Image src={logoImage} style={{ width: 48 }} className="relative -top-6 animate-bounce" />
 					<Typography className="">{APP_NAME} starts here</Typography>
 				</div>
 			) : (
-				<SessionList sessions={data} />
+				<SessionList sessions={data as SessionDTO[]} />
 			)}
 		</div>
 	);

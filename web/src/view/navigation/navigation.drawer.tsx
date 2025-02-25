@@ -80,6 +80,7 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 		return fields.map((field, index) => {
 			return (
 				<Typography
+					key={index}
 					className={classNames({
 						'text-lg font-bold': index === 0,
 						'text-sm font-light': index > 0,
@@ -124,9 +125,10 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 					</div>
 					{/* SHOW LAST X ACTIVE SESSIONS */}
 					<div className="flex flex-col gap-4">
-						{links.map(({ link, text, icon }) => (
+						{links.map(({ link, text, icon }, index) => (
 							<Anchor
 								end
+								key={index}
 								href={link}
 								activeClassName="font-bold"
 								className={classNames(

@@ -16,6 +16,11 @@ export async function findSessionById(id: SessionDTO['id']): Promise<SessionDTO>
 	return WEB_API.get<SessionDTO>(`${rootPath}/${id}`, {}).then((it) => normalizeSessionDTO(it));
 }
 
+// Note: Validate owner with the current user
+export async function findAdminSessionById(id: SessionDTO['id']): Promise<SessionDTO> {
+	return WEB_API.get<SessionDTO>(`${rootPath}/${id}`, {}).then((it) => normalizeSessionDTO(it));
+}
+
 export async function deleteSession(id: SessionDTO['id']): Promise<SessionDTO> {
 	return WEB_API.delete<SessionDTO>(`${rootPath}/${id}`, {});
 }

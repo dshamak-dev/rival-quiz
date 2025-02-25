@@ -1,6 +1,7 @@
 import { DateType, ID } from './api.model';
 import { QuestionDataDTO, QuestionDTO } from './question.model';
 import { SessionUserActionDTO } from './session.user.model';
+import { SessionTypes as SharedSessionTypes } from '@shared/session/type';
 
 // export class Session implements SessionType {
 // id?: ID;
@@ -19,6 +20,13 @@ import { SessionUserActionDTO } from './session.user.model';
 // 		Object.assign(this, data);
 // 	}
 // }
+
+export enum SessionTypes {
+	USER_BET = SharedSessionTypes.USER_BET,
+	SPONSOR = SharedSessionTypes.SPONSOR,
+	SYSTEM_PRIZE = SharedSessionTypes.SYSTEM_PRIZE,
+	AUCTION = SharedSessionTypes.AUCTION,
+}
 
 export type SessionType = Omit<SessionDTO, '_id' | 'id' | 'ownerId'>;
 
@@ -45,17 +53,21 @@ export type SessionDTO = {
 	type?: SessionTypes;
 	allowBids?: boolean;
 	betType?: SessionBetType;
+	previewUrl?: string;
 	hasNextAnswer?: boolean;
 	activeQuestionId?: ID;
 	questionData?: QuestionDataDTO;
 };
 
-export enum SessionTypes {
-	Single = 'single',
-	Multiple = 'multiple',
-	Range = 'range',
-	Auction = 'auction',
-}
+// export enum SessionTypes {
+// 	USER_BET = 'user_bet',
+// 	BANK = 'bank',
+// 	SYSTEM_PRIZE = 'system_prize',
+// 	// Single = 'single',
+// 	// Multiple = 'multiple',
+// 	// Range = 'range',
+// 	AUCTION = 'auction',
+// }
 
 export type SessionData = Record<string, any>;
 

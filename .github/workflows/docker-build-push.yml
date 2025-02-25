@@ -37,3 +37,13 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+      - name: Delete old workflow runs
+        if: success()  # Runs only if the workflow succeeds
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          workflow: ${{ github.workflow }}  # Dynamically uses the current workflow
+          retain_days: 0  # Delete all previous runs
+          keep_minimum_runs: 2  # Keep at least 1 latest run
