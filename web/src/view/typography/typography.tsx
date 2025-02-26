@@ -9,6 +9,7 @@ interface IProps extends PropsWithChildren<any> {
 	type?: TypographyType;
 	size?: TypographySize;
 	tag?: string;
+	truncate?: boolean;
 }
 
 export function Typography(props: IProps) {
@@ -43,7 +44,9 @@ export function Typography(props: IProps) {
 
 	return createElement(tag as string, {
 		...props,
-		className: classNames(className, props.className, sizeClassName),
+		className: classNames(className, props.className, sizeClassName, {
+			'truncate': props.truncate
+		}),
 	});
 }
 

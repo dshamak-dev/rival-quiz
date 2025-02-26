@@ -1,7 +1,7 @@
 // import { pushStoreItem } from "@control/storage.control";
 import { getErrorMessage, validateJSONResponse, WEB_API } from '@control/api.control';
 import { AuthDTO, UserDTO } from '@model/user.model';
-import { UserAuthPayloadDTO } from '@model/user.role';
+import { USER_ROLE_TYPE, UserAuthPayloadDTO } from '@model/user.role';
 import { UserHistoryDTO } from '@shared/user/model';
 import cookie from 'cookie';
 
@@ -17,6 +17,15 @@ export async function findUserByToken() {
 
 export async function findUserById(id: UserDTO['id']): Promise<UserDTO> {
 	return WEB_API.get<UserDTO>(`/users/${id}`, {}).then((it) => normalizeUserDTO(it));
+}
+
+export async function postUserRoleRequest(role: USER_ROLE_TYPE) {
+	return WEB_API.post<UserDTO>(`/users/current/role-request`, {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ role }),
+	});
 }
 
 // export async function deleteOne(id: IUser["id"]): Promise<IUser> {

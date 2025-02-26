@@ -1,5 +1,10 @@
 import express from "express";
-import { authorizeUser, createUser, findUserByQuery } from "./user.action";
+import {
+  authorizeUser,
+  createUser,
+  findUserByQuery,
+  updateUser,
+} from "./user.action";
 import {
   encryptPassword,
   generateToken,
@@ -80,6 +85,29 @@ useRouter.get("/current", async (req: any, res: any) => {
   }
 
   res.status(200).json(user).end();
+});
+
+useRouter.post("/current/role-request", async (req: any, response: any) => {
+  const token = getAuthToken(req);
+
+  const user = await findUserByToken(token).catch((err) => null);
+
+  if (!user) {
+    response.statusMessage = "Invalid token";
+    return response.status(403).end();
+  }
+
+  const role = req.body?.role;
+
+  // TODO: Add validation or permission check
+  updateUser(user.id, { role })
+    .then((res) => {
+      response.status(200).json(res).end();
+    })
+    .catch((err) => {
+      response.statusMessage = err.message || "The request was rejected";
+      return response.status(400).end();
+    });
 });
 
 useRouter.use(function (request, response, next: any) {

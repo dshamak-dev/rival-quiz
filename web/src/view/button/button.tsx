@@ -39,7 +39,7 @@ export function Button({ className, layout, size = 'small', loading, children, .
 		<button
 			{...props}
 			className={classNames(
-				'shadow-md uppercase',
+				'flex gap-2 items-center justify-center shadow-md uppercase',
 				layoutClassName,
 				sizeClassName,
 				{

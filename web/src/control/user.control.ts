@@ -12,3 +12,18 @@ export function validateUserPermissions(user: UserDTO | null, requiredPermission
 
 	return requiredPermissions.includes(user.role);
 }
+
+export function getUserRoleLabel(role: USER_ROLE_TYPE): string {
+	switch (role) {
+		case USER_ROLE_TYPE.SUPER_ADMIN:
+			return 'Super Admin';
+		case USER_ROLE_TYPE.ADMIN:
+			return 'Admin';
+		case USER_ROLE_TYPE.CREATOR:
+			return 'Creator';
+		case USER_ROLE_TYPE.USER:
+			return 'User';
+		default:
+			return 'Guest';
+	}
+}
