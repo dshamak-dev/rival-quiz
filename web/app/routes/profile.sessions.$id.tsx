@@ -180,7 +180,7 @@ export default function ProfileSessionPage() {
 					}
 				}
 
-				console.log('handleUpdate', {current, next});
+				console.log('handleUpdate', { current, next });
 
 				return next;
 			});
@@ -189,12 +189,16 @@ export default function ProfileSessionPage() {
 		});
 	};
 
+	const canChangeType = !sessionState?.type || sessionState?.state === SessionStateType.Draft;
+
 	const handleSelectType = (nextType: SessionTypes | undefined) => {
+		if (!canChangeType) {
+			return;
+		}
+
 		handleUpdate('info', {
 			type: nextType,
-		}).then(() => {
-
-		});
+		}).then(() => {});
 	};
 
 	const content = useMemo(() => {
@@ -264,10 +268,7 @@ export default function ProfileSessionPage() {
 					/>
 				</Collapse>
 
-				<Collapse
-					title={`Questions (${sessionState?.questions?.length || 0})`}
-					initialState={!sessionState.questions?.length || sessionState.questions.length <= 1}
-				>
+				<Collapse title={`Questions (${sessionState?.questions?.length || 0})`} initialState={true}>
 					<SingleQuestionSessionForm
 						session={sessionState}
 						loading={loading || isBusy}
@@ -319,7 +320,7 @@ export default function ProfileSessionPage() {
 							<Typography className="max-[640px]:hidden">
 								Type: <b className="uppercase">{enumToLabel(sessionState.type)}</b>
 							</Typography>
-							<Icon name="Pencil" />
+							{canChangeType && <Icon name="Pencil" />}
 						</div>
 					)}
 				</div>

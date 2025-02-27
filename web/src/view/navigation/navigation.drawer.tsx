@@ -91,7 +91,7 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 						'text-lg font-bold leading-none': index === 0,
 						'text-sm font-light': index > 0,
 					})}
-					truncate
+					truncate="true"
 				>
 					{field}
 				</Typography>

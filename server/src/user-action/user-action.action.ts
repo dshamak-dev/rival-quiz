@@ -42,10 +42,11 @@ export async function createUserAction(payload) {
     }
     case UserActionTypes.REMOVE_ANSWER: {
       // await removeSessionUser(payload.sessionId, payload.userId);
-      // return userActionDBModel.deleteOne({
-      //   userId: payload.userId,
-      //   sessionId: payload.sessionId,
-      // });
+      return userActionDBModel.deleteOne({
+        userId: payload.userId,
+        sessionId: payload.sessionId,
+        questionId: payload.questionId,
+      });
     }
   }
 
@@ -53,5 +54,7 @@ export async function createUserAction(payload) {
 }
 
 export async function getUserActions(query) {
-  return userActionDBModel.find(query).then((res) => res.map((it: any) => it.json));
+  return userActionDBModel
+    .find(query)
+    .then((res) => res.map((it: any) => it.json));
 }

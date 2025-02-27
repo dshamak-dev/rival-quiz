@@ -1,6 +1,6 @@
 import { findSessions } from '@api/session.api';
 import { findUserByToken } from '@api/user.api';
-import { useUI } from '@control/ui.control';
+import { SessionDTO } from '@model/session.model';
 import { json, LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
 import { useAuth } from '@state/auth.hook';
@@ -8,7 +8,6 @@ import { Anchor } from '@view/anchor';
 import { Button } from '@view/button/button';
 import { DateText } from '@view/date/date.text';
 import { Icon } from '@view/icon';
-import { MobileSupportPlaceholder } from '@view/page/mobile.support-placeholder';
 import { SessionCreateButton } from '@view/session/session.create-button';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
@@ -19,34 +18,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const user = await findUserByToken().catch((err) => null);
 
 	if (!user?.id) {
-		return null;
+		return { session: null };
 	}
 
-	const query = `ownerId=${user?.id}`;
+	const query = `ownerId=${user.id}`;
 
 	const sessions = await findSessions(query).catch((err) => null);
 
-	return json(sessions);
+	return json({ sessions });
 }
 
 export default function ProfileSessionListPage() {
-	const { isLoggedIn, user } = useAuth();
-	const sessions = useLoaderData<typeof loader>();
+	const { isLoggedIn } = useAuth();
+	const { sessions } = useLoaderData<{ sessions: SessionDTO[] | null }>();
 
 	const navigate = useNavigate();
-	const { deviceType, isMobile } = useUI();
-	// const { data, loading, dispatch } = useAPI({
-	// 	initialState: undefined,
-	// 	request: (query: string) => findSessions(query).catch((err) => null),
-	// });
-
-	// useEffect(() => {
-	// 	if (!user?.id) {
-	// 		return;
-	// 	}
-
-	// 	setTimeout(() => dispatch(`ownerId=${user.id}`), 1000);
-	// }, [user?.id]);
 
 	const content = useMemo(() => {
 		if (!isLoggedIn) {

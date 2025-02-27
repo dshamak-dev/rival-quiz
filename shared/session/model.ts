@@ -17,8 +17,7 @@ export type SessionDTO = {
 	type?: SessionTypes;
 	allowBids?: boolean;
 	betType?: SessionBetType;
-	hasNextAnswer?: boolean;
-	hasNextQuestion: boolean;
+	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
 	questionData?: Record<string, any>;
 };

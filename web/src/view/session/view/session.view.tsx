@@ -34,7 +34,9 @@ export function SessionView({ session }: SessionViewProps) {
 		}
 
 		switch (session?.type) {
-			case SessionTypes.Single: {
+			case SessionTypes.USER_BET:
+			case SessionTypes.SPONSOR:
+			case SessionTypes.SYSTEM_PRIZE: {
 				return <SessionViewSingleQuestion />;
 			}
 			// case SessionStateType.Draft: {
@@ -65,13 +67,16 @@ export function SessionView({ session }: SessionViewProps) {
 		}
 	}, [session, question]);
 
-	if (!session){
+	if (!session) {
 		return null;
 	}
 
 	return (
 		<SessionContextProvider value={session}>
-			<div className="sticky top-0 z-10 bg-white grid grid-rows-[auto_1fr_auto] gap-2 w-full" data-testid="session-cover">
+			<div
+				className="sticky top-0 z-10 bg-white grid grid-rows-[auto_1fr_auto] gap-2 w-full"
+				data-testid="session-cover"
+			>
 				<SessionViewHeader />
 				<div style={{ minWidth: 'min(50vw, 100%)', maxWidth: '100%' }} className="w-fit mx-auto p-6 mt-[12vh]">
 					{sessionStateContent}

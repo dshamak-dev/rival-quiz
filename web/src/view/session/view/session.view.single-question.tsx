@@ -68,14 +68,14 @@ export function SessionViewSingleQuestion() {
 	const userData = useMemo(() => {
 		return {
 			answers: session?.questions?.reduce((accum, it) => {
-				const qAction = userActions?.find((it) => it.questionId === it.questionId);
+				const qAction = userActions?.find((it) => it.questionId === question?.id);
 
 				accum[it.id] = qAction?.data?.value;
 
 				return accum;
 			}, {} as { [questionId: string]: string | undefined }),
 		};
-	}, [session?.questions, userActions]);
+	}, [question, session?.questions, userActions]);
 
 	const sessionData: any = useMemo(() => {
 		// const _data = {
@@ -100,7 +100,7 @@ export function SessionViewSingleQuestion() {
 
 	const getQuestionAnswer = (questionId?: string) => {
 		if (questionId == null) {
-			return;
+			return undefined;
 		}
 
 		return userData?.answers?.[questionId];
@@ -153,7 +153,7 @@ export function SessionViewSingleQuestion() {
 			// },
 		];
 
-		if (!question) {
+		if (!question || !session) {
 			return options;
 		}
 
@@ -167,7 +167,12 @@ export function SessionViewSingleQuestion() {
 					value: it,
 				};
 
-				if (questionData) {
+				if (
+					questionData &&
+					[SessionStateType.Locked, SessionStateType.LockedForReview, SessionStateType.Completed].includes(
+						session.state
+					)
+				) {
 					const _itVotes = totalByAnswers ? totalByAnswers[it] || 0 : 0;
 					let progress = !totalByAnswers ? 0 : _itVotes / totalVotes;
 

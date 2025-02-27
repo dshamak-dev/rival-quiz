@@ -271,7 +271,10 @@ _router.post("/:id/resolve", async (req: any, res: any) => {
   // Start next question
   setSessionState(session, SessionStateType.Active)
     .then((updates) => {
-      res.status(200).json(updates);
+      return updateSession(sessionId, updates);
+    })
+    .then((updated) => {
+      res.status(200).json(updated);
     })
     .catch((err) => {
       res.statusMessage = err || "Can't update session.";

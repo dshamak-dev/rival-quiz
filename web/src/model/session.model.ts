@@ -54,7 +54,7 @@ export type SessionDTO = {
 	allowBids?: boolean;
 	betType?: SessionBetType;
 	previewUrl?: string;
-	hasNextAnswer?: boolean;
+	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
 	questionData?: QuestionDataDTO;
 };

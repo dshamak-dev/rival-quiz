@@ -18,11 +18,13 @@ export class Session implements SessionModelType {
 	users?: ID[] = [];
 	type?: SessionTypes;
 	data?: SessionData;
-	hasNextAnswer?: boolean;
+	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
+	origin?: SessionDTO;
 
 	get json(): SessionDTO {
 		return {
+			...this.origin,
 			id: this.id as string,
 			description: this.description,
 			state: this.state,
@@ -42,6 +44,7 @@ export class Session implements SessionModelType {
 	}
 
 	constructor(data: SessionDTO | undefined) {
+		this.origin = data;
 		Object.assign(this, data || {});
 	}
 

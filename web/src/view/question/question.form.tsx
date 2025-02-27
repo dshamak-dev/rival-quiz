@@ -16,11 +16,11 @@ export type QuestionFormProps = {
 	active?: boolean;
 };
 
-export function QuestionForm({ sessionId, active, initialValue, disabled, onSubmit, onDelete }: QuestionFormProps) {
+export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: QuestionFormProps) {
 	const [formState, setFormState] = useState({ ...initialValue });
 
-	const questionId = initialValue.id;
-	const isActive = active;
+	// const questionId = initialValue.id;
+	// const isActive = active;
 
 	useEffect(() => {
 		setFormState(initialValue);
@@ -59,6 +59,8 @@ export function QuestionForm({ sessionId, active, initialValue, disabled, onSubm
 
 		setFormState(_state);
 	};
+
+	const canEdit = onSubmit != null;
 
 	const handleSubmit = () => {
 		if (onSubmit) {
@@ -110,7 +112,7 @@ export function QuestionForm({ sessionId, active, initialValue, disabled, onSubm
 					onChange={handleOptionsChange}
 				/>
 			</div>
-			<div className="flex justify-end gap-4">
+			{canEdit && <div className="flex justify-end gap-4">
 				{onDelete && (
 					<Button disabled={disabled} size="small" onClick={handleDelete}>
 						Delete
@@ -131,7 +133,7 @@ export function QuestionForm({ sessionId, active, initialValue, disabled, onSubm
 				>
 					Save
 				</Button>
-			</div>
+			</div>}
 		</div>
 	);
 }

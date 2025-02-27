@@ -101,7 +101,8 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 				className="flex flex-col"
 			/> */}
 
-			<div className="flex justify-end gap-4">
+			{/* Hide to allow auto-save  */}
+			{/* <div className="flex justify-end gap-4">
 				<Button
 					layout="primary"
 					size="small"
@@ -114,7 +115,7 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 				<Button size="small" className="min-w-[100px]" disabled={!isDirty || disabled} onClick={handleCancel}>
 					Cancel
 				</Button>
-			</div>
+			</div> */}
 		</div>
 	);
 }
