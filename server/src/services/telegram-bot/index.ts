@@ -1,5 +1,5 @@
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN as string;
-const WEB_APP_URL = process.env.WEB_APP_URL as string;
+// const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN as string;
+// const WEB_APP_URL = process.env.WEB_APP_URL as string;
 
 import { create, getChats } from "./api";
 import router from "./router";
@@ -9,7 +9,7 @@ export default function init() {
     if (!chats) {
       return create({});
     }
-  });
+  }).catch(() => null);
 
   return {
     router,

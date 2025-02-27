@@ -33,6 +33,12 @@ jobs:
       - name: Define ROOT_DIRECTORY
         run: echo "ROOT_DIRECTORY=${{ github.event.inputs.root_directory || '/root' }}" >> $GITHUB_ENV
 
+      - name: Read version from package.json
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Append package version and timestamp to .env
+        run: echo "BUILD_NUMBER=$(jq -r .version package.json)#$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> .env
+
       - name: Delete existing docker-compose.yml on the server (if exists)
         uses: appleboy/ssh-action@master
         with:
@@ -103,6 +109,7 @@ jobs:
             # Split input into lines and write to .env file
             echo "Creating .env file..."
             echo "${{ secrets.ENV_VARS }}" | tr ';' '\n' > .env
+            echo "BUILD=$BUILD_NUMBER" >> .env
 
             # Confirm the contents of the .env file
             echo "Generated .env file contents:"

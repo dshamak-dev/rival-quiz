@@ -22,6 +22,9 @@ jobs:
       - name: Install SSH client
         run: sudo apt-get install -y openssh-client
 
+      - name: Define ROOT_DIRECTORY
+        run: echo "ROOT_DIRECTORY=${{ github.event.inputs.root_directory || '/root' }}" >> $GITHUB_ENV
+
       - name: SSH into Droplet, restart containers
         uses: appleboy/ssh-action@master
         with:
@@ -31,24 +34,22 @@ jobs:
           port: ${{ secrets.DROPLET_SSH_PORT }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           script: |
+            ROOT_DIRECTORY="${{ env.ROOT_DIRECTORY }}" 
             # Navigate to the root directory
-            cd ${{ github.event.inputs.root_directory }} || { echo "Error: Directory ${{ github.event.inputs.root_directory }} does not exist"; exit 1; }
+            cd $ROOT_DIRECTORY || { echo "Error: Directory $ROOT_DIRECTORY does not exist"; exit 1; }
 
             # Check if docker-compose.yml exists
             if [ ! -f "docker-compose.yml" ]; then
-              echo "Error: docker-compose.yml not found in directory ${{ github.event.inputs.root_directory }}" >&2
+              echo "Error: docker-compose.yml not found in directory $ROOT_DIRECTORY" >&2
               exit 1
             fi
-            const restartApi = "${{ inputs.restart_api }}" === "yes";
 
-            if (restartApi) {
+            if [ "${{ inputs.restart_api }}" === "yes" ]; then
               echo "Restarting API..."
               docker restart quizlo-server || true
-            }
+            fi
 
-            const restartWeb = "${{ inputs.restart_web }}" === "yes";
-
-            if (restartWeb) {
+            if [ "${{ inputs.restart_web }}" === "yes" ]; then
               echo "Restarting web..."
               docker restart quizlo-web || true
-            }
+            fi
