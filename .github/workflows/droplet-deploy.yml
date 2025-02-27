@@ -139,6 +139,8 @@ jobs:
 
   clear-old-builds:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write # Grant permission to delete workflow runs
     steps:
       - name: Delete old workflow runs
         if: success() # Runs only if the workflow succeeds
