@@ -136,12 +136,15 @@ jobs:
             docker compose down || true
             docker compose --env-file .env up -d
 
+  clear-old-builds:
+    runs-on: ubuntu-latest
+    steps:
       - name: Delete old workflow runs
-        if: success()  # Runs only if the workflow succeeds
+        if: success() # Runs only if the workflow succeeds
         uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          workflow: ${{ github.workflow }}  # Dynamically uses the current workflow
-          retain_days: 0  # Delete all previous runs
-          keep_minimum_runs: 2  # Keep at least 1 latest run
+          workflow: ${{ github.workflow }} # Uses the current workflow
+          retain_days: 0 # Delete all previous runs
+          keep_minimum_runs: 2 # Keep at least 2 latest runs
