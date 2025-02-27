@@ -57,6 +57,8 @@ services:
     build:
       context: ./
       dockerfile: ./web/Dockerfile.dev
+    env_file:
+      - .env
     command: npm run dev
     volumes:
       - ./web/app:/www/app

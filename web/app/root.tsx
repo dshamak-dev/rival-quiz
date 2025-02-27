@@ -26,7 +26,7 @@ import { DrawerProvider } from '@view/drawer/drawer.provider';
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
 
-	const { origin, host, protocol, port } = new URL(request.url);
+	const { host, protocol } = new URL(request.url);
 
 	const service = envVariables.API_SERVICE;
 	const API_URL = service ? `${protocol}//${envVariables.API_SERVICE}` : `${protocol}//${host}/api`;
@@ -126,6 +126,8 @@ export default function App() {
 		return deviceType != null && [DeviceType.Mobile].includes(deviceType);
 	}, [deviceType]);
 
+	const buildNumber = initialData?.envVariables?.BUILD_NUMBER || 'N/A';
+
 	useEffect(() => {
 		// const API_URL = `${window.location.protocol}//${window.location.hostname}:${initialData.envVariables.API_PORT}`;
 
@@ -151,9 +153,12 @@ export default function App() {
 				<Links />
 			</head>
 			<body>
-				<main className={classNames('min-h-screen', {
-					'overflow-hidden': isMobileView,
-				})}>
+				<main
+					className={classNames('min-h-screen', {
+						'overflow-hidden': isMobileView,
+					})}
+					data-build={buildNumber}
+				>
 					{isLoading ? (
 						<ClientComponent>
 							<div className="h-screen max-h-full flex items-center justify-center">

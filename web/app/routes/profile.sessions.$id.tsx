@@ -180,8 +180,6 @@ export default function ProfileSessionPage() {
 					}
 				}
 
-				console.log('handleUpdate', { current, next });
-
 				return next;
 			});
 

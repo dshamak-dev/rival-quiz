@@ -21,8 +21,6 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<UserHisto
 
 	const items = await getUserHistory().catch((err) => null);
 
-	console.log('User history items:', items);
-
 	return items;
 }
 

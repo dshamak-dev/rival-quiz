@@ -131,7 +131,7 @@ class BroadcastManager {
 		this.attempts++;
 
 		if (this.attempts >= this.maxAttempts) {
-			console.error('Failed to connect to WebSocket server');
+			// console.error('Failed to connect to WebSocket server');
             return;
         }
 
