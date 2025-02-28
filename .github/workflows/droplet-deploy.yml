@@ -139,6 +139,7 @@ jobs:
 
   clear-old-builds:
     runs-on: ubuntu-latest
+    needs: deploy-to-droplet
     permissions:
       actions: write # Grant permission to delete workflow runs
     steps:

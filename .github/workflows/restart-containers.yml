@@ -16,7 +16,7 @@ on:
         default: "no"
 
 jobs:
-  deploy-to-droplet:
+  restart-containers:
     runs-on: ubuntu-latest
     steps:
       - name: Install SSH client
@@ -35,6 +35,8 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           script: |
             ROOT_DIRECTORY="${{ env.ROOT_DIRECTORY }}" 
+            RESTART_API="${{ inputs.restart_api }}"
+            RESTART_WEB="${{ inputs.restart_web }}"
             # Navigate to the root directory
             cd $ROOT_DIRECTORY || { echo "Error: Directory $ROOT_DIRECTORY does not exist"; exit 1; }
 
@@ -44,12 +46,17 @@ jobs:
               exit 1
             fi
 
-            if [ "${{ inputs.restart_api }}" === "yes" ]; then
-              echo "Restarting API..."
-              docker restart quizlo-server || true
+            if [ "$RESTART_API" = "yes" ] && [ "$RESTART_WEB" = "yes" ]; then
+              docker compose up -d
+              exit 0
             fi
 
-            if [ "${{ inputs.restart_web }}" === "yes" ]; then
+            if [ "$RESTART_API" = "yes" ]; then
+              echo "Restarting API..."
+              docker compose up -d api
+            fi
+
+            if [ "$RESTART_WEB" = "yes" ]; then
               echo "Restarting web..."
-              docker restart quizlo-web || true
+              docker compose up -d web
             fi
