@@ -1,6 +1,6 @@
 import { authCookie, getAuthCookie } from '@/auth';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { Form, useLoaderData, useNavigate } from '@remix-run/react';
+import { Form, useLoaderData } from '@remix-run/react';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
 import { useMemo, useState } from 'react';
@@ -25,31 +25,17 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	const isSignUp = urlSearchParams.get('action') === 'create';
 
-	try {
-		const auth = await (isSignUp ? signupUser : loginUser)(payload);
-
-		if (!auth) {
-			return json(null, { status: 401 });
-		}
-
-		const token = auth.token;
-
-		const redirectUrl = getRedirectUrl(request.url);
-
-		return redirect(redirectUrl, {
-			status: 200,
-			headers: {
-				'Set-Cookie': await authCookie.serialize(token),
-			},
-		});
-	} catch (err) {
-		return json(getErrorMessage(err), { status: 400 });
+	if (isSignUp) {
+		return signupUser(payload);
 	}
+
+	return loginUser(payload);
+
+	// TODO: Add form validation errors
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const authToken = await getAuthCookie(request);
-
 	const continueUrl = getRedirectUrl(request.url);
 
 	if (!authToken) {
@@ -63,7 +49,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function LoginPage() {
 	const [isLoading, setIsLoading] = useState(false);
-	const navigate = useNavigate();
 	const { continueUrl } = useLoaderData<typeof loader>();
 
 	const [authResponse, setAuthResponse] = useState<{ user?: UserDTO; error?: string; payload: any } | null>(null);
@@ -77,11 +62,11 @@ export default function LoginPage() {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify(payload),
-			})
-				.then(validateJSONResponse)
-				.then(() => {
-					navigate(continueUrl || '/');
-				});
+			}).then((response) => {
+				if (response.ok) {
+					window.location.href = continueUrl;
+				}
+			});
 		},
 	});
 
@@ -96,15 +81,6 @@ export default function LoginPage() {
 		setIsLoading(true);
 
 		dispatch({ action, payload })
-			// .then(res => res.json())
-			.then((res) => {
-				console.log('Auth Response:', res);
-
-				// fetch(`/login?continue=${continueUrl}`, {
-				// 	method: 'POST',
-				//     credentials: 'include',
-				// });
-			})
 			.catch((err) => {
 				console.error('Auth error:', err);
 				setAuthResponse({

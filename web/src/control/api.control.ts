@@ -6,20 +6,24 @@ export class WEB_API {
 		this.apiUrl = variables.API_URL;
 	}
 
-	static setJWT(token: string | null) {
-		this.JWT = token;
-	}
-
 	static joinUrl(path: string) {
 		return [this.apiUrl?.replace(/$\//, '') || '', path.replace(/^\//, '')].join('/');
 	}
 
 	static getAuthHeaders() {
-		const token = this.JWT;
+		return {};
+	}
 
-		return {
-			Authorization: token ? `Bearer ${token}` : undefined,
-		};
+	static fetch(path: string, params?: Record<string, any>) {
+		const url = WEB_API.joinUrl(path);
+		return fetch(url, {
+			credentials: 'include',
+			...params,
+			headers: {
+				...this.getAuthHeaders(),
+				...params?.headers,
+			},
+		});
 	}
 
 	static get<T>(path: string, params?: Record<string, any>): Promise<T> {
@@ -41,7 +45,6 @@ export class WEB_API {
 
 	static post<T>(path: string, params: Record<string, any>, includeHeaders = false): Promise<T> {
 		const url = this.joinUrl(path);
-		const token = this.JWT;
 
 		return fetch(url, {
 			method: 'POST',

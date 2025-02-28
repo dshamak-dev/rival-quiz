@@ -30,7 +30,7 @@ export function NavigationDesktop() {
 
 	const links = useMemo(() => {
 		const _items = [
-			{ link: '/', end: true, text: 'Exprole' },
+			{ link: '/explore', end: true, text: 'Explore' },
 		];
 
 		_items.push({ link: '/roadmap', end: true, text: 'roadmap' });
@@ -53,7 +53,7 @@ export function NavigationDesktop() {
 			)}
 		>
 			<div>
-				<Anchor end href="/" className="relative -left-4 flex gap-2 items-center" activeClassName="">
+				<Anchor end href="/explore" className="relative -left-4 flex gap-2 items-center" activeClassName="">
 					<Image src={logoImage} style={{ width: 24 }} />
 					<Badge visible={isConnected} color="#71f8ce" transform="translateX(8px) translateY(4px)">
 						<Typography className="uppercase text-xs font-black">{APP_NAME}</Typography>

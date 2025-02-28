@@ -1,36 +1,26 @@
-import { WEB_API } from '@control/api.control';
 import { createCookie, json, redirect } from '@remix-run/node';
 
 const NODE_ENV = process.env.NODE_ENV;
 const isProd = NODE_ENV === 'production';
 const isSecure = !!process.env.SECURE;
-
-// const secret = process.env.COOKIE_SECRET || 'default';
 const secInDay = 60 * 60 * 24;
 
 export const authCookie = createCookie('authToken', {
-	// httpOnly: true,
-	// path: "/",
+	httpOnly: true,
+	path: '/',
 	sameSite: 'lax',
 	secure: isProd && isSecure,
 	// secrets: [secret],
-	maxAge: secInDay * 5, //sec * min * hour * days
+	maxAge: secInDay * 7, //sec * min * hour * days
 });
 
-// const { getSession, commitSession, destroySession } =
-//   createCookieSessionStorage({
-//     cookie: {
-//       name: "authToken",
-//     //   httpOnly: true,
-//     //   maxAge: 60,
-//     //   path: "/",
-//     //   sameSite: "lax",
-//     //   secrets: ["s3cret1"],
-//     //   secure: true,
-//     },
-//   });
+type SessionData = {
+	authToken: string;
+};
 
-// export { getSession, commitSession, destroySession };
+type SessionFlashData = {
+	error: string;
+};
 
 export async function getCookie(req: Request) {
 	const cookieString = req.headers.get('Cookie');
@@ -38,12 +28,10 @@ export async function getCookie(req: Request) {
 	return cookieString;
 }
 
-export async function getAuthCookie(req: Request) {
-	const cookieString = req.headers.get('Cookie');
+export async function getAuthCookie(request: Request) {
+	const cookieString = request.headers.get('Cookie');
 
-	const userId = await authCookie.parse(cookieString);
-
-	return userId;
+	return cookieString;
 }
 
 export async function authProtectedRoute(req: Request) {
@@ -57,8 +45,7 @@ export async function authProtectedRoute(req: Request) {
 }
 
 export async function requireAuthCookie(req: Request) {
-	const cookie = await getAuthCookie(req);
-	const url = req.url;
+	const cookie = await getAuthCookie(req).catch((err) => null);
 
 	if (!cookie) {
 		throw await logOut(getContinueUrl(req));
@@ -69,17 +56,19 @@ export async function requireAuthCookie(req: Request) {
 
 export function getContinueUrl(req: Request) {
 	if (req?.url) {
-		return new URL(req.url)?.pathname || '/';
+		const { pathname } = new URL(req.url) || { pathname: '/' };
+
+		if (pathname.includes('login')) {
+			return '/';
+		}
+
+		return pathname;
 	}
 
 	return '/';
 }
 
 export async function logOut(fromUrl: string | null) {
-	WEB_API.setJWT(null);
-
-	// `/login${fromUrl ? `?continue=${fromUrl}` : ''}`
-
 	return redirect(`/login?continue=${fromUrl || '/'}`, {
 		headers: {
 			'Set-Cookie': await authCookie.serialize('', {

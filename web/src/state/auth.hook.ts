@@ -4,6 +4,7 @@ import { useLocation, useSubmit } from '@remix-run/react';
 import { USER_ROLE_TYPE } from '@model/user.role';
 import { useAPI } from '@api/api.hook';
 import { postUserRoleRequest } from '@api/user.api';
+import { UserDTO } from '@model/user.model';
 
 export function useAuth() {
 	const { dispatch, user, wallet } = useContext(AppContext);
@@ -34,9 +35,17 @@ export function useAuth() {
 		});
 	};
 
+	const setUser = (user: UserDTO) => {
+		if (dispatch) {
+            dispatch((current: AppState) => {
+                return {...current, user };
+            });
+        }
+    };
+
 	const isLoggedIn = useMemo(() => {
 		return !!user;
 	}, [user]);
 
-	return { user, wallet, processing, isLoggedIn, logOut, requestRoleUpdate };
+	return { user, wallet, processing, isLoggedIn, logOut, requestRoleUpdate, setUser };
 }

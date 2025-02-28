@@ -362,7 +362,7 @@ export function SessionViewSingleQuestion() {
 							<Typography>Good luck next time!</Typography>
 						)}
 
-						<LinkButton layout="primary" href="/">
+						<LinkButton layout="primary" href="/explore">
 							Leave Session
 						</LinkButton>
 					</div>

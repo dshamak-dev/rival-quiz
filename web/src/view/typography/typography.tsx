@@ -5,7 +5,7 @@ type TypographyType = 'h1' | 'h2' | 'h3' | 'paragraph';
 
 type TypographySize = 'small' | 'medium' | 'large' | 'huge' | 'custom';
 
-type Props = {
+type Props = PropsWithChildren<any> & {
 	type?: TypographyType;
 	size?: TypographySize;
 	tag?: string;

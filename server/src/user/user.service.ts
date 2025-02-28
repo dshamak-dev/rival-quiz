@@ -47,12 +47,12 @@ useRouter.post("/create", async (req: any, res: any, next: any) => {
   });
 });
 
-useRouter.post("/login", async (req: any, res: any) => {
+useRouter.post("/login", async (req: any, response: any) => {
   const body = req.body;
 
   if (!body || !body.email || !body.password) {
-    res.statusMessage = "Invalid email or password";
-    return res.status(400).end();
+    response.statusMessage = "Invalid email or password";
+    return response.status(400).end();
   }
 
   const user = await findUserByQuery({
@@ -65,17 +65,22 @@ useRouter.post("/login", async (req: any, res: any) => {
 
   if (!user) {
     console.log("No user found", { body });
-    res.statusMessage = "Wrong username or password";
-    return res.status(400).end();
+    response.statusMessage = "Wrong username or password";
+    return response.status(400).end();
   }
 
-  authorizeUser(user, res);
+  authorizeUser(user, response);
 
-  res.status(200).json(user);
+  response.status(200).json(user);
 });
 
 useRouter.get("/current", async (req: any, res: any) => {
   const token = getAuthToken(req);
+
+  if (!token) {
+    res.statusMessage = "Invalid token";
+    return res.status(403).end();
+  }
 
   const user = await findUserByToken(token).catch((err) => null);
 

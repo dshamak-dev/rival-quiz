@@ -28,19 +28,6 @@ export async function postUserRoleRequest(role: USER_ROLE_TYPE) {
 	});
 }
 
-// export async function deleteOne(id: IUser["id"]): Promise<IUser> {
-//   return WEB_API.delete<IUser>(`/users/user?id=${id}`, {});
-// }
-
-// export async function updateOne(user: IUser) {
-//   return WEB_API.put<IUser>("users/update", {
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(user),
-//   });
-// }
-
 export function normalizeUserDTO(payload: UserDTO): UserDTO {
 	const user = { ...payload };
 
@@ -60,9 +47,7 @@ export async function loginUser(payload: UserAuthPayloadDTO) {
 			body: JSON.stringify(payload),
 		},
 		true
-	).then(async (res): Promise<AuthDTO> => {
-		return setUserAuth(res);
-	});
+	);
 }
 
 export async function signupUser(payload: UserAuthPayloadDTO) {
@@ -76,31 +61,7 @@ export async function signupUser(payload: UserAuthPayloadDTO) {
 			body: JSON.stringify(payload),
 		},
 		true
-	).then(async (res): Promise<AuthDTO> => {
-		return setUserAuth(res);
-	});
-}
-
-async function setUserAuth(response: Response) {
-	if (!response.ok) {
-		return validateJSONResponse(response);
-	}
-
-	const cookies = response.headers.get('Set-Cookie');
-	const cookieEntries = cookies ? cookie.parse(cookies) : null;
-
-	const token = cookieEntries?.authToken;
-
-	if (token) {
-		WEB_API.setJWT(token);
-	}
-
-	const user = await response.json();
-
-	return Promise.resolve({
-		token,
-		user,
-	});
+	);
 }
 
 // start region: User History

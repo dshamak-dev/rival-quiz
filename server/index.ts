@@ -31,19 +31,8 @@ const corsOptions = {
   origin: allowlist,
   credentials: true,
 };
-const corsOptionsDelegate = function (req: any, callback: any) {
-  let corsOptions;
-  const origin = req.headers.origin;
-  const allowAccess = allowlist.some((it) => it === origin);
 
-  if (allowAccess) {
-    corsOptions = { origin: true };
-  } else {
-    corsOptions = { origin: false };
-  }
-
-  callback(null, corsOptions);
-};
+app.use(cookieParser());
 
 app.use(cors(corsOptions));
 
@@ -60,8 +49,6 @@ app.use((req, res, next) => {
 
   next();
 });
-
-app.use(cookieParser());
 
 services.forEach((init) => {
   const service = init();
@@ -106,20 +93,7 @@ app.get("/health", (req, res) => {
     .end();
 });
 
-// default route path
-// app.use((req, res) => {
-//   res.cookie("timelog", Date.now(), {
-//     // path: "./",
-//     httpOnly: false,
-//     maxAge: 1000000,
-//   });
-
-//   res.status(404).send("Hello, World!");
-// });
-
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(`ERROR: ${err.message}`);
-
   addLog({
     source: req.url || "express",
     message: err.message,
