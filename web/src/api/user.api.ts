@@ -82,6 +82,6 @@ export async function signupUser(payload: UserAuthPayloadDTO) {
 }
 
 // start region: User History
-export async function getUserHistory() {
-	return WEB_API.get<UserHistoryDTO[]>('/users/history', {});
+export async function getUserHistory(params ={}) {
+	return WEB_API.get<UserHistoryDTO[]>('/users/history', params);
 }

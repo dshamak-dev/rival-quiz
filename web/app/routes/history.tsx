@@ -1,4 +1,4 @@
-import { getAuthCookie } from '@/auth';
+import { getAuthHeaders } from '@/auth';
 import { getUserHistory } from '@api/user.api';
 import { formatDate } from '@control/date.control';
 import { SessionStateType } from '@model/session.model';
@@ -13,13 +13,13 @@ import { useMemo } from 'react';
 import { sessionStateLabels } from 'src/constants/session.constant';
 
 export async function loader({ request }: LoaderFunctionArgs): Promise<UserHistoryDTO[] | null> {
-	const token: string | null = await getAuthCookie(request);
+	const headers = await getAuthHeaders(request).catch((err) => null);
 
-	if (!token) {
+	if (!headers) {
 		return null;
 	}
 
-	const items = await getUserHistory().catch((err) => null);
+	const items = await getUserHistory({ headers }).catch((err) => null);
 
 	return items;
 }
