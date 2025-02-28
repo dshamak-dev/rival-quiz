@@ -1,4 +1,4 @@
-// /** @type {import('@remix-run/dev').AppConfig} */
+/** @type {import('@remix-run/dev').AppConfig} */
 module.exports = {
 	serverConfiguration: {
 		port: process.env.PORT || 3003,

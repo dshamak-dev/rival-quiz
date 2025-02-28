@@ -9,11 +9,7 @@ import { useUI } from '@control/ui.control';
 import { SessionDTO, SessionStateType } from '@model/session.model';
 import { APP_NAME } from 'src/constants/config.constants';
 import { LoaderFunctionArgs } from '@remix-run/node';
-import { ShouldRevalidateFunction, useLoaderData } from '@remix-run/react';
-
-export const shouldRevalidate: ShouldRevalidateFunction = ({ nextUrl }) => {
-	return nextUrl.pathname === '/';
-};
+import { useLoaderData } from '@remix-run/react';
 
 export async function loader({ request }: LoaderFunctionArgs): Promise<SessionDTO[]> {
 	const data = await findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).then(sessions => sessions?.sort((a, b) => {
