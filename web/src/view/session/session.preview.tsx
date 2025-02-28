@@ -3,13 +3,12 @@ import { Icon } from '@view/icon';
 import { Anchor } from '@view/anchor';
 import { Typography } from '@view/typography/typography';
 import { SessionDTO, SessionStateType } from '@model/session.model';
-import { sessionStateLabels } from 'src/constants/session.constant';
 import { Button } from '@view/button/button';
 import { useAuth } from '@state/auth.hook';
-import { SUPER_ADMIN_ROLE } from '@model/user.role';
 import { Image } from '@view/image/image';
 
 import placeholderImage from '@assets/placeholders/p_01.png';
+import { useUI } from '@control/ui.control';
 
 export type SessionPreviewProps = {
 	session: SessionDTO;
@@ -17,23 +16,15 @@ export type SessionPreviewProps = {
 
 export function SessionPreview({ session }: SessionPreviewProps) {
 	const { user } = useAuth();
-
-	const canEdit = useMemo(() => {
-		if (!user) {
-			return false;
-		}
-
-		return user.role === SUPER_ADMIN_ROLE.id || user.id === session.ownerId;
-	}, [user, session]);
+	const { isMobile } = useUI();
 
 	const controlContent = useMemo(() => {
 		// Check if user is in the session
 		if (session.data?.isAvalable || session.state === SessionStateType.Published) {
 			return (
-				<Anchor href={`/sessions/${session.id}`}>
-					<Button layout="primary" className="w-full flex items-center gap-2 justify-center">
+				<Anchor href={`/sessions/${session.id}`} className="w-full">
+					<Button faded={false} className="w-full flex items-center gap-2 justify-center">
 						<span className="text-sm">Open</span>
-						<Icon name="ArrowRight" size={14} className="" />
 					</Button>
 				</Anchor>
 			);
@@ -71,26 +62,32 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 	}, [session?.state]);
 
 	return (
-		<div
-			key={session.id}
-			className="relative grid grid-rows-[1fr_42px] min-h-[200px] gap-4 py-4 px-6 rounded border"
-		>
-			{canEdit && (
-				<div className="absolute right-2 top-1">
-					<Anchor
-						href={`/profile/sessions/${session.id}`}
-						className="flex items-center justify-center w-6 h-6 border rounded-full bg-black text-white hover:bg-amber-600"
-					>
-						<Icon name="Pencil" size={12} />
-					</Anchor>
+		<Anchor href={`/sessions/${session.id}`} key={session.id} className="relative rounded overflow-hidden">
+			{!isMobile && (
+				<div className="absolute z-10 top-0 left-0 w-full h-full bg-black/55 opacity-0 hover:opacity-100 flex items-center justify-center p-8">
+					{controlContent}
 				</div>
 			)}
-			<Typography className="absolute left-2 top-2 text-white py-1 px-2 rounded bg-black text-xs ">{sessionStateLabels[session.state]}</Typography>
-			<div className="flex flex-col gap-2 justify-between text-center">
-				<Image className="h-[160px] object-cover" src={session.image} placeholderImage={placeholderImage} />
-				<Typography className="text-4xl font-bold text-center">{session.title}</Typography>
+			<div className="relative grid grid-rows-[1fr_auto] bg-gray-100">
+				<Image
+					className="h-[200px] w-full object-cover rounded"
+					src={session.image}
+					placeholderImage={placeholderImage}
+				/>
+				<div className="grid grid-cols-[auto_1fr] gap-4 p-4">
+					<div>
+						<Image
+							className="h-12 w-12 object-cover rounded"
+							src={session.metadata?.ownerAvatar}
+							placeholderImage={placeholderImage}
+						/>
+					</div>
+					<div className="flex flex-col">
+						<Typography className="text-4xl font-bold">{session.title}</Typography>
+						<Typography className="text-sm ">@{session.metadata?.ownerName || 'incognito'}</Typography>
+					</div>
+				</div>
 			</div>
-			<div className="grid items-end">{controlContent}</div>
-		</div>
+		</Anchor>
 	);
 }

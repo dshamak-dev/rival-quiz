@@ -148,9 +148,7 @@ export default function App() {
 			</head>
 			<body>
 				<main
-					className={classNames('min-h-screen', {
-						'overflow-hidden': isMobileView,
-					})}
+					className={classNames('min-h-screen')}
 					data-build={buildNumber}
 				>
 					{isLoading ? (
@@ -167,7 +165,7 @@ export default function App() {
 						<BroadcastProvider env={initialData.envVariables}>
 							<AppContextProvider value={initialData}>
 								<div
-									className={classNames('max-h-full h-screen', {
+									className={classNames('min-h-screen', {
 										'grid grid-rows-[auto_1fr]': !isMobileView && deviceType != null,
 										'grid grid-rows-[auto_1fr_auto]': isMobileView,
 									})}

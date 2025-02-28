@@ -12,7 +12,7 @@ export function NavigationMobile() {
 
 	const links = useMemo(() => {
 		const _items: { link?: string; end?: boolean; icon?: IconType; text?: string }[] = [
-			{ link: '/explore', end: true, icon: 'House', text: 'Explore' },
+			{ link: '/explore', end: true, icon: 'Grid', text: 'Explore' },
 		];
 
 		if (isLoggedIn) {

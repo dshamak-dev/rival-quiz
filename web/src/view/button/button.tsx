@@ -6,11 +6,12 @@ export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
 	layout?: 'primary' | 'secondary' | 'tertiary';
 	size?: ButtonSizeType;
 	loading?: boolean;
+	faded?: boolean;
 };
 
 export type ButtonSizeType = 'base' | 'small' | 'large';
 
-export function Button({ className, layout, size = 'small', loading, children, ...props }: ButtonProps) {
+export function Button({ className, layout, size = 'small', loading, children, faded = true, ...props }: ButtonProps) {
 	const layoutClassName = useMemo(() => {
 		switch (layout) {
 			case 'primary':
@@ -44,7 +45,7 @@ export function Button({ className, layout, size = 'small', loading, children, .
 				sizeClassName,
 				{
 					'opacity-50': props.disabled,
-					'opacity-80 hover:shadow-sm hover:opacity-100': !props.disabled,
+					'opacity-80 hover:shadow-sm hover:opacity-100': !props.disabled && faded,
 				},
 				className
 			)}

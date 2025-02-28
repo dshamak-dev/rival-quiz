@@ -16,6 +16,7 @@ export const SessionSchema = new mongoose.Schema(
       },
     },
     ownerId: { type: String, required: true },
+    metadata: Object,
     state: { type: Number, default: SessionStateType.Draft },
     questions: { type: [QuestionSchema], default: [] },
     hasNextQuestion: { type: Boolean, default: true },

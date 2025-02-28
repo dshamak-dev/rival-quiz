@@ -115,7 +115,7 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 				</Button>
 			</div>
 		) : (
-			<Chip className="uppercase bg-teal-300 text-xs">{getUserRoleLabel(user.role as USER_ROLE_TYPE)}</Chip>
+			<Chip className="uppercase bg-black text-amber-400 text-xs">{getUserRoleLabel(user.role as USER_ROLE_TYPE)}</Chip>
 		);
 
 		return (
@@ -138,7 +138,7 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 							)}
 							<div className="flex flex-col gap-2">
 								<div className="grid grid-cols-[1fr_auto]">
-									<div>{userInfoContent}</div>
+									<div className="max-w-full overflow-hidden">{userInfoContent}</div>
 									{vipControls}
 								</div>
 								<Typography className="flex gap-2 items-center uppercase text-xs">

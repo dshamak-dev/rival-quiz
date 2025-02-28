@@ -152,6 +152,10 @@ _router.post("/", async (req: any, res: any) => {
 
   createSession({
     ownerId: ownerId,
+    metadata: {
+      ownerName: owner.name || owner.tag,
+      ownerAvatar: owner.photoUrl,
+    },
     title: "",
     hash,
     ...(req.body ?? {}),

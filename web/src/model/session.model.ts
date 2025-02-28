@@ -57,6 +57,7 @@ export type SessionDTO = {
 	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
 	questionData?: QuestionDataDTO;
+	metadata?: { ownerName: string; ownerAvatar: string; };
 };
 
 // export enum SessionTypes {

@@ -16,9 +16,9 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({ nextUrl }) => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs): Promise<SessionDTO[]> {
-	const url = new URL(request.url);
-
-	const data = await findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).catch(
+	const data = await findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).then(sessions => sessions?.sort((a, b) => {
+		return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+	})).catch(
 		() => undefined
 	);
 
@@ -32,7 +32,7 @@ export default function LandingPage() {
 	return (
 		<div
 			className={classNames('min-h-full p-6', {
-				'h-full overflow-y-auto': isMobile,
+				// 'h-full overflow-y-auto': isMobile,
 				'h-fit': !isMobile,
 			})}
 		>
