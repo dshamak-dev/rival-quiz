@@ -41,6 +41,8 @@ export function BroadcastProvider({ children, env }: any) {
 	}, []);
 
 	useEffect(() => {
+		// Disabled broadcast
+		return;
 		const protocol = window.location.protocol === 'https:'? 'wss:' : 'ws:';
 		const WS_URL = `${protocol}//${window.location.hostname}/ws`;
 		const manager = new BroadcastManager(WS_URL);

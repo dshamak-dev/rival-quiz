@@ -1,9 +1,9 @@
 // import { pushStoreItem } from "@control/storage.control";
-import { getErrorMessage, validateJSONResponse, WEB_API } from '@control/api.control';
-import { AuthDTO, UserDTO } from '@model/user.model';
+import { getAuthCookie } from '@/auth';
+import { WEB_API } from '@control/api.control';
+import { UserDTO } from '@model/user.model';
 import { USER_ROLE_TYPE, UserAuthPayloadDTO } from '@model/user.role';
 import { UserHistoryDTO } from '@shared/user/model';
-import cookie from 'cookie';
 
 // export async function findMany(): Promise<IUser[]> {
 //   return WEB_API.get<IUser[]>("/users/all", {}).then((res) =>
@@ -11,8 +11,25 @@ import cookie from 'cookie';
 //   );
 // }
 
-export async function findUserByToken() {
-	return WEB_API.get<UserDTO>('/users/current', {}).then((it) => normalizeUserDTO(it));
+export async function findUserByToken(request: Request) {
+	const cookie: string | null = await getAuthCookie(request);
+
+	return WEB_API.fetch('users/current', {
+		method: 'GET',
+		headers: { Cookie: cookie },
+		credentials: 'include',
+	})
+		.then((response) => {
+			if (response.ok) {
+				return response.json();
+			}
+
+			return null;
+		})
+		.then((it) => normalizeUserDTO(it))
+		.catch((error) => {
+			return null;
+		});
 }
 
 export async function findUserById(id: UserDTO['id']): Promise<UserDTO> {

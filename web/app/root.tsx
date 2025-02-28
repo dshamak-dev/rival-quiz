@@ -10,7 +10,6 @@ import { ClientComponent } from '@view/client/client.component';
 import { getAuthCookie, getContinueUrl, logOut } from '@/auth';
 import { AppContextProvider } from 'src/state/app.state';
 import { WEB_API } from '@control/api.control';
-import { findUserByToken } from '@api/user.api';
 import { Navigation } from '@view/page/navigation';
 
 import logoImage from '@assets/logo.png';
@@ -63,7 +62,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}
 	}
 
-	const wallet = await getUserWallet().catch((err) => null);
+	const wallet = await getUserWallet({ headers: { Cookie: cookie } }).catch((err) => null);
 
 	return { user, wallet, envVariables };
 }

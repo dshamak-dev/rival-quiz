@@ -34,6 +34,16 @@ export async function getAuthCookie(request: Request) {
 	return cookieString;
 }
 
+export async function getAuthHeaders(request: Request) {
+	const cookie: string | null = await getAuthCookie(request);
+
+	if (!cookie){
+		return Promise.reject('No cookie found');
+	}
+
+	return { Cookie: cookie };
+}
+
 export async function authProtectedRoute(req: Request) {
 	const cookie = await getAuthCookie(req);
 

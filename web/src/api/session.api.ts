@@ -1,13 +1,12 @@
 import { WEB_API } from '@control/api.control';
 import { normalizeQuesionDTO } from '@control/question.control';
-import { ID } from '@model/api.model';
 import { QuestionDTO } from '@model/question.model';
 import { SessionAnswerPayload, SessionDTO } from '@model/session.model';
 
 const rootPath = '/sessions';
 
-export async function findSessions(query: string | null = null): Promise<SessionDTO[]> {
-	return WEB_API.get<SessionDTO[]>(`${rootPath}${query ? `?${query}` : ''}`, {}).then((items) =>
+export async function findSessions(query: string | null = null, props = undefined): Promise<SessionDTO[]> {
+	return WEB_API.get<SessionDTO[]>(`${rootPath}${query ? `?${query}` : ''}`, props).then((items) =>
 		items?.map(normalizeSessionDTO)
 	);
 }

@@ -15,7 +15,7 @@ import { useMemo } from 'react';
 import { sessionStateLabels } from 'src/constants/session.constant';
 
 export async function loader({ request }: LoaderFunctionArgs) {
-	const user = await findUserByToken().catch((err) => null);
+	const user = await findUserByToken(request);
 
 	if (!user?.id) {
 		return { session: null };

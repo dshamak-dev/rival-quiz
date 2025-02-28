@@ -11,7 +11,6 @@ import { useMemo, useRef } from 'react';
 
 import logoImage from '@assets/logo.png';
 import { Icon } from '@view/icon';
-import { UserAuthBadge } from '@view/user/user.auth-badge';
 import { useTelegram } from 'src/hooks/telegram.hook';
 import { NavigationDrawer } from './navigation.drawer';
 import { LinkButton } from '@view/anchor/link.button';

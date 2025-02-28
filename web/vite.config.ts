@@ -10,4 +10,7 @@ export default defineConfig({
 			serverBuildFile: 'index.js',
 		}),
 	],
+	define: {
+		'process.env': process.env,
+	},
 });
