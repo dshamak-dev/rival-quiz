@@ -110,6 +110,7 @@ jobs:
             # Split input into lines and write to .env file
             echo "Creating .env file..."
             echo "${{ secrets.ENV_VARS }}" | tr ';' '\n' > .env
+            echo "NODE_ENV=production" >> .env
             echo "BUILD=$BUILD_NUMBER" >> .env
 
             # Confirm the contents of the .env file

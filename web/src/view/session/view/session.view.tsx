@@ -65,7 +65,7 @@ export function SessionView({ session }: SessionViewProps) {
 				);
 			}
 		}
-	}, [session, question]);
+	}, [user, session, question]);
 
 	if (!session) {
 		return null;

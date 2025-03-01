@@ -11,8 +11,8 @@ export async function findSessions(query: string | null = null, props = undefine
 	);
 }
 
-export async function findSessionById(id: SessionDTO['id']): Promise<SessionDTO> {
-	return WEB_API.get<SessionDTO>(`${rootPath}/${id}`, {}).then((it) => normalizeSessionDTO(it));
+export async function findSessionById(id: SessionDTO['id'], params = {}): Promise<SessionDTO> {
+	return WEB_API.get<SessionDTO>(`${rootPath}/${id}`, params).then((it) => normalizeSessionDTO(it));
 }
 
 // Note: Validate owner with the current user

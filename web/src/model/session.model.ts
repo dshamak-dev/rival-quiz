@@ -1,25 +1,7 @@
 import { DateType, ID } from './api.model';
 import { QuestionDataDTO, QuestionDTO } from './question.model';
 import { SessionUserActionDTO } from './session.user.model';
-import { SessionTypes as SharedSessionTypes } from '@shared/session/type';
-
-// export class Session implements SessionType {
-// id?: ID;
-// description?: string;
-// state: SessionStateType = SessionStateType.Draft;
-// title: string = '';
-// ownerId?: ID;
-// createdAt: DateType = new Date().toISOString();
-// updatedAt?: DateType;
-// questions?: QuestionDTO[] = [];
-// image?: string = undefined;
-// betType?: SessionBetType;
-// users?: ID[] = [];
-
-// 	constructor(data: SessionType | undefined) {
-// 		Object.assign(this, data);
-// 	}
-// }
+import { SessionTypes as SharedSessionTypes, SessionSettingsDTO } from '@shared/session/type';
 
 export enum SessionTypes {
 	USER_BET = SharedSessionTypes.USER_BET,
@@ -51,7 +33,7 @@ export type SessionDTO = {
 	userActions?: SessionUserActionDTO[];
 	users?: ID[];
 	type?: SessionTypes;
-	allowBids?: boolean;
+	settings?: SessionSettingsDTO;
 	betType?: SessionBetType;
 	previewUrl?: string;
 	hasNextQuestion?: boolean;

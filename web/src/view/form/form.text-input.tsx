@@ -3,7 +3,7 @@ import { ChangeEvent, ComponentProps, FocusEvent, HTMLInputTypeAttribute, useCal
 import { FormLabel } from './form.label';
 import { getRandomId } from '@control/random';
 
-export type TextInputType = 'text' | 'email' | 'password';
+export type TextInputType = 'text' | 'email' | 'password' | 'number';
 
 export type TextInputSizeType = 'base' | 'small' | 'large';
 

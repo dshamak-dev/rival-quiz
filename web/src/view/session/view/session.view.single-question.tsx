@@ -33,13 +33,15 @@ export function SessionViewSingleQuestion() {
 		request: (payload: SessionUserActionPayload) => postSessionUserAction(payload),
 	});
 	const {
-		data: userActions,
+		data: userActionsData,
 		loading: loadingUserData,
 		dispatch: fetchUserActions,
 	} = useAPI({
 		initialState: session?.userActions,
 		request: (sessionId: ID) => fetchSessionUserActions(sessionId),
 	});
+	const userActions = userActionsData || session?.userActions;
+	console.log('userActionsData', userActionsData);
 
 	const hasJoined = useMemo(() => {
 		if (!isLoggedIn || !user) {
@@ -67,15 +69,15 @@ export function SessionViewSingleQuestion() {
 
 	const userData = useMemo(() => {
 		return {
-			answers: session?.questions?.reduce((accum, it) => {
+			answers: session?.questions?.reduce((accum, question) => {
 				const qAction = userActions?.find((it) => it.questionId === question?.id);
 
-				accum[it.id] = qAction?.data?.value;
+				accum[question.id] = qAction?.data?.value;
 
 				return accum;
 			}, {} as { [questionId: string]: string | undefined }),
 		};
-	}, [question, session?.questions, userActions]);
+	}, [session?.questions, userActions]);
 
 	const sessionData: any = useMemo(() => {
 		// const _data = {
@@ -302,7 +304,7 @@ export function SessionViewSingleQuestion() {
 							Confirm answer
 						</Button>
 					) : (
-						<Button layout="primary" onClick={handleCancelAnswer}>
+						<Button layout="outline" onClick={handleCancelAnswer}>
 							Cancel answer
 						</Button>
 					)

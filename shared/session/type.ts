@@ -4,3 +4,7 @@ export enum SessionTypes {
   SYSTEM_PRIZE = "system_prize",
   AUCTION = "auction",
 }
+
+export type SessionSettingsDTO = {
+	pool?: number;
+}

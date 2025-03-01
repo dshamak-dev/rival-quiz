@@ -4,7 +4,7 @@ import {
   archiveSessionData,
   completeSessionData,
   createSessionData,
-  findActiveSessionDataBySessionId
+  findActiveSessionDataBySessionId,
 } from "../session-data/session-data.actions";
 import { normalizeSession } from "./session.utils";
 import {
@@ -22,6 +22,14 @@ import {
 } from "../session-data/session-data.model";
 import { findSessionData } from "../session-data/session-data.api";
 import { SessionStateType } from "./session.model";
+import { expandResponse } from "@shared/async/helpers";
+import { addLog } from "@/services/logger/api";
+import { SessionTypes } from "@shared/session/type";
+import { ID } from "@shared/common/model";
+import {
+  TransactionParty,
+  TransactionPayload,
+} from "@/services/transaction/type";
 
 export const sessionDBModel = mongoose.model("sessions", SessionSchema);
 
@@ -103,7 +111,13 @@ export async function patchSession(id, payload) {
       if (state !== undefined && origin.state !== state) {
         session.state = state;
 
-        const updates = await setSessionState(session, state);
+        const [updates, error] = await expandResponse(
+          setSessionState(session, state)
+        );
+
+        if (error || !updates) {
+          return Promise.reject(error || "Failed to change session state");
+        }
 
         Object.assign(session, updates || {});
       }
@@ -184,16 +198,54 @@ export async function setSessionState(session, nextState: SessionStateType) {
     }
     case SessionStateType.Published: {
       // If previous state was locked, unlock it and remove lock record
+      if (session.type === SessionTypes.SPONSOR) {
+        const [transaction, transactionError] = await expandResponse(
+          createTransaction(
+            { id: session.ownerId, type: "user" },
+            { id: "0", type: "system" },
+            {
+              type: "deposit",
+              amount: session.settings.pool,
+              details: `Sponsorship deposit for session ${session.title}`,
+            }
+          )
+        );
+
+        if (transactionError || !transaction) {
+          await addLog({
+            source: "create-sponsor-transaction",
+            message: transactionError,
+            data: {
+              sessionId: sessionId,
+            },
+          });
+          return Promise.reject(
+            transactionError || "Failed to create sponsor transaction"
+          );
+        }
+      }
 
       const activeSessionData = await findActiveSessionDataBySessionId(
         sessionId
       );
 
       if (activeSessionData) {
-        await archiveSessionData(activeSessionData.id);
+        await archiveSessionData(activeSessionData.id).catch((err) => null);
       }
 
-      await createSessionData(session);
+      const [sessionData, error] = await expandResponse(
+        createSessionData(session)
+      );
+
+      if (error || !sessionData) {
+        await addLog({
+          source: "create-session-data",
+          message: error,
+          data: {
+            sessionId: sessionId,
+          },
+        });
+      }
 
       break;
     }
@@ -299,9 +351,9 @@ export async function distributePrizePool(session, prizePool) {
   //   .catch((error) => [null, error]);
 
   Object.entries(prizePool).forEach(async ([userId, score]) => {
-    const from = { id: sessionId, type: "session" };
-    const to = { id: userId, type: "user" };
-    const transactionData = {
+    const from: TransactionParty = { id: sessionId as ID, type: "session" };
+    const to: TransactionParty = { id: userId, type: "user" };
+    const transactionData: TransactionPayload = {
       amount: Number(score),
       type: "prize",
       details: `Prize distribution for session ${session.title}`,

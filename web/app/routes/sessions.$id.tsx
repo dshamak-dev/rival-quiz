@@ -1,4 +1,5 @@
 // import { useAPI } from '@api/api.hook';
+import { getAuthHeaders } from '@/auth';
 import { findSessionById } from '@api/session.api';
 import { SessionDTO } from '@model/session.model';
 import { json, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
@@ -8,14 +9,15 @@ import { SessionView } from '@view/session/view/session.view';
 import { Typography } from '@view/typography/typography';
 import { Suspense } from 'react';
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
+	const headers = await getAuthHeaders(request).catch((err) => null);
 	const id = params?.id;
 
 	if (!id) {
 		return null;
 	}
 
-	const session = await findSessionById(id).catch((err) => null);
+	const session = await findSessionById(id, { headers }).catch((err) => null);
 
 	return json(session);
 }
@@ -43,11 +45,6 @@ export const meta: MetaFunction<typeof loader> = ({ params, data }) => {
 export default function SessionPage() {
 	// const params = useParams();
 	const session = useLoaderData<typeof loader>();
-	// const { data, loading, dispatch } = useAPI({ initialState: null, request: (id: string) => findSessionById(id) });
-
-	// useEffect(() => {
-	// 	dispatch(params.id);
-	// }, [params.id]);
 
 	return (
 		<div className="w-full p-6 flex justify-center">

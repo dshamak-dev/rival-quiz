@@ -17,6 +17,13 @@ export const sessionStateOptions: SelectOption[] = Object.entries(sessionStateLa
 	return { label, value: Number(value) };
 });
 
+export const sessionTypeLabels: Record<SessionTypes, string> = {
+	[SessionTypes.USER_BET]: 'User Bets',
+	[SessionTypes.SPONSOR]: 'Sponsorship',
+	[SessionTypes.SYSTEM_PRIZE]: 'System Prize',
+	[SessionTypes.AUCTION]: 'Auction',
+};
+
 export const sessionBetLabels: Record<SessionBetType, string> = {
 	[SessionBetType.None]: 'No bets',
 	[SessionBetType.Single]: 'Signle bet',
@@ -28,7 +35,13 @@ export const sessionBetOptions: SelectOption[] = Object.entries(sessionBetLabels
 	return { label, value: Number(value) };
 });
 
-export const SESSION_TYPE_OPTIONS: { value: SessionTypes; icon: IconType; text: string; label: string; enabled: boolean }[] = [
+export const SESSION_TYPE_OPTIONS: {
+	value: SessionTypes;
+	icon: IconType;
+	text: string;
+	label: string;
+	enabled: boolean;
+}[] = [
 	{
 		icon: 'CashCoin',
 		value: SessionTypes.USER_BET,

@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { ButtonHTMLAttributes, PropsWithChildren, useMemo } from 'react';
 
 export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
-	layout?: 'primary' | 'secondary' | 'tertiary';
+	layout?: 'primary' | 'secondary' | 'tertiary' | 'outline';
 	size?: ButtonSizeType;
 	loading?: boolean;
 	faded?: boolean;

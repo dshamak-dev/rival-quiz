@@ -1,5 +1,6 @@
 import { DateType, ID } from "../common/model";
 import { SessionBetType, SessionStateType, SessionTypes } from "./constants";
+import { SessionSettingsDTO } from './type';
 
 export type SessionDTO = {
 	id: ID;
@@ -15,9 +16,10 @@ export type SessionDTO = {
 	userActions?: Record<string, any>[];
 	users?: ID[];
 	type?: SessionTypes;
-	allowBids?: boolean;
+	settings?: SessionSettingsDTO;
 	betType?: SessionBetType;
 	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
 	questionData?: Record<string, any>;
 };
+

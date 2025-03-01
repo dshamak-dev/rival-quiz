@@ -21,7 +21,7 @@ export const SessionSchema = new mongoose.Schema(
     questions: { type: [QuestionSchema], default: [] },
     hasNextQuestion: { type: Boolean, default: true },
     activeQuestionId: { type: String },
-    allowBids: { type: Boolean, default: false },
+    settings: Object,
     type: {
       type: String,
       enum: SessionTypes,

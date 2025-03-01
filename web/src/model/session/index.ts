@@ -34,12 +34,12 @@ export class Session implements SessionModelType {
 			updatedAt: this.updatedAt,
 			questions: this.questions || [],
 			image: this.image,
-			userActions: this.data?.userActions,
+			userActions: this.origin?.userActions,
 			users: this.users,
 			type: this.type || this.data?.type,
-			allowBids: this.data?.allowBids,
-			activeQuestionId: this.data?.activeQuestionId,
-			betType: this.data?.betType,
+			settings: this.origin?.settings,
+			activeQuestionId: this.origin?.activeQuestionId,
+			betType: this.origin?.betType,
 		};
 	}
 

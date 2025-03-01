@@ -35,7 +35,7 @@ export async function addWalletBalanceByUserId(userId, value) {
 export async function addWalletBalance(id, value) {
   const amount = Number(value);
 
-  if (Number.isNaN(amount) || amount <= 0) {
+  if (Number.isNaN(amount)) {
     return Promise.reject("Invalid balance amount");
   }
 

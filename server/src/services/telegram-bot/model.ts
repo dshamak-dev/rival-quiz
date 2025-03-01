@@ -72,11 +72,11 @@ export class TelegramBot {
 
     this.token = token;
     this.webAppUrl = webAppUrl;
-    this.chats = await getChatIds();
+    this.chats = await getChatIds().catch(err => []);
 
     const bot = (this.bot = new Telegraf(token));
 
-    bot.telegram.setChatMenuButton({
+    await bot.telegram.setChatMenuButton({
       menuButton: {
         type: "web_app",
         text: "Play 🎲",
@@ -84,7 +84,7 @@ export class TelegramBot {
           url: webAppUrl,
         },
       },
-    });
+    }).catch(err => null);
 
     bot.start((ctx) => {
       this.registerChat(ctx);
@@ -109,7 +109,7 @@ export class TelegramBot {
       this.registerChat(ctx);
     });
 
-    bot.launch();
+    return bot.launch();
   }
 
   registerChat(ctx) {

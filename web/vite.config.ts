@@ -10,4 +10,5 @@ export default defineConfig({
 			serverBuildFile: 'index.js',
 		}),
 	],
+	define: process.env.NODE_ENV === 'development' ? { 'process.env': process.env } : {},
 });
