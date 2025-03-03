@@ -35,3 +35,19 @@ jobs:
         with:
           name: test-results
           path: test-results/
+
+  clear-old-builds:
+    runs-on: ubuntu-latest
+    needs: run-tests
+    permissions:
+      actions: write # Grant permission to delete workflow runs
+    steps:
+      - name: Delete old workflow runs
+        if: success() # Runs only if the workflow succeeds
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          workflow: ${{ github.workflow }} # Uses the current workflow
+          retain_days: 0 # Delete all previous runs
+          keep_minimum_runs: 3 # Keep at least 2 latest runs
