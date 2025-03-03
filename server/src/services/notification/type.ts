@@ -13,6 +13,7 @@ export type Notification = {
   title: string;
   content?: string;
   url?: string;
+  preview?: string;
   createdAt: Date;
   updatedAt: Date;
   isRead?: boolean;

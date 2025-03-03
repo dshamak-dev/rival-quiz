@@ -18,6 +18,7 @@ export async function createNotification(payload: NotificationCreatePayload) {
       {},
       {
         parse_mode: "MarkdownV2",
+        preview: payload.preview,
         link: payload.url,
       }
     );

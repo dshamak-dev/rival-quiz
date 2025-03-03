@@ -8,6 +8,7 @@ import { escapeMarkdownV2, urlJoin } from "@shared/common/url.helpers";
 
 export type MessageExtraProps = ExtraReplyMessage & {
   link?: string;
+  preview?: string;
 };
 
 export class TelegramBotManager {
@@ -117,12 +118,18 @@ export class TelegramBot {
   }
 
   async sendChatMessage(id: string, message, params: MessageExtraProps = {}) {
-    const { link, ...extras } = params;
+    const { link, preview, ...extras } = params;
 
     const messageParams: ExtraReplyMessage = {
       ...this.getInitialMessageProps(),
       ...extras,
     };
+
+    if (!messageParams.link_preview_options && preview) {
+      messageParams.link_preview_options = {
+        url: preview,
+      };
+    }
 
     let chatMessage = message;
 

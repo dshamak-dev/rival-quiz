@@ -267,7 +267,8 @@ export async function setSessionState(session, nextState: SessionStateType) {
           type: "system",
         },
         type: "info",
-        url: `/session/${session.id}`,
+        url: `/sessions/${session.id}`,
+        preview: session.image,
       }).catch((error) => {
         console.log("Failed to send notification", error);
 
