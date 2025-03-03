@@ -58,7 +58,7 @@ export class TelegramBotManager {
     return true;
   }
 
-  static async init() {
+  static async init(activate = true) {
     TelegramBotManager.bots = [];
 
     const bots = await fetchTelegramBots().catch((err) => {
@@ -78,7 +78,7 @@ export class TelegramBotManager {
         if ((data.token, data.webAppURL)) {
           const bot = new TelegramBot();
 
-          bot.init(data.token, data.webAppURL, data.chats);
+          bot.init(data.token, data.webAppURL, data.chats, activate);
 
           TelegramBotManager.bots.push(bot);
         }
@@ -172,7 +172,7 @@ export class TelegramBot {
     this.bot = undefined;
   }
 
-  async init(token, webAppURL, chats: string[] = []) {
+  async init(token, webAppURL, chats: string[] = [], activate = true) {
     if (!token) {
       return Promise.reject("Invalid Telegram bot token");
     }
@@ -180,6 +180,10 @@ export class TelegramBot {
     this.token = token;
     this.webAppURL = webAppURL;
     this.chats = chats || [];
+
+    if (!activate) {
+      return;
+    }
 
     const bot = (this.bot = new Telegraf(token));
 
