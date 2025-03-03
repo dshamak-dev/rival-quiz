@@ -31,6 +31,7 @@ export type SessionDTO = {
 	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
 	questionData?: QuestionDataDTO;
+	hash: string;
 	metadata?: { ownerName: string; ownerAvatar: string; };
 };
 

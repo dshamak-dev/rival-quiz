@@ -12,7 +12,9 @@ export const SessionSchema = new mongoose.Schema(
       type: String,
       unique: true,
       default: function () {
-        return randomString();
+        const length = 8;
+        const reg = new RegExp(`(\\S{${length / 2}})`, "g");
+        return randomString(length).replace(reg, "$1-").slice(0, -1);
       },
     },
     ownerId: { type: String, required: true },

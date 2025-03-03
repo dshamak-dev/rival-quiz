@@ -50,7 +50,7 @@ export default function UserHistoryPage() {
 									)}
 								</div>
 								<Anchor
-									href={`/sessions/${item.metadata.sessionId}`}
+									href={`/sessions/${item.metadata.hash || item.metadata.sessionId}`}
 									className="flex items-center gap-2"
 								>
 									<Icon name="ArrowRight" size={20} />

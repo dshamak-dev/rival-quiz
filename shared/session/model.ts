@@ -20,5 +20,6 @@ export type SessionDTO = {
 	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
 	questionData?: Record<string, any>;
+	hash: string;
 };
 

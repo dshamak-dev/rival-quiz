@@ -60,6 +60,22 @@ export function getSessionById(id) {
   return sessionDBModel.findById(id).then((res) => normalizeSession(res));
 }
 
+export async function findSessionByIdOrHash(value: string) {
+  let object = await sessionDBModel
+    .findOne({ hash: value })
+    .catch((err) => null);
+
+  if (!object) {
+    object = await sessionDBModel.findById(value).catch((err) => null);
+  }
+
+  if (object) {
+    return normalizeSession(object);
+  }
+
+  return null;
+}
+
 export function getSessionsByOwner(ownerID) {
   return sessionDBModel.find({ ownerID }).then((res) => normalizeSession(res));
 }
@@ -259,15 +275,13 @@ export async function setSessionState(session, nextState: SessionStateType) {
       }
 
       await createNotification({
-        title: "Session published",
-        content: [`Title: ${session.title}`, session.description]
-          .filter((it) => !!it?.trim())
-          .join("\n"),
+        title: session.title || "New session available",
+        content: [session.description].filter((it) => !!it?.trim()).join("\n"),
         target: {
           type: "system",
         },
         type: "info",
-        url: `/sessions/${session.id}`,
+        url: `/sessions/${session.tag}`,
         preview: session.image,
       }).catch((error) => {
         console.log("Failed to send notification", error);

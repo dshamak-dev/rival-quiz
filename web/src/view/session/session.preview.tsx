@@ -24,7 +24,7 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 		// Check if user is in the session
 		if (session.data?.isAvalable || session.state === SessionStateType.Published) {
 			return (
-				<Anchor href={`/sessions/${session.id}`} className="w-full">
+				<Anchor href={`/sessions/${session.hash}`} className="w-full">
 					<Button faded={false} className="w-full flex items-center gap-2 justify-center">
 						<span className="text-sm">Open</span>
 					</Button>
@@ -53,7 +53,7 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 				);
 			default:
 				return (
-					<Anchor href={`/sessions/${session.id}`}>
+					<Anchor href={`/sessions/${session.hash}`}>
 						<Button className="w-full flex items-center gap-2 justify-center">
 							<span className="text-sm">View Results</span>
 							<Icon name="ArrowRight" size={14} className="" />
@@ -66,7 +66,7 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 	const sessionType = session.type ? sessionTypeLabels[session.type] : null;
 
 	return (
-		<Anchor href={`/sessions/${session.id}`} key={session.id} className="relative rounded overflow-hidden border">
+		<Anchor href={`/sessions/${session.hash}`} key={session.id} className="relative rounded overflow-hidden border">
 			{sessionType && (
 				<div className="absolute z-10 top-0 left-0 p-2">
 					<Chip className="uppercase bg-black text-white text-xs">{sessionType}</Chip>
