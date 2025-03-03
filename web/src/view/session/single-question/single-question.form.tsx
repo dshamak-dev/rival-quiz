@@ -30,8 +30,8 @@ export function SingleQuestionSessionForm({
 	const sessionModel = new Session(session);
 	const nowTime = Date.now();
 
-	const questionsNum = session.questions?.length || 0;
-	const canAddQuestion = questionsNum === 0;
+	// const questionsNum = session.questions?.length || 0;
+	const canAddQuestion = true; //questionsNum === 0;
 	const canEditQuestion = [SessionStateType.Draft, SessionStateType.Published].includes(session.state);
 	const activeQuestion = sessionModel.getActiveQuestion() || null;
 
@@ -55,7 +55,7 @@ export function SingleQuestionSessionForm({
 											'text-gray-600': !isActive,
 										})}
 									>
-										<Icon name={isActive ? 'QuestionSquareFill' : 'CheckSquare'} />
+										<Icon name={isActive ? 'QuestionSquareFill' : 'QuestionSquare'} />
 										<Typography
 											className={classNames({
 												'line-through': isAnswerd,
@@ -73,7 +73,7 @@ export function SingleQuestionSessionForm({
 								active={isActive}
 								initialValue={question}
 								disabled={loading || !canEditQuestion}
-								onSubmit={(questionData) => onUpdate(`questions.${question.id}`, questionData)}
+								onSubmit={canEditQuestion ? (questionData) => onUpdate(`questions.${question.id}`, questionData) : undefined}
 								onDelete={() => onDelete(question.id)}
 							/>
 						</Collapse>
@@ -82,7 +82,7 @@ export function SingleQuestionSessionForm({
 			) : (
 				<Typography className="text-xs">No questions</Typography>
 			)}
-			<div>
+			{canEditQuestion && <div>
 				<Button
 					layout={canAddQuestion ? 'tertiary' : undefined}
 					size="small"
@@ -95,7 +95,7 @@ export function SingleQuestionSessionForm({
 					<Icon name="PlusCircle" />
 					Add question
 				</Button>
-			</div>
+			</div>}
 		</div>
 	);
 }

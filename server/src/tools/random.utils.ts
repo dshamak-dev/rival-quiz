@@ -1,5 +1,5 @@
-import crypto from "crypto";
+import { randomBytes } from "crypto";
 
 export function randomString(size = 8) {
-  return crypto.randomBytes(size).toString("base64").slice(0, size);
+  return randomBytes(size).toString("base64url").slice(0, size);
 }

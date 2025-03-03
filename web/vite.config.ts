@@ -1,10 +1,14 @@
-import { vitePlugin as remix } from "@remix-run/dev";
-import { defineConfig } from "vite";
-import tsconfigPaths from 'vite-tsconfig-paths'
+import { vitePlugin as remix } from '@remix-run/dev';
+import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), remix({
-    buildDirectory: "build",
-    serverBuildFile: "index.js",
-  })]
+	plugins: [
+		tsconfigPaths(),
+		remix({
+			buildDirectory: 'build',
+			serverBuildFile: 'index.js',
+		}),
+	],
+	define: process.env.NODE_ENV === 'development' ? { 'process.env': process.env } : {},
 });

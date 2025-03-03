@@ -5,7 +5,7 @@ esbuild
     entryPoints: ["index.ts"],
     outdir: "dist",
     bundle: true, // Bundle everything together
-    minify: true, // Set to true for production
+    minify: false, // Set to true for production
     sourcemap: true, // Enable source maps
     platform: "node",
     format: "cjs",

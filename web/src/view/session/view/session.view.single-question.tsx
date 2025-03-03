@@ -33,13 +33,15 @@ export function SessionViewSingleQuestion() {
 		request: (payload: SessionUserActionPayload) => postSessionUserAction(payload),
 	});
 	const {
-		data: userActions,
+		data: userActionsData,
 		loading: loadingUserData,
 		dispatch: fetchUserActions,
 	} = useAPI({
 		initialState: session?.userActions,
 		request: (sessionId: ID) => fetchSessionUserActions(sessionId),
 	});
+	const userActions = userActionsData || session?.userActions;
+	console.log('userActionsData', userActionsData);
 
 	const hasJoined = useMemo(() => {
 		if (!isLoggedIn || !user) {
@@ -67,10 +69,10 @@ export function SessionViewSingleQuestion() {
 
 	const userData = useMemo(() => {
 		return {
-			answers: session?.questions?.reduce((accum, it) => {
-				const qAction = userActions?.find((it) => it.questionId === it.questionId);
+			answers: session?.questions?.reduce((accum, question) => {
+				const qAction = userActions?.find((it) => it.questionId === question?.id);
 
-				accum[it.id] = qAction?.data?.value;
+				accum[question.id] = qAction?.data?.value;
 
 				return accum;
 			}, {} as { [questionId: string]: string | undefined }),
@@ -100,7 +102,7 @@ export function SessionViewSingleQuestion() {
 
 	const getQuestionAnswer = (questionId?: string) => {
 		if (questionId == null) {
-			return;
+			return undefined;
 		}
 
 		return userData?.answers?.[questionId];
@@ -153,7 +155,7 @@ export function SessionViewSingleQuestion() {
 			// },
 		];
 
-		if (!question) {
+		if (!question || !session) {
 			return options;
 		}
 
@@ -167,7 +169,12 @@ export function SessionViewSingleQuestion() {
 					value: it,
 				};
 
-				if (questionData) {
+				if (
+					questionData &&
+					[SessionStateType.Locked, SessionStateType.LockedForReview, SessionStateType.Completed].includes(
+						session.state
+					)
+				) {
 					const _itVotes = totalByAnswers ? totalByAnswers[it] || 0 : 0;
 					let progress = !totalByAnswers ? 0 : _itVotes / totalVotes;
 
@@ -297,7 +304,7 @@ export function SessionViewSingleQuestion() {
 							Confirm answer
 						</Button>
 					) : (
-						<Button layout="primary" onClick={handleCancelAnswer}>
+						<Button layout="outline" onClick={handleCancelAnswer}>
 							Cancel answer
 						</Button>
 					)
@@ -357,7 +364,7 @@ export function SessionViewSingleQuestion() {
 							<Typography>Good luck next time!</Typography>
 						)}
 
-						<LinkButton layout="primary" href="/">
+						<LinkButton layout="primary" href="/explore">
 							Leave Session
 						</LinkButton>
 					</div>

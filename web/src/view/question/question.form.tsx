@@ -16,11 +16,11 @@ export type QuestionFormProps = {
 	active?: boolean;
 };
 
-export function QuestionForm({ sessionId, active, initialValue, disabled, onSubmit, onDelete }: QuestionFormProps) {
+export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: QuestionFormProps) {
 	const [formState, setFormState] = useState({ ...initialValue });
 
-	const questionId = initialValue.id;
-	const isActive = active;
+	// const questionId = initialValue.id;
+	// const isActive = active;
 
 	useEffect(() => {
 		setFormState(initialValue);
@@ -60,6 +60,8 @@ export function QuestionForm({ sessionId, active, initialValue, disabled, onSubm
 		setFormState(_state);
 	};
 
+	const canEdit = onSubmit != null;
+
 	const handleSubmit = () => {
 		if (onSubmit) {
 			onSubmit(formState);
@@ -78,9 +80,9 @@ export function QuestionForm({ sessionId, active, initialValue, disabled, onSubm
 		}
 	};
 
-	const handleSync = () => {
-		requestQuestionSync({ questionId: questionId, sessionId: sessionId });
-	};
+	// const handleSync = () => {
+	// 	requestQuestionSync({ questionId: questionId, sessionId: sessionId });
+	// };
 
 	return (
 		<div className="flex flex-col gap-4 p-4" data-id={initialValue?.id}>
@@ -110,7 +112,7 @@ export function QuestionForm({ sessionId, active, initialValue, disabled, onSubm
 					onChange={handleOptionsChange}
 				/>
 			</div>
-			<div className="flex justify-end gap-4">
+			{canEdit && <div className="flex justify-end gap-4">
 				{onDelete && (
 					<Button disabled={disabled} size="small" onClick={handleDelete}>
 						Delete
@@ -119,9 +121,9 @@ export function QuestionForm({ sessionId, active, initialValue, disabled, onSubm
 				<Button size="small" disabled={!isDirty} className="min-w-[100px]" onClick={handleCancel}>
 					Cancel
 				</Button>
-				{isActive && <Button size="small" layout="tertiary" onClick={handleSync}>
+				{/* {isActive && <Button size="small" layout="tertiary" onClick={handleSync}>
 					Sync Data
-				</Button>}
+				</Button>} */}
 				<Button
 					layout="primary"
 					size="small"
@@ -131,7 +133,7 @@ export function QuestionForm({ sessionId, active, initialValue, disabled, onSubm
 				>
 					Save
 				</Button>
-			</div>
+			</div>}
 		</div>
 	);
 }

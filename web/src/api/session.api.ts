@@ -1,18 +1,26 @@
 import { WEB_API } from '@control/api.control';
 import { normalizeQuesionDTO } from '@control/question.control';
-import { ID } from '@model/api.model';
 import { QuestionDTO } from '@model/question.model';
 import { SessionAnswerPayload, SessionDTO } from '@model/session.model';
 
 const rootPath = '/sessions';
 
-export async function findSessions(query: string | null = null): Promise<SessionDTO[]> {
-	return WEB_API.get<SessionDTO[]>(`${rootPath}${query ? `?${query}` : ''}`, {}).then((items) =>
+export async function findSessions(query: string | null = null, props = undefined): Promise<SessionDTO[]> {
+	return WEB_API.get<SessionDTO[]>(`${rootPath}${query ? `?${query}` : ''}`, props).then((items) =>
 		items?.map(normalizeSessionDTO)
 	);
 }
 
-export async function findSessionById(id: SessionDTO['id']): Promise<SessionDTO> {
+export async function findSessionById(id: SessionDTO['id'], params = {}): Promise<SessionDTO> {
+	return WEB_API.get<SessionDTO>(`${rootPath}/${id}`, params).then((it) => normalizeSessionDTO(it));
+}
+
+export async function findSessionByHash(hash: SessionDTO['hash'], params = {}): Promise<SessionDTO> {
+	return WEB_API.get<SessionDTO>(`${rootPath}/${hash}`, params).then((it) => normalizeSessionDTO(it));
+}
+
+// Note: Validate owner with the current user
+export async function findAdminSessionById(id: SessionDTO['id']): Promise<SessionDTO> {
 	return WEB_API.get<SessionDTO>(`${rootPath}/${id}`, {}).then((it) => normalizeSessionDTO(it));
 }
 

@@ -1,11 +1,12 @@
-import { formatDate } from '@control/date.control';
+import { DateFormatType, formatDate } from '@control/date.control';
 import { Typography } from '@view/typography/typography';
 import { ComponentProps, useMemo } from 'react';
 
-export type DateTextProps = {
+export type DateTextProps = Omit<ComponentProps<typeof Typography>, 'children'> & {
 	date: string | Date | number;
-	format?: string;
-} & ComponentProps<typeof Typography>;
+	format?: DateFormatType;
+	children?: React.ReactNode;
+};
 
 export function DateText({ date, format, ...props }: DateTextProps) {
 	const text = useMemo(() => {

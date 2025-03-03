@@ -1,10 +1,12 @@
 import { useUI } from '@control/ui.control';
-import { validateUserPermissions } from '@control/user.control';
+import { getUserRoleLabel, validateUserPermissions } from '@control/user.control';
 import { isNullOrEmpty } from '@control/validate.utils';
 import { USER_ROLE_TYPE } from '@model/user.role';
 import { useAuth } from '@state/auth.hook';
+import { usePermissions } from '@state/permissions.hook';
 import { Anchor } from '@view/anchor';
 import { Button } from '@view/button/button';
+import { Chip } from '@view/chip';
 import { Drawer } from '@view/drawer/drawer';
 import { Icon, IconType } from '@view/icon';
 import { Image } from '@view/image/image';
@@ -12,6 +14,7 @@ import { SessionCreateButton } from '@view/session/session.create-button';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
 import { ReactNode, Suspense, useMemo, useRef, useState } from 'react';
+import { PERMISSION_TYPE } from 'src/constants/permission.constants';
 
 type NavigationDrawerProps = {
 	children?: ReactNode | ((open: boolean) => ReactNode);
@@ -22,7 +25,10 @@ type NavLinkItem = { link: string; text: string; icon: IconType; permissions?: U
 
 export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProps) {
 	const { isMobile } = useUI();
-	const { isLoggedIn, user, logOut } = useAuth();
+	const { isLoggedIn, user, logOut, processing, requestRoleUpdate } = useAuth();
+	const can = usePermissions();
+	const canCreateSession = can(PERMISSION_TYPE.CREATE_SESSION);
+
 	const [isOpen, setIsOpen] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -80,10 +86,12 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 		return fields.map((field, index) => {
 			return (
 				<Typography
-					className={classNames({
-						'text-lg font-bold': index === 0,
+					key={index}
+					className={classNames('max-w-[20rem]', {
+						'text-lg font-bold leading-none': index === 0,
 						'text-sm font-light': index > 0,
 					})}
+					truncate="true"
 				>
 					{field}
 				</Typography>
@@ -91,10 +99,24 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 		});
 	}, [user]);
 
+	const handleRequestVIP = () => {
+		requestRoleUpdate(USER_ROLE_TYPE.CREATOR);
+	};
+
 	const content = useMemo(() => {
 		if (!isLoggedIn || !user) {
 			return null;
 		}
+
+		const vipControls = !canCreateSession ? (
+			<div>
+				<Button layout="tertiary" onClick={handleRequestVIP} loading={processing}>
+					Request VIP
+				</Button>
+			</div>
+		) : (
+			<Chip className="uppercase bg-black text-amber-400 text-xs">{getUserRoleLabel(user.role as USER_ROLE_TYPE)}</Chip>
+		);
 
 		return (
 			<div className="h-full grid grid-rows-[1fr_auto] gap-6 p-4">
@@ -107,15 +129,18 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 							})}
 						>
 							{!isNullOrEmpty(user.photoUrl) && (
-								<div className="flex min-h-full items-center">
+								<div className="flex min-h-full">
 									<Image
 										src={user.photoUrl}
 										className="w-[48px] h-[48px] rounded-full overflow-hidden object-cover"
 									/>
 								</div>
 							)}
-							<div>
-								{userInfoContent}
+							<div className="flex flex-col gap-2">
+								<div className="grid grid-cols-[1fr_auto]">
+									<div className="max-w-full overflow-hidden">{userInfoContent}</div>
+									{vipControls}
+								</div>
 								<Typography className="flex gap-2 items-center uppercase text-xs">
 									<span>#{user.tag || user.id}</span> <Icon name="Copy" size={12} />
 								</Typography>
@@ -124,13 +149,14 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 					</div>
 					{/* SHOW LAST X ACTIVE SESSIONS */}
 					<div className="flex flex-col gap-4">
-						{links.map(({ link, text, icon }) => (
+						{links.map(({ link, text, icon }, index) => (
 							<Anchor
 								end
+								key={index}
 								href={link}
 								activeClassName="font-bold"
 								className={classNames(
-									'flex justify-between gap-4 items-center py-2 px-4 bg-gray-100',
+									'flex justify-between gap-4 items-center py-2 px-4 bg-gray-50',
 									'uppercase text-inherit font-inherit hover:bg-gray-200'
 								)}
 							>
@@ -153,7 +179,7 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 				</div>
 			</div>
 		);
-	}, [isLoggedIn, user, links]);
+	}, [isLoggedIn, user, links, processing]);
 
 	if (!isLoggedIn) {
 		return null;

@@ -5,13 +5,16 @@ type TypographyType = 'h1' | 'h2' | 'h3' | 'paragraph';
 
 type TypographySize = 'small' | 'medium' | 'large' | 'huge' | 'custom';
 
-interface IProps extends PropsWithChildren<any> {
+type Props = PropsWithChildren<any> & {
 	type?: TypographyType;
 	size?: TypographySize;
 	tag?: string;
+	truncate?: boolean | string;
+	className?: string;
+	children: React.ReactNode;
 }
 
-export function Typography(props: IProps) {
+export function Typography(props: Props) {
 	const sizeClassName = useMemo(() => {
 		return props.size ? getSizeClassName(props.size) : null;
 	}, [props.size]);
@@ -43,7 +46,9 @@ export function Typography(props: IProps) {
 
 	return createElement(tag as string, {
 		...props,
-		className: classNames(className, props.className, sizeClassName),
+		className: classNames(className, props.className, sizeClassName, {
+			'truncate': !!props.truncate
+		}),
 	});
 }
 

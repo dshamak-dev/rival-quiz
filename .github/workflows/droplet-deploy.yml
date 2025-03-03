@@ -14,6 +14,7 @@ on:
 jobs:
   deploy-to-droplet:
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'  # Run only if previous workflow was successful
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -32,6 +33,12 @@ jobs:
 
       - name: Define ROOT_DIRECTORY
         run: echo "ROOT_DIRECTORY=${{ github.event.inputs.root_directory || '/root' }}" >> $GITHUB_ENV
+
+      - name: Read version from package.json
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Append package version and timestamp to .env
+        run: echo "BUILD_NUMBER=$(jq -r .version package.json)#$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> .env
 
       - name: Delete existing docker-compose.yml on the server (if exists)
         uses: appleboy/ssh-action@master
@@ -103,6 +110,8 @@ jobs:
             # Split input into lines and write to .env file
             echo "Creating .env file..."
             echo "${{ secrets.ENV_VARS }}" | tr ';' '\n' > .env
+            echo "NODE_ENV=production" >> .env
+            echo "BUILD=$BUILD_NUMBER" >> .env
 
             # Confirm the contents of the .env file
             echo "Generated .env file contents:"
@@ -127,4 +136,20 @@ jobs:
             docker rm quizlo-web || true
             # Run containers
             docker compose down || true
-            docker compose --env-file .env up -d || exit 1
+            docker compose --env-file .env up -d
+
+  clear-old-builds:
+    runs-on: ubuntu-latest
+    needs: deploy-to-droplet
+    permissions:
+      actions: write # Grant permission to delete workflow runs
+    steps:
+      - name: Delete old workflow runs
+        if: success() # Runs only if the workflow succeeds
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          workflow: ${{ github.workflow }} # Uses the current workflow
+          retain_days: 0 # Delete all previous runs
+          keep_minimum_runs: 2 # Keep at least 2 latest runs

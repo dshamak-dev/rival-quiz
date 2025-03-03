@@ -45,7 +45,7 @@ export function HeaderMobile() {
 						<Icon name="ArrowLeft" size={22} />
 					</div>
 				) : (
-					<Anchor href="/" className="flex gap-2 items-center text-black">
+					<Anchor href="/explore" className="flex gap-2 items-center text-black">
 						<Image src={logoImage} style={{ width: 24 }} />
 						<Badge visible={isConnected} color="#71f8ce" transform="translateX(8px) translateY(4px)">
 							<Typography className="uppercase text-xs font-black">{APP_NAME}</Typography>
@@ -57,7 +57,7 @@ export function HeaderMobile() {
 			<div className="flex items-center justify-end gap-6">
 				{isLoggedIn ? (
 					<>
-						<Badge>
+						<Badge visible>
 							<Icon name="Bell" size={16} className="animate-bounce" />
 						</Badge>
 

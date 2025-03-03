@@ -13,12 +13,5 @@ export enum SessionTypes {
 	Single = 'single',
 	Multiple = 'multiple',
 	Range = 'range',
-	Auction = 'auction',
-}
-
-export enum SessionBetType {
-	None = 0,
-	Single = 1,
-	Auction = 2,
-	Range = 3,
+	Lottery = 'lottery',
 }

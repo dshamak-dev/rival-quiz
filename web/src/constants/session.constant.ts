@@ -1,5 +1,6 @@
-import { SessionStateType, SessionBetType } from '@model/session.model';
+import { SessionStateType, SessionTypes } from '@model/session.model';
 import { SelectOption } from '@view/form/form.select';
+import { IconType } from '@view/icon';
 
 export const sessionStateLabels: Record<SessionStateType, string> = {
 	[SessionStateType.Draft]: 'Draft',
@@ -16,13 +17,39 @@ export const sessionStateOptions: SelectOption[] = Object.entries(sessionStateLa
 	return { label, value: Number(value) };
 });
 
-export const sessionBetLabels: Record<SessionBetType, string> = {
-	[SessionBetType.None]: 'No bets',
-	[SessionBetType.Single]: 'Signle bet',
-	[SessionBetType.Range]: 'Range bet value',
-	[SessionBetType.Auction]: 'Auction',
+export const sessionTypeLabels: Record<SessionTypes, string> = {
+	[SessionTypes.USER_BET]: 'Bets',
+	[SessionTypes.SPONSOR]: 'Sponsor',
+	[SessionTypes.SYSTEM_PRIZE]: 'System Prize',
+	[SessionTypes.LOTTERY]: 'Lottery',
 };
 
-export const sessionBetOptions: SelectOption[] = Object.entries(sessionBetLabels).map(([value, label]) => {
-	return { label, value: Number(value) };
-});
+export const SESSION_TYPE_OPTIONS: {
+	value: SessionTypes;
+	icon: IconType;
+	text: string;
+	label: string;
+	enabled: boolean;
+}[] = [
+	{
+		icon: 'CashCoin',
+		value: SessionTypes.USER_BET,
+		text: 'Users are making bets',
+		label: 'Bets',
+		enabled: true,
+	},
+	{
+		icon: 'PersonHearts',
+		value: SessionTypes.SPONSOR,
+		text: 'The creator is drawing the prize',
+		label: 'Sponsorship',
+		enabled: true,
+	},
+	{
+		icon: 'Shuffle',
+		value: SessionTypes.LOTTERY,
+		text: 'A random winner is chosen',
+		label: 'Lottery',
+		enabled: false,
+	},
+];

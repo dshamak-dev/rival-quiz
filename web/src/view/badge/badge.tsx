@@ -10,7 +10,7 @@ export type BadgeProps = {
 	color?: string;
 };
 
-export function Badge({ visible = true, color, transform, children }: BadgeProps) {
+export function Badge({ visible = false, color, transform, children }: BadgeProps) {
 	return Children.map(children, (child) => {
 		const className = classNames(visible ? styles.container : null, child?.props.className);
 

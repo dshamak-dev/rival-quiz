@@ -21,8 +21,6 @@ export function SessionCreateButton({ className, children, onSubmit }: SessionCr
 	const handleCreateSession = () => {
 		dispatch()
 			.then((session) => {
-				// Handle session created
-				console.log('Session created:', session);
 				// Redirect to session page
 				navigate(`/profile/sessions/${session.id}`);
 				onSubmit?.();

@@ -1,6 +1,7 @@
 import { DateType, ID } from './api.model';
 
 export type WalletDTO = {
+	id: ID;
 	userId: ID;
 	type: WalletTypeEnum;
 	currency: CurrencyTypeEnum;

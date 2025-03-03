@@ -1,33 +1,16 @@
 import { DateType, ID } from './api.model';
 import { QuestionDataDTO, QuestionDTO } from './question.model';
 import { SessionUserActionDTO } from './session.user.model';
+import { SessionTypes as SharedSessionTypes, SessionSettingsDTO } from '@shared/session/type';
 
-// export class Session implements SessionType {
-// id?: ID;
-// description?: string;
-// state: SessionStateType = SessionStateType.Draft;
-// title: string = '';
-// ownerId?: ID;
-// createdAt: DateType = new Date().toISOString();
-// updatedAt?: DateType;
-// questions?: QuestionDTO[] = [];
-// image?: string = undefined;
-// betType?: SessionBetType;
-// users?: ID[] = [];
-
-// 	constructor(data: SessionType | undefined) {
-// 		Object.assign(this, data);
-// 	}
-// }
+export enum SessionTypes {
+	USER_BET = SharedSessionTypes.USER_BET,
+	SPONSOR = SharedSessionTypes.SPONSOR,
+	SYSTEM_PRIZE = SharedSessionTypes.SYSTEM_PRIZE,
+	LOTTERY = SharedSessionTypes.LOTTERY,
+}
 
 export type SessionType = Omit<SessionDTO, '_id' | 'id' | 'ownerId'>;
-
-export enum SessionBetType {
-	None = 0,
-	Single = 1,
-	Auction = 2,
-	Range = 3,
-}
 
 export type SessionDTO = {
 	id: ID;
@@ -43,19 +26,14 @@ export type SessionDTO = {
 	userActions?: SessionUserActionDTO[];
 	users?: ID[];
 	type?: SessionTypes;
-	allowBids?: boolean;
-	betType?: SessionBetType;
-	hasNextAnswer?: boolean;
+	settings?: SessionSettingsDTO;
+	previewUrl?: string;
+	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
 	questionData?: QuestionDataDTO;
+	hash: string;
+	metadata?: { ownerName: string; ownerAvatar: string; };
 };
-
-export enum SessionTypes {
-	Single = 'single',
-	Multiple = 'multiple',
-	Range = 'range',
-	Auction = 'auction',
-}
 
 export type SessionData = Record<string, any>;
 

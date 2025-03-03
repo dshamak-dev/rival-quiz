@@ -1,12 +1,23 @@
 import { useContext, useMemo } from 'react';
-import { AppContext } from '@state/app.state';
+import { AppContext, AppState } from '@state/app.state';
 import { useLocation, useSubmit } from '@remix-run/react';
-// import { SUPER_ADMIN_ROLE } from '@model/user.role';
+import { USER_ROLE_TYPE } from '@model/user.role';
+import { useAPI } from '@api/api.hook';
+import { postUserRoleRequest } from '@api/user.api';
+import { UserDTO } from '@model/user.model';
 
 export function useAuth() {
-	const state = useContext(AppContext);
+	const { dispatch, user, wallet } = useContext(AppContext);
+	const { loading, dispatch: dispatchRole } = useAPI({
+		request: (role: USER_ROLE_TYPE) => postUserRoleRequest(role),
+		initialState: null,
+	});
 	const location = useLocation();
 	const handleSubmit = useSubmit();
+
+	const processing = useMemo(() => {
+		return loading;
+	}, [loading]);
 
 	const logOut = () => {
 		const path = location.pathname;
@@ -14,17 +25,27 @@ export function useAuth() {
 		handleSubmit({ from: path }, { method: 'post', action: '/logout', replace: true });
 	};
 
+	const requestRoleUpdate = (role: USER_ROLE_TYPE) => {
+		dispatchRole(role).then((res) => {
+			if (dispatch) {
+				dispatch((current: AppState) => {
+					return { ...current, user: { ...current?.user, ...res } };
+				});
+			}
+		});
+	};
+
+	const setUser = (user: UserDTO) => {
+		if (dispatch) {
+            dispatch((current: AppState) => {
+                return {...current, user };
+            });
+        }
+    };
+
 	const isLoggedIn = useMemo(() => {
-		return !!state.user;
-	}, [state?.user]);
+		return !!user;
+	}, [user]);
 
-	// const isRootUser = useMemo(() => {
-	// 	if (!state?.user) {
-	// 		return false;
-	// 	}
-
-	// 	return state.user.includes(SUPER_ADMIN_ROLE.id);
-	// }, [state?.user]);
-
-	return { user: state?.user, wallet: state?.wallet, isLoggedIn, logOut };
+	return { user, wallet, processing, isLoggedIn, logOut, requestRoleUpdate, setUser };
 }

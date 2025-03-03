@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { SessionStateType } from "./session.model";
 import { QuestionSchema } from "../question/question.schema";
 import { randomString } from "../tools/random.utils";
+import { SessionTypes } from "@shared/session/type";
 
 export const SessionSchema = new mongoose.Schema(
   {
@@ -11,20 +12,23 @@ export const SessionSchema = new mongoose.Schema(
       type: String,
       unique: true,
       default: function () {
-        return randomString();
+        const length = 8;
+        const reg = new RegExp(`(\\S{${length / 2}})`, "g");
+        return randomString(length).replace(reg, "$1-").slice(0, -1);
       },
     },
     ownerId: { type: String, required: true },
+    metadata: Object,
     state: { type: Number, default: SessionStateType.Draft },
     questions: { type: [QuestionSchema], default: [] },
     hasNextQuestion: { type: Boolean, default: true },
     activeQuestionId: { type: String },
-    allowBids: { type: Boolean, default: false },
+    settings: Object,
     type: {
       type: String,
-      enum: ["single", "multiple", "claw"],
-      default: "single",
+      enum: SessionTypes,
     },
+    image: String,
     users: { type: [String], default: [] },
   },
   { timestamps: true }

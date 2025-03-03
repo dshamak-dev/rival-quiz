@@ -21,12 +21,12 @@ export function SessionAdminResolveButton({
 	};
 
 	const text = useMemo(() => {
-		if (session.hasNextAnswer) {
+		if (session.hasNextQuestion) {
 			return 'Start Next Question';
 		}
 
 		return 'End Session';
-	}, [session?.hasNextAnswer]);
+	}, [session?.hasNextQuestion]);
 
 	return (
 		<Button {...buttonProps} layout="primary" loading={loading} onClick={handleSubmit}>

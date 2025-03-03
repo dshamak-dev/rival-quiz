@@ -4,7 +4,7 @@ module.exports = {
 		port: process.env.PORT || 3003,
 		host: process.env.HOST,
 	},
-  serverModuleFormat: "cjs",
+	serverModuleFormat: 'cjs',
 	future: {
 		v2_dev: true,
 	},

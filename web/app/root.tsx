@@ -10,7 +10,6 @@ import { ClientComponent } from '@view/client/client.component';
 import { getAuthCookie, getContinueUrl, logOut } from '@/auth';
 import { AppContextProvider } from 'src/state/app.state';
 import { WEB_API } from '@control/api.control';
-import { findUserByToken } from '@api/user.api';
 import { Navigation } from '@view/page/navigation';
 
 import logoImage from '@assets/logo.png';
@@ -22,45 +21,52 @@ import { HeaderMobile } from '@view/page/header.mobile';
 import { getUserWallet } from '@api/wallet.api';
 import { BroadcastProvider } from '@state/broadcast.state';
 import { DrawerProvider } from '@view/drawer/drawer.provider';
+import { APP_NAME } from 'src/constants/config.constants';
+import placeholderImage from '@assets/placeholders/p_01.png';
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
 
-	const { origin, host, protocol, port } = new URL(request.url);
+	const { host, protocol } = new URL(request.url);
 
 	const service = envVariables.API_SERVICE;
 	const API_URL = service ? `${protocol}//${envVariables.API_SERVICE}` : `${protocol}//${host}/api`;
 
 	WEB_API.setEnv({ ...envVariables, API_URL });
 
-	const token: string | null = await getAuthCookie(request);
+	const cookie: string | null = await getAuthCookie(request);
 
-	if (token) {
-		WEB_API.setJWT(token);
-	}
-
-	WEB_API.get('/health')
-		.then((res) => {
-			// console.log('API is up and running', res);
-		})
-		.catch((err) => {
-			// console.error('API is not available', { err });
-		});
+	WEB_API.fetch('/health', {
+		headers: { Cookie: cookie || '' },
+	}).catch(() => null);
 
 	let user = null;
 
-	if (token) {
-		user = await findUserByToken().catch((err) => null);
+	if (cookie) {
+		user = await WEB_API.fetch('users/current', {
+			method: 'GET',
+			headers: { Cookie: cookie },
+			credentials: 'include',
+		})
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
+
+				return null;
+			})
+			.catch((error) => {
+				return null;
+			});
 
 		if (!user) {
-			WEB_API.setJWT(null);
-			throw await logOut(getContinueUrl(request));
+			return logOut(getContinueUrl(request));
 		}
 	}
 
-	const wallet = await getUserWallet().catch((err) => null);
+	const wallet = await getUserWallet({ headers: { Cookie: cookie } }).catch((err) => null);
 
-	return { token, user, wallet, envVariables };
+	return { user, wallet, envVariables };
 }
 
 export const links: LinksFunction = () => [
@@ -98,7 +104,8 @@ export const links: LinksFunction = () => [
 	},
 ];
 
-const TITLE = 'Quiz Rivals';
+const TITLE = APP_NAME || '';
+const DESCRIPTION = `Platfor to create, share and play.`;
 
 export const meta: MetaFunction = () => {
 	return [
@@ -109,7 +116,19 @@ export const meta: MetaFunction = () => {
 		},
 		{
 			name: 'description',
-			content: 'Quizz Platform',
+			content: DESCRIPTION,
+		},
+		{
+			property: 'og:description',
+			content: DESCRIPTION,
+		},
+		{
+			property: 'og:type',
+			content: 'website',
+		},
+		{
+			property: 'og:url',
+			content: placeholderImage,
 		},
 	];
 };
@@ -126,18 +145,10 @@ export default function App() {
 		return deviceType != null && [DeviceType.Mobile].includes(deviceType);
 	}, [deviceType]);
 
+	const buildNumber = initialData?.envVariables?.BUILD_NUMBER || 'N/A';
+
 	useEffect(() => {
-		// const API_URL = `${window.location.protocol}//${window.location.hostname}:${initialData.envVariables.API_PORT}`;
-
 		WEB_API.setEnv({ ...initialData.envVariables, API_URL: '/api' });
-
-		if (initialData.token) {
-			WEB_API.setJWT(initialData.token);
-		}
-
-		WEB_API.get('/health').catch((err) => {
-			// console.error('API is not up and running', { err, url: WEB_API.apiUrl });
-		});
 	}, []);
 
 	return (
@@ -151,7 +162,7 @@ export default function App() {
 				<Links />
 			</head>
 			<body>
-				<main className="min-h-screen">
+				<main className={classNames('min-h-screen')} data-build={buildNumber}>
 					{isLoading ? (
 						<ClientComponent>
 							<div className="h-screen max-h-full flex items-center justify-center">
@@ -166,7 +177,7 @@ export default function App() {
 						<BroadcastProvider env={initialData.envVariables}>
 							<AppContextProvider value={initialData}>
 								<div
-									className={classNames('max-h-full h-screen', {
+									className={classNames('min-h-screen', {
 										'grid grid-rows-[auto_1fr]': !isMobileView && deviceType != null,
 										'grid grid-rows-[auto_1fr_auto]': isMobileView,
 									})}

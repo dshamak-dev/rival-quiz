@@ -1,15 +1,17 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { UserTokenDTO } from "./model";
+import { COOKIE_NAME } from "./user.action";
 
 const secret: string = process.env.JWT_SECRET || "secret_key";
 const salt: string = process.env.SECRET_SALT || "salt_key";
 
 export function generateToken(fields) {
-  // Implementation for generating a token
-  return jwt.sign(fields, secret, {
+  const token = jwt.sign(fields, secret, {
     expiresIn: "5d",
   });
+
+  return token;
 }
 
 export function generateEmailToken(user) {
@@ -25,17 +27,22 @@ export function generateTelegramToken(user) {
     id: user.meta?.id,
     name: user.meta?.name,
     authType: "telegram",
+    // secret,
   });
 }
 
 export function parseToken(token): UserTokenDTO | null {
-  const parsed = jwt.verify(token, secret);
+  try {
+    const parsed = jwt.verify(token, secret);
 
-  if (parsed) {
-    return parsed as UserTokenDTO;
+    if (parsed) {
+      return parsed as UserTokenDTO;
+    }
+
+    return null;
+  } catch (error) {
+    return null;
   }
-
-  return null;
 }
 
 export function encryptPassword(value) {
@@ -43,7 +50,15 @@ export function encryptPassword(value) {
 }
 
 export function getAuthToken(request) {
-  const token = request.headers.authorization?.split(" ")[1];
+  const cookie = request.cookies;
 
-  return token;
+  const token = cookie?.[COOKIE_NAME];
+
+  if (token) {
+    const parsed = parseToken(token);
+
+    return parsed ? token : null;
+  }
+
+  return null;
 }

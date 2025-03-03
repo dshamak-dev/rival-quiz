@@ -2,7 +2,7 @@ import express from "express";
 import {
   createSession,
   deleteSession,
-  getAllSessions,
+  findSessionByIdOrHash,
   getSessionById,
   patchSession,
   updateSession,
@@ -49,13 +49,14 @@ _router.get("/", async (req: any, res: any) => {
 });
 
 _router.get("/:id", async (req: any, res: any) => {
-  const sessionId = req.params.id;
-  const session = await getSessionById(sessionId).catch((err) => null);
+  const hashOrId = req.params.id;
+  const session = await findSessionByIdOrHash(hashOrId).catch((err) => null);
 
   if (!session) {
     return res.status(404).end();
   }
 
+  const sessionId = session.id;
   const user = await getRequestUser(req);
 
   const userActions = await getUserActions({
@@ -152,6 +153,10 @@ _router.post("/", async (req: any, res: any) => {
 
   createSession({
     ownerId: ownerId,
+    metadata: {
+      ownerName: owner.name || owner.tag,
+      ownerAvatar: owner.photoUrl,
+    },
     title: "",
     hash,
     ...(req.body ?? {}),
@@ -271,7 +276,10 @@ _router.post("/:id/resolve", async (req: any, res: any) => {
   // Start next question
   setSessionState(session, SessionStateType.Active)
     .then((updates) => {
-      res.status(200).json(updates);
+      return updateSession(sessionId, updates);
+    })
+    .then((updated) => {
+      res.status(200).json(updated);
     })
     .catch((err) => {
       res.statusMessage = err || "Can't update session.";
@@ -382,6 +390,7 @@ _router.post("/:id/users", async (req: any, res: any) => {
         USER_HISTORY_TYPE.JOIN_SESSION,
         {
           sessionId,
+          hash: session.hash
         }
       );
 

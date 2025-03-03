@@ -1,9 +1,9 @@
 import classNames from 'classnames';
-import { ChangeEvent, ComponentProps, HTMLInputTypeAttribute, useCallback, useMemo } from 'react';
+import { ChangeEvent, ComponentProps, FocusEvent, HTMLInputTypeAttribute, useCallback, useMemo } from 'react';
 import { FormLabel } from './form.label';
 import { getRandomId } from '@control/random';
 
-export type TextInputType = 'text' | 'email' | 'password';
+export type TextInputType = 'text' | 'email' | 'password' | 'number';
 
 export type TextInputSizeType = 'base' | 'small' | 'large';
 
@@ -21,6 +21,7 @@ export type TextInputProps = {
 	disabled?: boolean;
 	onChange?: (e: ChangeEvent<HTMLInputElement>, value: any) => void;
 	inputProps?: Record<string, any>;
+	onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
 };
 
 export function TextInput({
@@ -56,15 +57,17 @@ export function TextInput({
 	const inputProps = useMemo(() => {
 		const { inputProps, ...other } = props;
 
+		const isControlled = props.value !== undefined;
+
 		const nextProps = {
 			...inputProps,
 			...other,
-			defaultValue,
+			defaultValue: isControlled ? undefined : defaultValue,
 			type,
 			required: props.required,
 			id: `${id || ''}-${getRandomId()}`,
 			name: id,
-			value: props.value,
+			value: isControlled ? props.value || defaultValue : props.value,
 			placeholder: props.placeholder || undefined,
 		};
 

@@ -1,5 +1,6 @@
 import WebSocket, { WebSocketServer } from "ws";
 import dotenv from "dotenv";
+import { APP_NAME } from "@/config";
 
 export enum BroadcastMessageTypeEnum {
   INFO = "info",
@@ -52,7 +53,7 @@ class BroadcastProvider {
     const self = this;
 
     this.sendMessageToConnection(connection, {
-      text: "Welcome to the Quizlo broadcast!",
+      text: `Welcome to the ${APP_NAME} broadcast!`,
     });
 
     connection.isAlive = true;

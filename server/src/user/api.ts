@@ -88,7 +88,6 @@ export async function getUserHistory(userId: string, query = {}) {
     .sort({ created: -1 })
     .then((res) => res.map((it: any) => it.json))
     .then(async (items) => {
-      console.log("Draft", items);
       // Note: Populate item with session data
 
       let data: any[] = [];

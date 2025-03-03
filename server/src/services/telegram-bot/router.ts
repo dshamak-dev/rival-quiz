@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
-import { MessageExtraProps, TelegramBot } from "./model";
+import { TelegramBotManager } from "./model";
 
 dotenv.config();
 
@@ -14,90 +14,63 @@ router.use(express.static(PUBLIC_PATH));
 router.use(express.json());
 
 router.get("/health", (req, res) => {
-  const ok = TelegramBot.health;
+  const bots = TelegramBotManager.getBots();
 
-  res.status(ok ? 200 : 400).end();
+  res
+    .status(200)
+    .json(bots || [])
+    .end();
 });
 
-router.put("/state", (req, res) => {
-  const { status, token, wepApp } = req.body;
+router.put("/power", async (req, res) => {
+  const on = !!req.body.on;
 
-  if (!status) {
-    TelegramBot.stop();
-    res.status(200).end();
-    return;
+  if (on) {
+    return TelegramBotManager.init()
+      .then((data) => {
+        res.statusMessage = "Bots started successfully.";
+        res.status(200).json(data).end();
+      })
+      .catch((err) => {
+        res.statusMessage = err.message || "Failed to start bots.";
+        res.status(400).end();
+      });
   }
 
-  if (!token || !wepApp) {
-    res.statusMessage = "Invalid token or web app url";
-    res.status(400).end();
-    return;
-  }
+  await TelegramBotManager.stop();
 
-  const bot = TelegramBot.health ? TelegramBot.instance : new TelegramBot();
+  const bots = TelegramBotManager.getBots();
 
-  bot
-    .init(token, wepApp)
-    .then(() => {
-      res.status(200).json({ message: "Bot initialized successfully" });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.statusMessage = err.message || "Failed to initialize bot";
-      res.status(500).end();
-    });
+  res
+    .status(200)
+    .json(bots || [])
+    .end();
 });
 
 router.post("/message", (req, res) => {
-  const { id, message, markup } = req.body;
+  const { token, chat_id, message, markup } = req.body;
 
-  const bot = TelegramBot.instance;
-
-  if (!bot) {
-    res.statusMessage = "Telegram bot instance not found";
-    res.status(500).end();
-
-    return;
+  if (!message?.trim()) {
+    res.statusMessage = "Imvalid message.";
+    res.status(404).end();
   }
 
-  let parse_mode: MessageExtraProps['parse_mode'] | undefined = undefined;
-
-  switch (markup) {
-    case 'markdown': {
-      parse_mode ='MarkdownV2';
-      break;
+  TelegramBotManager.broadcastMessage(
+    message,
+    {
+      token,
+      chatId: chat_id,
+    },
+    {
+      parse_mode: markup,
     }
-    case 'html': {
-      parse_mode = 'HTML';
-      break;
-    }
-  }
-
-  if (!id) {
-    bot
-      .broadcastMessage(message, { parse_mode })
-      .then((payload) => {
-        res.status(200).json({ data: payload });
-      })
-      .catch((err) => {
-        console.error(err);
-
-        res.statusMessage =
-          err.message || "Failed to broadcast Telegram message";
-        res.status(500).end();
-      });
-    return;
-  }
-
-  bot
-    .sendChatMessage(id, message)
-    .then((payload) => {
-      res.status(200).json({ data: payload });
+  )
+    .then(() => {
+      res.statusMessage = "Message sent successfully.";
+      res.status(200).end();
     })
-    .catch((err) => {
-      console.error("Error sending Telegram message:", err);
-
-      res.statusMessage = err.message || "Failed to send Telegram message";
+    .catch((error) => {
+      res.statusMessage = error.message || "Failed to send message.";
       res.status(500).end();
     });
 });

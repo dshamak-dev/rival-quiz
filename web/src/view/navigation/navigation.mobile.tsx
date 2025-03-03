@@ -12,14 +12,13 @@ export function NavigationMobile() {
 
 	const links = useMemo(() => {
 		const _items: { link?: string; end?: boolean; icon?: IconType; text?: string }[] = [
-			{ link: '/', end: true, icon: 'House', text: 'Home' },
+			{ link: '/explore', end: true, icon: 'Grid', text: 'Explore' },
 		];
 
 		if (isLoggedIn) {
 			_items.push(
 				{ link: '/history', end: true, icon: 'ClockHistory', text: 'History' },
 				{ link: '/wallet', end: true, icon: 'Wallet2', text: 'Wallet' }
-				// { link: '/profile', end: true, icon: 'Person', text: 'Profile' }
 			);
 		}
 

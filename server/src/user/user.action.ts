@@ -6,7 +6,7 @@ import {
   getAuthToken,
 } from "./user.utils";
 import { TelegramMetaDTO, UserDTO } from "./model";
-import { Response } from "express";
+import { CookieOptions, Response } from "express";
 import { findUserByToken } from "./api";
 
 export async function findUserById(id) {
@@ -75,21 +75,19 @@ export async function createUserWithTelegram(
 
   const { authType, ...metadata } = payload;
 
-  return UserDBModel
-    .create({
-      name: metadata.name,
-      authType: "telegram",
-      photoUrl: metadata.photoUrl,
-      meta: metadata,
-    })
-    .then(normalizeuser);
+  return UserDBModel.create({
+    name: metadata.name,
+    authType: "telegram",
+    photoUrl: metadata.photoUrl,
+    meta: metadata,
+  }).then(normalizeuser);
 }
 
 export function updateUser(id, updates) {
   // Implementation for updating a user
-  return UserDBModel
-    .findByIdAndUpdate(id, updates, { new: true })
-    .then(normalizeuser);
+  return UserDBModel.findByIdAndUpdate(id, updates, { new: true }).then(
+    normalizeuser
+  );
 }
 
 export function deleteUser(id) {
@@ -120,8 +118,18 @@ export async function getRequestUser(request) {
 
   return findUserByToken(token);
 }
+const isProd = process.env.NODE_ENV === 'production';
+const cookieConfig: CookieOptions = {
+  httpOnly: true, // Prevents client-side access
+  secure: isProd, // Use HTTPS in production
+  sameSite: "lax", // Required for cross-origin cookies
+  // domain: "localhost", // Ensure this matches your deployment
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
 
-export function authorizeUser(user: UserDTO, response: any) {
+export const COOKIE_NAME = "authToken";
+export function authorizeUser(user: UserDTO, response: Response) {
   let token: string | null = null;
 
   switch (user.authType) {
@@ -135,17 +143,7 @@ export function authorizeUser(user: UserDTO, response: any) {
     }
   }
 
-  response.cookie("authToken", token, {
-    httpOnly: false,
-  });
+  response.cookie(COOKIE_NAME, token, cookieConfig);
 
   return token;
-
-  // response.cookie("token", token, {
-  //   httpOnly: false,
-  //   // path: "/",
-  //   // sameSite = only send cookie if the request is coming from the same origin
-  //   // sameSite: "lax", // "strict" | "lax" | "none" (secure must be true)
-  //   maxAge: 3600000 * 6, // 6 hours
-  // });
 }
