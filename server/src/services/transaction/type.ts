@@ -11,4 +11,5 @@ export type TransactionPayload = {
   details: string;
   data?: Record<string, any>;
   reference?: string;
+  unique?: boolean;
 };

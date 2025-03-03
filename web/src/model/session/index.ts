@@ -1,6 +1,6 @@
 import { DateType, ID } from '@model/api.model';
 import { QuestionDTO } from '@model/question.model';
-import { SessionBetType, SessionData, SessionDTO, SessionStateType, SessionTypes } from '@model/session.model';
+import { SessionData, SessionDTO, SessionStateType, SessionTypes } from '@model/session.model';
 
 export type SessionModelType = Omit<SessionDTO, 'id' | 'ownerId'>;
 
@@ -14,7 +14,6 @@ export class Session implements SessionModelType {
 	updatedAt?: DateType;
 	questions?: QuestionDTO[] = [];
 	image?: string = undefined;
-	betType?: SessionBetType;
 	users?: ID[] = [];
 	type?: SessionTypes;
 	data?: SessionData;
@@ -39,7 +38,6 @@ export class Session implements SessionModelType {
 			type: this.type || this.data?.type,
 			settings: this.origin?.settings,
 			activeQuestionId: this.origin?.activeQuestionId,
-			betType: this.origin?.betType,
 		};
 	}
 

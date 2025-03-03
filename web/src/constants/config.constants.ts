@@ -1,1 +1,1 @@
-export const APP_NAME = 'Quizlov';
+export const APP_NAME = 'Hype Hub';

@@ -7,7 +7,9 @@ import { useLoaderData, useParams } from '@remix-run/react';
 import { Icon } from '@view/icon';
 import { SessionView } from '@view/session/view/session.view';
 import { Typography } from '@view/typography/typography';
-import { Suspense } from 'react';
+// import { Suspense } from 'react';
+import { APP_NAME } from 'src/constants/config.constants';
+import placeholderImage from '@assets/placeholders/p_01.png';
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const headers = await getAuthHeaders(request).catch((err) => null);
@@ -27,9 +29,9 @@ export const meta: MetaFunction<typeof loader> = ({ params, data }) => {
 		return [];
 	}
 
-	const title = data?.title || 'Quizlov';
+	const title = data?.title || APP_NAME || 'Hype Hub';
 	const description = data?.description;
-	const imageUrl = data?.image || '';
+	const imageUrl = data?.image || placeholderImage;
 
 	return [
 		{ title: title },

@@ -5,7 +5,9 @@ import { TransactionStatusEnum } from "./model";
 
 const schema = new mongoose.Schema({
   senderId: { type: String, required: true },
+  senderType: { type: String },
   receiverId: { type: String, required: true },
+  receiverType: { type: String },
   type: { type: String, required: true },
   amount: Number,
   data: Object,

@@ -76,7 +76,7 @@ export function NavigationDesktop() {
 				<div className="flex items-center justify-end gap-6">
 					{isLoggedIn ? (
 						<>
-							<Badge>
+							<Badge visible>
 								<Icon name="Bell" size={16} className="animate-bounce" />
 							</Badge>
 							<WalletBalance />

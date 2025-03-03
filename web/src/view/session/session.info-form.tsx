@@ -1,12 +1,10 @@
 import { compareObjects } from '@control/object.utils';
 import { SessionDTO, SessionStateType, SessionTypes } from '@model/session.model';
-import { Button } from '@view/button/button';
-import { Select } from '@view/form/form.select';
 import { TextInput } from '@view/form/form.text-input';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
 import { useEffect, useMemo, useState } from 'react';
-import { sessionBetOptions, sessionStateLabels } from 'src/constants/session.constant';
+import { sessionStateLabels } from 'src/constants/session.constant';
 
 export type SessionInfoFormProps = {
 	initialValue: SessionDTO;

@@ -20,6 +20,12 @@ export async function createTransaction(
     return Promise.reject("Invalid transaction amount");
   }
 
+  const canCreate = await canCreateTransaction(from, to, payload);
+
+  if (!canCreate) {
+    return Promise.reject("Failed to create transaction");
+  }
+
   if (from.type === "user") {
     const [ok, walletError] = await expandResponse(
       addWalletBalanceByUserId(from.id, -amount)
@@ -41,7 +47,9 @@ export async function createTransaction(
 
   const transaction = await create({
     senderId: from.id,
+    senderType: from.type,
     receiverId: to.id,
+    receiverType: to.type,
     type: payload?.type || "income",
     amount: payload.amount,
     data: {
@@ -111,6 +119,28 @@ export async function validateTransactionById(id) {
   }
 
   return validateTransaction(transaction);
+}
+
+export async function canCreateTransaction(
+  from: TransactionParty,
+  to: TransactionParty,
+  payload: TransactionPayload
+): Promise<boolean> {
+  if (!payload.unique) {
+    return true;
+  }
+
+  const samePending = await model.findOne({
+    senderId: from.id,
+    receiverId: to.id,
+    status: TransactionStatusEnum.Pending,
+  });
+
+  return samePending != null;
+}
+
+export async function findTransaction(query) {
+  return model.findOne(query);
 }
 
 export async function validateTransaction(transaction) {

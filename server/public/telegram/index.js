@@ -2,47 +2,29 @@ document.addEventListener("DOMContentLoaded", start);
 
 async function start() {
   const loaderEl = document.getElementById("loader");
-  const botEl = document.getElementById("bot");
-  botEl.classList.add("hidden");
   const messageEl = document.getElementById("message");
   messageEl.classList.add("hidden");
 
   toggleBotStatusButton(false);
 
-  const stopBotEl = document.getElementById("stop-bot");
-  stopBotEl.addEventListener("click", async () => {
-    await toggleBotStatus({ status: false }).then((res) => {
-      if (res.ok) {
-        messageEl.classList.add("hidden");
-        botEl.classList.remove("hidden");
-        toggleBotStatusButton(false);
-      } else {
-        messageEl.classList.remove("hidden");
-        botEl.classList.add("hidden");
-        toggleBotStatusButton(true);
-      }
-    });
-  });
-
-  fetch("/api/telegram/health")
+  const bots = await fetch("/api/telegram/health")
     .then((res) => {
       if (res.ok) {
-        stopBotEl.classList.remove("hidden");
         messageEl.classList.remove("hidden");
+
+        return res.json();
       } else {
         messageEl.classList.add("hidden");
-        botEl.classList.remove("hidden");
       }
     })
     .finally(() => {
       loaderEl.classList.add("hidden");
     });
 
-  initBotForm(document.getElementById("bot-form"));
-  initMessageForm(document.getElementById("message-form"));
+  initMessageForm(document.getElementById("message-form"), bots);
 }
 
-function initBotForm(el) {
+function setBotData(el) {
   el?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -59,7 +41,6 @@ function initBotForm(el) {
         );
       }
 
-      document.getElementById("bot")?.classList.add("hidden");
       document.getElementById("message")?.classList.remove("hidden");
       toggleBotStatusButton(true);
 
@@ -74,7 +55,7 @@ function initBotForm(el) {
 
 function toggleBotStatusButton(visible = false) {
   const stopBotEl = document.getElementById("stop-bot");
-  stopBotEl.classList.toggle("hidden", !visible);
+  stopBotEl?.classList?.toggle("hidden", !visible);
 }
 
 async function toggleBotStatus(payload) {
@@ -87,19 +68,68 @@ async function toggleBotStatus(payload) {
   });
 }
 
-function initMessageForm(el) {
+function setChatIdSelect(chats) {
+  const chatIdSelectEl = document.getElementById("chat_id");
+
+  if (!chatIdSelectEl) {
+    return;
+  }
+
+  chatIdSelectEl.setAttribute("disabled", true);
+  chatIdSelectEl.innerHTML = `<option value="">Send to All</option>`;
+
+  if (chats?.length && chatIdSelectEl) {
+    chatIdSelectEl.removeAttribute("disabled");
+    chatIdSelectEl.innerHTML += chats
+      .map((id) => {
+        return `<option value="${id}">${id}</option>`;
+      })
+      .join("");
+  }
+}
+
+function initMessageForm(el, bots = []) {
   const markupEl = document.getElementById("markup");
-  if (markupEl){
-    markupEl.innerHTML = ['markdown', 'html'].map((type) => {
-      return `<option value="${type}">${type}</option>`;
-    }).join('');
+  if (markupEl) {
+    markupEl.innerHTML = ["markdown", "html"]
+      .map((type) => {
+        return `<option value="${type}">${type}</option>`;
+      })
+      .join("");
+  }
+
+  const botTokenSelectEl = document.getElementById("bot_token");
+
+  if (bots?.length && botTokenSelectEl) {
+    botTokenSelectEl.removeAttribute("disabled");
+    botTokenSelectEl.innerHTML = `<option selected value="">Send to All</option>`;
+
+    botTokenSelectEl.onchange = (e) => {
+      const value = e.target.value;
+
+      if (!value) {
+        setChatIdSelect([]);
+        return;
+      }
+
+      const chats = bots.find((bot) => bot.token === value)?.chats;
+
+      setChatIdSelect(chats);
+    };
+
+    botTokenSelectEl.innerHTML += bots
+      .map(({ token, webAppURL }) => {
+        return `<option value="${token}">${webAppURL}</option>`;
+      })
+      .join("");
   }
 
   el.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
 
-    const id = formData.get("id");
+    const chat_id = formData.get("chat_id");
+    const token = formData.get("token");
     const markup = formData.get("markup");
     const message = formData.get("message");
 
@@ -109,7 +139,7 @@ function initMessageForm(el) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id, message, markup }),
+        body: JSON.stringify({ token, chat_id, message, markup }),
       });
 
       if (!response.ok) {

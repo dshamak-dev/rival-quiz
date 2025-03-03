@@ -236,13 +236,13 @@ export default function ProfileSessionPage() {
 										</Typography>
 										<Typography>{it.text}</Typography>
 									</div>
-									<Button
+									{it.enabled ? <Button
 										layout={it.enabled ? 'primary' : undefined}
 										onClick={() => handleSelectType(it.value)}
 										disabled={!it.enabled || isBusy}
 									>
 										Select
-									</Button>
+									</Button> : <Typography size="custom" className="py-2 text-center text-gray-400">Not available</Typography>}
 								</div>
 							);
 						})}

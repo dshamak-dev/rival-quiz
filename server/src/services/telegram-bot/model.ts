@@ -1,44 +1,140 @@
 import { Telegraf } from "telegraf";
-import { getChatIds, rememberTelegramChatId } from "./actions";
+import { rememberTelegramChatId } from "./actions";
 import { delay } from "../../tools/async.utils";
 import { ExtraReplyMessage } from "telegraf/typings/telegram-types";
+import { fetchTelegramBots } from "./api";
+import { addLog } from "../logger/api";
+import { escapeMarkdownV2, urlJoin } from "@shared/common/url.helpers";
 
-export type MessageExtraProps = ExtraReplyMessage;
+export type MessageExtraProps = ExtraReplyMessage & {
+  link?: string;
+};
+
+export class TelegramBotManager {
+  static bots: TelegramBot[] = [];
+
+  static getBots() {
+    return TelegramBotManager.bots.map((bot) => {
+      const { token, webAppURL, chats } = bot;
+
+      return {
+        token,
+        webAppURL,
+        chats,
+      };
+    });
+  }
+
+  static findBotById(id: string) {
+    return TelegramBotManager.bots.find((bot) => bot.token === id);
+  }
+
+  static async broadcastMessage(
+    message: string,
+    params: { token?: string; chatId?: string },
+    extra: MessageExtraProps
+  ) {
+    const bots = TelegramBotManager.bots?.filter((bot) => {
+      return !params.token || bot.token === params.token;
+    });
+
+    return Promise.all(
+      bots.map((bot) => {
+        if (params.chatId) {
+          return bot.sendChatMessage(params.chatId, message, extra);
+        }
+
+        return bot.broadcastMessage(message, extra);
+      })
+    );
+  }
+
+  static async init() {
+    TelegramBotManager.bots = [];
+
+    const bots = await fetchTelegramBots().catch((err) => {
+      addLog({
+        source: "telegram-bot-manager-init",
+        message:
+          typeof err === "string"
+            ? err
+            : err?.message ?? "Failed to initialize Telegram bots",
+        data: {},
+      });
+      return null;
+    });
+
+    if (bots?.length) {
+      bots.forEach((data) => {
+        if ((data.token, data.webAppURL)) {
+          const bot = new TelegramBot();
+
+          bot.init(data.token, data.webAppURL, data.chats);
+
+          TelegramBotManager.bots.push(bot);
+        }
+      });
+    }
+  }
+}
 
 export class TelegramBot {
-  static instance: TelegramBot;
+  instance?: TelegramBot;
   bot?: Telegraf;
   token?: string;
-  webAppUrl?: string;
+  webAppURL?: string;
   chats: string[] = [];
 
-  static get health() {
-    const health = !!TelegramBot.instance?.bot;
+  get health() {
+    const health = !!this.instance?.bot;
 
     return health;
   }
 
   constructor() {
-    TelegramBot.instance = this;
+    // TelegramBot.instance = this;
 
     return this;
   }
 
-  static getInstance(): TelegramBot {
-    if (!TelegramBot.instance) {
+  getInstance(): TelegramBot {
+    if (!this.instance) {
       throw new Error("TelegramBot instance is not initialized");
     }
 
-    return TelegramBot.instance;
+    return this.instance;
   }
 
   async sendChatMessage(id: string, message, params: MessageExtraProps = {}) {
+    const { link, ...extras } = params;
+
     const messageParams: ExtraReplyMessage = {
       ...this.getInitialMessageProps(),
-      ...params,
+      ...extras,
     };
 
-    return this.bot?.telegram?.sendMessage(id, message, messageParams);
+    let chatMessage = message;
+
+    if (
+      link &&
+      this.webAppURL &&
+      params.parse_mode &&
+      ["markdownv2", "markdown"].includes(params.parse_mode.toLocaleLowerCase())
+    ) {
+      let targetLink = link;
+
+      try {
+        targetLink = urlJoin(this.webAppURL, link);
+      } catch (err) {
+        console.log(err, this.webAppURL, link);
+      }
+
+      targetLink = escapeMarkdownV2(targetLink);
+
+      chatMessage += `\n[Visit direct](${targetLink})`;
+    }
+
+    return this.bot?.telegram?.sendMessage(id, chatMessage, messageParams);
   }
 
   async broadcastMessage(message, params: MessageExtraProps) {
@@ -56,7 +152,7 @@ export class TelegramBot {
     return { ok: true };
   }
 
-  static stop() {
+  stop() {
     if (!this.instance?.bot) {
       return;
     }
@@ -65,26 +161,28 @@ export class TelegramBot {
     this.instance.bot = undefined;
   }
 
-  async init(token, webAppUrl) {
+  async init(token, webAppURL, chats: string[] = []) {
     if (!token) {
       return Promise.reject("Invalid Telegram bot token");
     }
 
     this.token = token;
-    this.webAppUrl = webAppUrl;
-    this.chats = await getChatIds().catch(err => []);
+    this.webAppURL = webAppURL;
+    this.chats = chats || [];
 
     const bot = (this.bot = new Telegraf(token));
 
-    await bot.telegram.setChatMenuButton({
-      menuButton: {
-        type: "web_app",
-        text: "Play 🎲",
-        web_app: {
-          url: webAppUrl,
+    const ok = await bot.telegram
+      .setChatMenuButton({
+        menuButton: {
+          type: "web_app",
+          text: "Play 🎲",
+          web_app: {
+            url: webAppURL,
+          },
         },
-      },
-    }).catch(err => null);
+      })
+      .catch((err) => null);
 
     bot.start((ctx) => {
       this.registerChat(ctx);
@@ -95,7 +193,7 @@ export class TelegramBot {
             [
               {
                 text: "Open App 🚀",
-                web_app: { url: webAppUrl },
+                web_app: { url: webAppURL },
               },
             ],
           ],
@@ -117,16 +215,20 @@ export class TelegramBot {
     const self = this;
 
     if (chatId && this.chats.includes(chatId) === false) {
-      rememberTelegramChatId(chatId).then((updated) => {
-        self.chats = updated;
-      });
+      rememberTelegramChatId(chatId)
+        .then((nextChats) => {
+          self.chats = nextChats || [];
+        })
+        .catch((err) => {
+          return null;
+        });
     }
   }
 
   getInitialMessageProps(): {
     reply_markup?: ExtraReplyMessage["reply_markup"];
   } {
-    if (!this.webAppUrl) {
+    if (!this.webAppURL) {
       return {};
     }
 
@@ -136,7 +238,7 @@ export class TelegramBot {
           [
             {
               text: "Open App 🚀",
-              web_app: { url: this.webAppUrl },
+              web_app: { url: this.webAppURL },
             },
           ],
         ],

@@ -7,17 +7,10 @@ export enum SessionTypes {
 	USER_BET = SharedSessionTypes.USER_BET,
 	SPONSOR = SharedSessionTypes.SPONSOR,
 	SYSTEM_PRIZE = SharedSessionTypes.SYSTEM_PRIZE,
-	AUCTION = SharedSessionTypes.AUCTION,
+	LOTTERY = SharedSessionTypes.LOTTERY,
 }
 
 export type SessionType = Omit<SessionDTO, '_id' | 'id' | 'ownerId'>;
-
-export enum SessionBetType {
-	None = 0,
-	Single = 1,
-	Auction = 2,
-	Range = 3,
-}
 
 export type SessionDTO = {
 	id: ID;
@@ -34,23 +27,12 @@ export type SessionDTO = {
 	users?: ID[];
 	type?: SessionTypes;
 	settings?: SessionSettingsDTO;
-	betType?: SessionBetType;
 	previewUrl?: string;
 	hasNextQuestion?: boolean;
 	activeQuestionId?: ID;
 	questionData?: QuestionDataDTO;
 	metadata?: { ownerName: string; ownerAvatar: string; };
 };
-
-// export enum SessionTypes {
-// 	USER_BET = 'user_bet',
-// 	BANK = 'bank',
-// 	SYSTEM_PRIZE = 'system_prize',
-// 	// Single = 'single',
-// 	// Multiple = 'multiple',
-// 	// Range = 'range',
-// 	AUCTION = 'auction',
-// }
 
 export type SessionData = Record<string, any>;
 

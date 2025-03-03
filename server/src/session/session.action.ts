@@ -9,6 +9,7 @@ import {
 import { normalizeSession } from "./session.utils";
 import {
   createTransaction,
+  findTransaction,
   validateTransactionById,
 } from "../services/transaction/action";
 import {
@@ -30,6 +31,8 @@ import {
   TransactionParty,
   TransactionPayload,
 } from "@/services/transaction/type";
+import { createNotification } from "@/services/notification/api";
+import { TransactionStatusEnum } from "@/services/transaction/model";
 
 export const sessionDBModel = mongoose.model("sessions", SessionSchema);
 
@@ -199,17 +202,25 @@ export async function setSessionState(session, nextState: SessionStateType) {
     case SessionStateType.Published: {
       // If previous state was locked, unlock it and remove lock record
       if (session.type === SessionTypes.SPONSOR) {
-        const [transaction, transactionError] = await expandResponse(
-          createTransaction(
-            { id: session.ownerId, type: "user" },
-            { id: "0", type: "system" },
-            {
-              type: "deposit",
-              amount: session.settings.pool,
-              details: `Sponsorship deposit for session ${session.title}`,
-            }
-          )
-        );
+        const from: TransactionParty = { id: session.ownerId, type: "user" };
+        const to: TransactionParty = { id: "0", type: "system" };
+        const payload: TransactionPayload = {
+          unique: true,
+          type: "deposit",
+          amount: session.settings.pool,
+          details: `Sponsorship deposit for session ${session.title}`,
+        };
+
+        const pendingDeposit = await findTransaction({
+          senderId: from.id,
+          receiverId: to.id,
+          status: TransactionStatusEnum.Pending,
+        });
+        const hasPending = pendingDeposit != null;
+
+        const [transaction, transactionError] = await (hasPending
+          ? Promise.resolve([hasPending, null])
+          : expandResponse(createTransaction(from, to, payload)));
 
         if (transactionError || !transaction) {
           await addLog({
@@ -246,6 +257,22 @@ export async function setSessionState(session, nextState: SessionStateType) {
           },
         });
       }
+
+      await createNotification({
+        title: "Session published",
+        content: [`Title: ${session.title}`, session.description]
+          .filter((it) => !!it?.trim())
+          .join("\n"),
+        target: {
+          type: "system",
+        },
+        type: "info",
+        url: `/session/${session.id}`,
+      }).catch((error) => {
+        console.log("Failed to send notification", error);
+
+        return null;
+      });
 
       break;
     }

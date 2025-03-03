@@ -21,6 +21,8 @@ import { HeaderMobile } from '@view/page/header.mobile';
 import { getUserWallet } from '@api/wallet.api';
 import { BroadcastProvider } from '@state/broadcast.state';
 import { DrawerProvider } from '@view/drawer/drawer.provider';
+import { APP_NAME } from 'src/constants/config.constants';
+import placeholderImage from '@assets/placeholders/p_01.png';
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const envVariables = process.env;
@@ -102,7 +104,8 @@ export const links: LinksFunction = () => [
 	},
 ];
 
-const TITLE = 'Quiz Rivals';
+const TITLE = APP_NAME || '';
+const DESCRIPTION = `Platfor to create, share and play.`;
 
 export const meta: MetaFunction = () => {
 	return [
@@ -113,7 +116,19 @@ export const meta: MetaFunction = () => {
 		},
 		{
 			name: 'description',
-			content: 'Quizz Platform',
+			content: DESCRIPTION,
+		},
+		{
+			property: 'og:description',
+			content: DESCRIPTION,
+		},
+		{
+			property: 'og:type',
+			content: 'website',
+		},
+		{
+			property: 'og:url',
+			content: placeholderImage,
 		},
 	];
 };
@@ -147,10 +162,7 @@ export default function App() {
 				<Links />
 			</head>
 			<body>
-				<main
-					className={classNames('min-h-screen')}
-					data-build={buildNumber}
-				>
+				<main className={classNames('min-h-screen')} data-build={buildNumber}>
 					{isLoading ? (
 						<ClientComponent>
 							<div className="h-screen max-h-full flex items-center justify-center">
