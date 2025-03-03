@@ -1,8 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
-import { MessageExtraProps, TelegramBot, TelegramBotManager } from "./model";
-import { addLog } from "../logger/api";
+import { TelegramBotManager } from "./model";
 
 dotenv.config();
 
@@ -17,13 +16,35 @@ router.use(express.json());
 router.get("/health", (req, res) => {
   const bots = TelegramBotManager.getBots();
 
-  if (!bots?.length) {
-    res.statusMessage = "No bots are available";
-    res.status(400).end();
-    return;
+  res
+    .status(200)
+    .json(bots || [])
+    .end();
+});
+
+router.put("/power", async (req, res) => {
+  const on = !!req.body.on;
+
+  if (on) {
+    return TelegramBotManager.init()
+      .then((data) => {
+        res.statusMessage = "Bots started successfully.";
+        res.status(200).json(data).end();
+      })
+      .catch((err) => {
+        res.statusMessage = err.message || "Failed to start bots.";
+        res.status(400).end();
+      });
   }
 
-  res.status(200).json(bots).end();
+  await TelegramBotManager.stop();
+
+  const bots = TelegramBotManager.getBots();
+
+  res
+    .status(200)
+    .json(bots || [])
+    .end();
 });
 
 router.post("/message", (req, res) => {

@@ -14,13 +14,14 @@ export class TelegramBotManager {
   static bots: TelegramBot[] = [];
 
   static getBots() {
-    return TelegramBotManager.bots.map((bot) => {
-      const { token, webAppURL, chats } = bot;
+    return TelegramBotManager.bots.map((model) => {
+      const { token, webAppURL, chats, bot } = model;
 
       return {
         token,
         webAppURL,
         chats,
+        active: model.health,
       };
     });
   }
@@ -49,6 +50,14 @@ export class TelegramBotManager {
     );
   }
 
+  static async stop() {
+    for (const model of this.bots) {
+      model.stop();
+    }
+
+    return true;
+  }
+
   static async init() {
     TelegramBotManager.bots = [];
 
@@ -65,7 +74,7 @@ export class TelegramBotManager {
     });
 
     if (bots?.length) {
-      bots.forEach((data) => {
+      for (const data of bots) {
         if ((data.token, data.webAppURL)) {
           const bot = new TelegramBot();
 
@@ -73,8 +82,10 @@ export class TelegramBotManager {
 
           TelegramBotManager.bots.push(bot);
         }
-      });
+      }
     }
+
+    return this.getBots();
   }
 }
 
@@ -86,7 +97,7 @@ export class TelegramBot {
   chats: string[] = [];
 
   get health() {
-    const health = !!this.instance?.bot;
+    const health = this.bot != null;
 
     return health;
   }
@@ -153,12 +164,12 @@ export class TelegramBot {
   }
 
   stop() {
-    if (!this.instance?.bot) {
+    if (!this.bot) {
       return;
     }
 
-    this.instance.bot.stop();
-    this.instance.bot = undefined;
+    this.bot.stop();
+    this.bot = undefined;
   }
 
   async init(token, webAppURL, chats: string[] = []) {
