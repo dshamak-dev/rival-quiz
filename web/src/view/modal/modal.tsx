@@ -99,25 +99,25 @@ export function Modal(props: ModalProps) {
 					<div className={styles.footer}>
 						{props.cancelButtonProps !== null && (
 							<Button
-								{...props.cancelButtonProps}
 								size="small"
+								{...props.cancelButtonProps}
 								onClick={() => handleVisibilityChange('cancel')}
 								disabled={isLoading}
 							>
-								Cancel
+								{props.cancelButtonProps?.children || 'Cancel'}
 							</Button>
 						)}
 						{props.okButtonProps !== null && (
 							<Button
-								{...props.okButtonProps}
 								layout="primary"
 								size="small"
 								className="min-w-[80px]"
+								{...props.okButtonProps}
 								onClick={() => handleVisibilityChange('close')}
 								disabled={props.okButtonProps?.disabled || isLoading}
 								loading={isLoading}
 							>
-								OK
+								{props.okButtonProps?.children || 'OK'}
 							</Button>
 						)}
 					</div>

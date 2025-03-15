@@ -88,7 +88,7 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 						<Image
 							className="h-12 w-12 object-cover rounded"
 							src={session.metadata?.ownerAvatar}
-							placeholderImage={placeholderImage}
+							placeholderImage="/logo"
 						/>
 					</div>
 					<div className="flex flex-col">

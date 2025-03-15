@@ -12,7 +12,6 @@ import { AppContextProvider } from 'src/state/app.state';
 import { WEB_API } from '@control/api.control';
 import { Navigation } from '@view/page/navigation';
 
-import logoImage from '@assets/logo.png';
 import { Image } from '@view/image/image';
 import { useUI } from '@control/ui.control';
 import classNames from 'classnames';
@@ -166,11 +165,7 @@ export default function App() {
 					{isLoading ? (
 						<ClientComponent>
 							<div className="h-screen max-h-full flex items-center justify-center">
-								<Image
-									src={logoImage}
-									style={{ width: 48 }}
-									className="relative -top-6 animate-bounce"
-								/>
+								<Image src="/logo" style={{ width: 48 }} className="relative -top-6 animate-bounce" />
 							</div>
 						</ClientComponent>
 					) : (

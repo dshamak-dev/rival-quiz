@@ -126,8 +126,12 @@ export class TelegramBot {
     };
 
     if (!messageParams.link_preview_options && preview) {
+      const previewUrl = preview.startsWith("/")
+        ? urlJoin(this.webAppURL, preview)
+        : preview;
+
       messageParams.link_preview_options = {
-        url: preview,
+        url: previewUrl,
       };
     }
 

@@ -1,6 +1,5 @@
 import { Typography } from '@view/typography/typography';
 
-import logoImage from '@assets/logo.png';
 import { Image } from '@view/image/image';
 import { findSessions } from '@api/session.api';
 import { SessionList } from '@view/session/session.list';
@@ -12,11 +11,13 @@ import { LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 
 export async function loader({ request }: LoaderFunctionArgs): Promise<SessionDTO[]> {
-	const data = await findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`).then(sessions => sessions?.sort((a, b) => {
-		return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-	})).catch(
-		() => undefined
-	);
+	const data = await findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`)
+		.then((sessions) =>
+			sessions?.sort((a, b) => {
+				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+			})
+		)
+		.catch(() => undefined);
 
 	return data || [];
 }
@@ -34,7 +35,7 @@ export default function LandingPage() {
 		>
 			{!data ? (
 				<div className="h-screen max-h-full flex flex-col items-center justify-center">
-					<Image src={logoImage} style={{ width: 48 }} className="relative -top-6 animate-bounce" />
+					<Image src="/logo" style={{ width: 48 }} className="relative -top-6 animate-bounce" />
 					<Typography className="">{APP_NAME} starts here</Typography>
 				</div>
 			) : (

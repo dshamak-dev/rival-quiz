@@ -8,8 +8,7 @@ import { useLocation, useNavigate } from '@remix-run/react';
 import { Image } from '@view/image/image';
 import { Typography } from '@view/typography/typography';
 
-import logoImage from '@assets/logo.png';
-import { WalletBalance } from '@view/wallet/wallet.balance';
+import { WalletBalance } from 'src/wallet/view/wallet.balance';
 import { Anchor } from '@view/anchor';
 import { useBroadcast } from '@state/broadcast.state';
 import { APP_NAME } from 'src/constants/config.constants';
@@ -46,7 +45,7 @@ export function HeaderMobile() {
 					</div>
 				) : (
 					<Anchor href="/explore" className="flex gap-2 items-center text-black">
-						<Image src={logoImage} style={{ width: 24 }} />
+						<Image src="/logo" style={{ width: 24 }} />
 						<Badge visible={isConnected} color="#71f8ce" transform="translateX(8px) translateY(4px)">
 							<Typography className="uppercase text-xs font-black">{APP_NAME}</Typography>
 						</Badge>

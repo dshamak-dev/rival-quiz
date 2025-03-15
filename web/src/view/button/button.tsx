@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { ButtonHTMLAttributes, PropsWithChildren, useMemo } from 'react';
 
 export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
-	layout?: 'primary' | 'secondary' | 'tertiary' | 'outline';
+	layout?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'text';
 	size?: ButtonSizeType;
 	loading?: boolean;
 	faded?: boolean;
@@ -17,9 +17,9 @@ export function Button({ className, layout, size = 'small', loading, children, f
 			case 'primary':
 				return 'bg-black text-white';
 			case 'secondary':
-				return 'bg-sky-300 text-black';
+				return 'border border-black/20 bg-sky-300 text-black';
 			case 'tertiary':
-				return 'bg-amber-300 text-black';
+				return 'border border-black/20 bg-amber-300 text-black';
 			default:
 				return 'border border-black bg-white text-black';
 		}
@@ -35,6 +35,10 @@ export function Button({ className, layout, size = 'small', loading, children, f
 				return 'text-base py-2 px-4';
 		}
 	}, [size]);
+
+	if (layout === 'text') {
+		return <div {...props}>{children}</div>;
+	}
 
 	return (
 		<button
