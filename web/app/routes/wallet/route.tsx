@@ -4,6 +4,7 @@ import { createWallet } from '@api/wallet.api';
 import { TransactionDTO } from '@model/transaction.model';
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
+import { InvoiceStatus } from '@shared/invoice/type';
 import { useAuth } from '@state/auth.hook';
 import { Button } from '@view/button/button';
 import { Icon } from '@view/icon';
@@ -16,6 +17,8 @@ import { WalletCard } from 'src/wallet/view/wallet.card';
 import { WalletDepositButton } from 'src/wallet/view/wallet.deposit-button';
 import { WalletWithdrawButton } from 'src/wallet/view/wallet.withdraw-button';
 
+import styles from './wallet.module.css';
+
 type LoaderPayload = { transactions: TransactionDTO[] | null; invoices: InvoiceDTO[] | null } | null;
 
 export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderPayload> {
@@ -26,7 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderPay
 	}
 
 	const transactions = await getUserTransactions({ headers }).catch((err) => null);
-	const invoices = await getUserInvoices({ headers }).catch((err) => {
+	const invoices = await getUserInvoices({ headers }).then(res => res.filter(it => it.status === InvoiceStatus.DRAFT)).catch((err) => {
 		return null;
 	});
 
@@ -46,7 +49,7 @@ export default function ProfileWalletPage() {
 	const invoices: InvoiceDTO[] | null = loaderData?.invoices || [];
 
 	return (
-		<div className="grid grid-rows-[auto_1fr] gap-4 h-full p-4">
+		<div className={styles.content}>
 			<div className="flex flex-col gap-4">
 				{wallet ? (
 					<WalletCard item={wallet} />
@@ -75,15 +78,15 @@ export default function ProfileWalletPage() {
 					</div>
 				</section>
 			</div>
-			<div className="relative h-full overflow-hidden flex flex-col gap-4">
+			<div className="relative h-full overflow-hidden flex flex-col gap-4 h-full overflow-y-auto">
 				{!!invoices?.length && (
 					<div className="flex flex-col gap-1">
-						<Typography className="sticky top-0">Invoices:</Typography>
+						<Typography className="sticky top-0 bg-white">Invoices:</Typography>
 						<InvoiceList items={invoices} />
 					</div>
 				)}
 				<div className="flex flex-col gap-1">
-					<Typography className="sticky top-0">Transactions:</Typography>
+					<Typography className="sticky top-0 bg-white">Transactions:</Typography>
 					<div className="flex flex-col gap-4 h-full overflow-y-auto">
 						{transactions?.length ? (
 							transactions.map((transaction) => (

@@ -161,7 +161,9 @@ export default function App() {
 				<Links />
 			</head>
 			<body>
-				<main className={classNames('min-h-screen')} data-build={buildNumber}>
+				<main className={classNames('min-h-screen', {
+					'mobile': isMobileView
+				})} data-build={buildNumber}>
 					{isLoading ? (
 						<ClientComponent>
 							<div className="h-screen max-h-full flex items-center justify-center">
