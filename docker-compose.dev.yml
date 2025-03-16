@@ -61,12 +61,13 @@ services:
       - .env
     command: npm run dev
     volumes:
-      - ./web/app:/www/app
-      - ./web/src:/www/src
+      - ./web:/www
+      - /www/node_modules
       - ./shared:/shared
     ports:
       - "80"
     environment:
+      - CHOKIDAR_USEPOLLING=true
       - NODE_ENV=development
       - PORT=80
       - API_SERVICE=api-local

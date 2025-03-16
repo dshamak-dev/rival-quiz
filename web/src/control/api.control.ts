@@ -6,7 +6,11 @@ export class WEB_API {
 		this.apiUrl = variables.API_URL;
 	}
 
-	static joinUrl(path: string) {
+	static joinUrl(path: string, isRemix = false) {
+		if (isRemix) {
+			return path;
+		}
+
 		return [this.apiUrl?.replace(/$\//, '') || '', path.replace(/^\//, '')].join('/');
 	}
 
@@ -15,7 +19,7 @@ export class WEB_API {
 	}
 
 	static fetch(path: string, params?: Record<string, any>) {
-		const url = WEB_API.joinUrl(path);
+		const url = WEB_API.joinUrl(path, params?.remix);
 		return fetch(url, {
 			credentials: 'include',
 			...params,
@@ -27,7 +31,7 @@ export class WEB_API {
 	}
 
 	static get<T>(path: string, params?: Record<string, any>): Promise<T> {
-		const url = WEB_API.joinUrl(path);
+		const url = WEB_API.joinUrl(path, params?.remix);
 
 		return fetch(url, {
 			credentials: 'include',
@@ -44,7 +48,7 @@ export class WEB_API {
 	}
 
 	static post<T>(path: string, params: Record<string, any>, includeHeaders = false): Promise<T> {
-		const url = this.joinUrl(path);
+		const url = this.joinUrl(path, params?.remix);
 
 		return fetch(url, {
 			method: 'POST',
@@ -84,7 +88,7 @@ export class WEB_API {
 	}
 
 	static delete<T>(path: string, params?: Record<string, any>): Promise<T> {
-		const url = WEB_API.joinUrl(path);
+		const url = WEB_API.joinUrl(path, params?.remix);
 
 		return fetch(url, {
 			method: 'DELETE',

@@ -4,20 +4,23 @@ import { ModalButton } from '@view/modal/modal.button';
 import { Typography } from '@view/typography/typography';
 import { FC, ReactNode, useMemo, useRef, useState } from 'react';
 import { DEPOSIT_BUNDLES } from '../constants/bundles';
-import { fetchDepositRequest } from '../api/wallet.deposit.api';
 import { useAuth } from '@state/auth.hook';
-import { InvoiceItem } from '../type/wallet.invoice-type';
+import { InvoiceCreateDTO, InvoiceItem } from '../../invoice/type';
 import classNames from 'classnames';
+import { createInvoice } from 'src/invoice/api';
+import { InvoiceSummary } from 'src/invoice/view/invoice.summary';
+import { toCurrency } from 'src/payment/helper';
+import { usePayment } from 'src/payment/state';
 
 type Props = { trigger: ReactNode };
 
 export const WalletDepositWindow: FC<Props> = ({ trigger }) => {
 	const { user } = useAuth();
-	const [_, setUpdateState] = useState<number | null>(null);
+	const [formUpdatedAt, setUpdateState] = useState<number | null>(null);
+	const { exchangeRates } = usePayment();
 	const formRef = useRef({
 		bundleId: '',
-		sellRate: 9 / 1,
-		buyRate: 10.25 / 1,
+		currency: exchangeRates.USD,
 		subtotal: 0,
 		total: 0,
 		discount: 0,
@@ -55,10 +58,10 @@ export const WalletDepositWindow: FC<Props> = ({ trigger }) => {
 		setUpdateState(Date.now());
 	};
 
-	const selectBundle = (byndle: any) => {
-		calculateTotal({ ...byndle, discountCode: '' });
+	const selectBundle = (bundle: any) => {
+		calculateTotal({ ...bundle, discountCode: '' });
 
-		formRef.current.bundleId = byndle.id;
+		formRef.current.bundleId = bundle.id;
 	};
 
 	const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,12 +81,9 @@ export const WalletDepositWindow: FC<Props> = ({ trigger }) => {
 		calculateTotal({ value: value, discount: 0 });
 	};
 
-	const handleSubmit = async () => {
-		if (!user?.id) {
-			return;
-		}
-
-		const { total, discount, totalAmount, bundleId } = formState;
+	const getInvoicePayload = () => {
+		const userId = user?.id as InvoiceCreateDTO['userId'];
+		const { total, discount, discountCode, totalAmount, bundleId } = formState;
 
 		const items: InvoiceItem[] = [];
 		const bundle = DEPOSIT_BUNDLES.find((b) => b.id === bundleId);
@@ -91,24 +91,54 @@ export const WalletDepositWindow: FC<Props> = ({ trigger }) => {
 		if (bundle) {
 			items.push({
 				productId: bundle.id,
-				quantity: 1,
-				total: totalAmount,
+				discount: bundle.discount,
+				quantity: bundle.value,
+				total: total,
 				name: bundle.title,
 				metadata: bundle,
 			});
+		} else {
+			items.push({
+				productId: 'custom',
+				discount: 0,
+				quantity: totalAmount,
+				total: total,
+				name: 'Custom Amount',
+				metadata: {
+					discountCode,
+				},
+			});
 		}
 
-		setFormValues({ busy: true, error: '' });
-		return fetchDepositRequest({
-			userId: user.id,
+		const payload: InvoiceCreateDTO = {
+			userId,
 			total: total,
 			discount: discount,
 			items,
+			currency: exchangeRates.USD.type,
 			metadata: {
 				totalAmount,
 				bundleId,
 			},
-		})
+		};
+
+		return payload;
+	};
+
+	const invoiceState = useMemo(() => {
+		return getInvoicePayload();
+	}, [formState, formUpdatedAt]);
+
+	const handleSubmit = async () => {
+		if (!user?.id) {
+			return;
+		}
+
+		const invoicePayload = getInvoicePayload();
+
+		setFormValues({ busy: true, error: '' });
+
+		return createInvoice(invoicePayload)
 			.then(() => {
 				// TODO: show payment window for invoice
 			})
@@ -120,15 +150,6 @@ export const WalletDepositWindow: FC<Props> = ({ trigger }) => {
 			.finally(() => {
 				setFormValues({ busy: false });
 			});
-	};
-
-	const toCurrency = (value: string | number, rate: number = formState.buyRate): string => {
-		const numberValue = Number(value) / rate;
-		const isNegative = numberValue < 0;
-		const abs = Math.abs(numberValue);
-		const formattedValue = isNegative ? `-$${abs.toFixed(2)}` : `$${abs.toFixed(2)}`;
-
-		return formattedValue;
 	};
 
 	const bundleItems = useMemo(() => {
@@ -148,7 +169,9 @@ export const WalletDepositWindow: FC<Props> = ({ trigger }) => {
 					className={classNames('flex flex-col gap-2')}
 				>
 					<Typography>{item.title}</Typography>
-					<Typography>{toCurrency(item.value * item.discount * -1)}</Typography>
+					<Typography className="text-emerald-500">
+						{toCurrency(item.value * item.discount * -1, formState.currency.buy, formState.currency.symbol)}
+					</Typography>
 				</Button>
 			</div>
 		));
@@ -156,20 +179,22 @@ export const WalletDepositWindow: FC<Props> = ({ trigger }) => {
 
 	return (
 		<ModalButton
-			title="Add Balance"
+			title={'top up balance'.toUpperCase()}
 			buttonProps={{
 				layout: 'text',
 				children: trigger,
 			}}
 			okButtonProps={{
 				disabled: formState.draft || !formState.valid,
-				children: formState.totalAmount ? `Deposit ${toCurrency(formState.totalAmount)}` : 'Deposit',
+				children: formState.totalAmount
+					? `Deposit ${toCurrency(formState.total, formState.currency.buy, formState.currency.symbol)}`
+					: 'Deposit',
 			}}
 			beforeClose={handleSubmit}
 		>
 			<div className="flex flex-col gap-6">
 				<div>
-					<Typography>Exchange Rate: 1 USD = {formState.buyRate} BUNDS</Typography>
+					<Typography>Exchange Rate: 1 USD = {formState.currency.buy} BUNDS</Typography>
 				</div>
 				<div>
 					<Typography>Bundles</Typography>
@@ -202,10 +227,7 @@ export const WalletDepositWindow: FC<Props> = ({ trigger }) => {
 					</div>
 				</div>
 				<div className="text-right">
-					<Typography>Total Amount: {formState.totalAmount}</Typography>
-					<Typography>Subtotal: {toCurrency(formState.subtotal)}</Typography>
-					<Typography>Discount: {toCurrency(formState.discount * -1)}</Typography>
-					<Typography className="font-bold">Total: {toCurrency(formState.total)}</Typography>
+					<InvoiceSummary invoice={invoiceState} />
 					{formState.error && <Typography className="text-red-500">{formState.error}</Typography>}
 				</div>
 			</div>

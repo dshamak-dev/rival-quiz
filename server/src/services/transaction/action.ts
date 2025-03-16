@@ -87,9 +87,9 @@ export async function createTransaction(
 
   if (
     transaction.status === TransactionStatusEnum.Pending &&
-    transaction.type !== "deposit"
+    transaction.type !== "reserve"
   ) {
-    return validateTransactionById(transaction.id);
+    return validateTransaction(transaction);
   }
 
   return transaction;

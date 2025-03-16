@@ -54,10 +54,10 @@ services.forEach((init) => {
   const service = init();
 
   if (service.name) {
-    console.log(`Initializing ${service.name}`);
+    console.log(`Service ${service.name} available at /${service.route} route`);
   }
 
-  app.use(service.route, service.router);
+  app.use(`/${service.route}`, service.router);
 });
 
 // User routes initialization

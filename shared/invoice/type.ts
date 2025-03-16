@@ -5,13 +5,15 @@ export type InvoiceCreateDTO = {
   discount?: number;
   items?: InvoiceItem[];
   metadata?: any;
+  currency: string;
   total: number;
 };
 
 export type InvoiceDTO = InvoiceCreateDTO & {
+  id: ID;
   history?: Record<string, any>[];
   status?: InvoiceStatus;
-  expireDate?: string;
+  validUntil?: string;
   createdAt: string;
   updatedAt: string;
 };
