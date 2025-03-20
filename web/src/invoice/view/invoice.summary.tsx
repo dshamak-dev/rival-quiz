@@ -12,7 +12,10 @@ type Props = {
 };
 export function InvoiceSummary({ invoice }: Props) {
 	const { exchangeRates } = usePayment();
-	const currency = useMemo(() => exchangeRates.USD, [exchangeRates]);
+	const currency = useMemo(
+		() => Object.values(exchangeRates).find((it) => it.type === invoice.currency) || exchangeRates.USD,
+		[exchangeRates, invoice.currency]
+	);
 
 	const [_, setUpdateState] = useState<number | null>(null);
 	const summaryRef = useRef({

@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { ButtonHTMLAttributes, PropsWithChildren, useMemo } from 'react';
 
 export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
-	layout?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'text';
+	layout?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'danger' | 'text' | 'custom';
 	size?: ButtonSizeType;
 	loading?: boolean;
 	faded?: boolean;
@@ -14,6 +14,10 @@ export type ButtonSizeType = 'base' | 'small' | 'large';
 export function Button({ className, layout, size = 'small', loading, children, faded = true, ...props }: ButtonProps) {
 	const layoutClassName = useMemo(() => {
 		switch (layout) {
+			case 'custom':
+				return '';
+			case 'danger':
+				return 'text-white bg-red-600 hover:bg-red-500 border border-black/20';
 			case 'primary':
 				return 'bg-black text-white';
 			case 'secondary':

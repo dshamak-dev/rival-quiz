@@ -1,5 +1,6 @@
 import { WEB_API } from '@control/api.control';
 import { InvoiceDTO, InvoiceCreateDTO } from '../type';
+import { InvoiceStatus } from '@shared/invoice/type';
 
 const rootPath = `/invoices`;
 
@@ -37,5 +38,14 @@ export async function completeInvoice(
 	return WEB_API.post<InvoiceDTO>(`${rootPath}/${id}/complete`, {
 		...params,
 		body: JSON.stringify(payload),
+	});
+}
+
+export async function cancelInvoice(id: InvoiceDTO['id'], params: any): Promise<InvoiceDTO> {
+	return WEB_API.patch<InvoiceDTO>(`${rootPath}/${id}`, {
+		...params,
+		body: JSON.stringify({
+			status: InvoiceStatus.OVERDUE,
+		}),
 	});
 }

@@ -4,16 +4,23 @@ import { InvoicePreview } from './invoice.preview';
 
 type Props = {
 	items: InvoiceDTO[];
+	onChange?: (items: InvoiceDTO[]) => void;
 };
 
-export function InvoiceList({ items }: Props) {
+export function InvoiceList({ items, onChange }: Props) {
+	const handleInvoiceChange = (invoice: InvoiceDTO, index: number) => {
+		onChange?.([...items.slice(0, index), invoice, ...items.slice(index + 1)]);
+	};
+
 	return (
-		<div className="flex flex-col gap-4 h-full overflow-y-auto">
+		<>
 			{items?.length ? (
-				items.map((item) => <InvoicePreview key={item.id} item={item} />)
+				items.map((item, index) => (
+					<InvoicePreview key={item.id} item={item} onChange={(item) => handleInvoiceChange(item, index)} />
+				))
 			) : (
-				<Typography>No invoices found</Typography>
+				<Typography>No draft invoices found</Typography>
 			)}
-		</div>
+		</>
 	);
 }

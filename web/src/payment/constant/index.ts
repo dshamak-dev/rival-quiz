@@ -1,5 +1,5 @@
 export enum PAYMENT_METHOD {
-	CARD = 'card',
+	STRIPE = 'stripe',
     // PAYPAL = 'paypal',
     // BITCOIN = 'bitcoin',
     TELEGRAM = 'telegram',

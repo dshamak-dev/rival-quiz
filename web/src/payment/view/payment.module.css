@@ -1,3 +1,11 @@
+.container {
+	@apply flex flex-col gap-4;
+}
+
+.paymentList {
+	@apply flex gap-4 items-center;
+}
+
 .form {
 	@apply flex flex-col gap-4;
 }

@@ -8,17 +8,21 @@ export type CollapseProps = {
 	title: TitleType | ((isOpen: boolean) => TitleType);
 	initialState?: boolean;
 	children: JSX.Element;
+	stickyHeader?: boolean;
 };
 
-export function Collapse({ title, children, initialState = false }: CollapseProps) {
+export function Collapse({ title, children, stickyHeader, initialState = false }: CollapseProps) {
 	const [isOpen, setIsOpen] = useState(initialState);
 
 	return (
-		<div className="flex flex-col bg-white rounded overflow-hidden border">
+		<div className="relative flex flex-col bg-white rounded overflow-hidden border">
 			<div
 				className={classNames(
 					'w-full py-2 px-4 flex gap-4 items-center justify-between',
-					'cursor-pointer bg-gray-200'
+					'cursor-pointer bg-gray-200',
+					{
+						'sticky top-0': stickyHeader
+					}
 				)}
 				onClick={() => setIsOpen(!isOpen)}
 			>

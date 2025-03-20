@@ -55,6 +55,7 @@ export class WEB_API {
 			...params,
 			credentials: 'include',
 			headers: {
+				'Content-Type': 'application/json',
 				...this.getAuthHeaders(),
 				...params.headers,
 			},

@@ -18,6 +18,8 @@ import { WalletDepositButton } from 'src/wallet/view/wallet.deposit-button';
 import { WalletWithdrawButton } from 'src/wallet/view/wallet.withdraw-button';
 
 import styles from './wallet.module.css';
+import { useMemo, useState } from 'react';
+import { Collapse } from '@view/collapse/collapse';
 
 type LoaderPayload = { transactions: TransactionDTO[] | null; invoices: InvoiceDTO[] | null } | null;
 
@@ -29,9 +31,11 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<LoaderPay
 	}
 
 	const transactions = await getUserTransactions({ headers }).catch((err) => null);
-	const invoices = await getUserInvoices({ headers }).then(res => res.filter(it => it.status === InvoiceStatus.DRAFT)).catch((err) => {
-		return null;
-	});
+	const invoices = await getUserInvoices({ headers })
+		.then((res) => res.filter((it) => it.status === InvoiceStatus.DRAFT))
+		.catch((err) => {
+			return null;
+		});
 
 	return { transactions, invoices };
 }
@@ -46,7 +50,16 @@ export default function ProfileWalletPage() {
 	const { wallet } = useAuth();
 	const loaderData: LoaderPayload = useLoaderData<LoaderPayload>();
 	const transactions: TransactionDTO[] | null = loaderData?.transactions || [];
-	const invoices: InvoiceDTO[] | null = loaderData?.invoices || [];
+	const [invoices, setInvoices] = useState(loaderData?.invoices || []);
+
+	const draftInvoices = useMemo(() => {
+		return invoices?.filter((it) => it.status === InvoiceStatus.DRAFT) || [];
+	}, [invoices]);
+
+	const handleAddInvoice = (invoice: InvoiceDTO) => {
+		console.log('Adding invoice:', invoice);
+		setInvoices((current) => [...current, invoice]);
+	};
 
 	return (
 		<div className={styles.content}>
@@ -63,7 +76,7 @@ export default function ProfileWalletPage() {
 				)}
 				<section data-testid="payment-section" className="flex items-end gap-4">
 					<div className="min-w-[12rem]">
-						<WalletDepositButton>
+						<WalletDepositButton onSubmit={handleAddInvoice}>
 							<Button layout="tertiary" size="small" className="w-full">
 								<Icon name="Cash" size={14} /> Top Up
 							</Button>
@@ -79,23 +92,28 @@ export default function ProfileWalletPage() {
 				</section>
 			</div>
 			<div className="relative h-full overflow-hidden flex flex-col gap-4 h-full overflow-y-auto">
-				{!!invoices?.length && (
-					<div className="flex flex-col gap-1">
-						<Typography className="sticky top-0 bg-white">Invoices:</Typography>
-						<InvoiceList items={invoices} />
-					</div>
-				)}
-				<div className="flex flex-col gap-1">
-					<Typography className="sticky top-0 bg-white">Transactions:</Typography>
-					<div className="flex flex-col gap-4 h-full overflow-y-auto">
-						{transactions?.length ? (
-							transactions.map((transaction) => (
-								<TransactionCard key={transaction.id} item={transaction} />
-							))
-						) : (
-							<Typography>No transactions found</Typography>
-						)}
-					</div>
+				<div>
+					<Collapse
+						title={`Invoices (${draftInvoices?.length || 0})`}
+						initialState={draftInvoices?.length < 3}
+					>
+						<div className="p-2 flex flex-col gap-4 h-full overflow-y-auto">
+							<InvoiceList items={draftInvoices} onChange={(items: InvoiceDTO[]) => setInvoices(items)} />
+						</div>
+					</Collapse>
+				</div>
+				<div>
+					<Collapse title={`Transactions (${transactions?.length || 0})`} stickyHeader>
+						<div className="p-2 flex flex-col gap-4 h-full overflow-y-auto">
+							{transactions?.length ? (
+								transactions.map((transaction) => (
+									<TransactionCard key={transaction.id} item={transaction} />
+								))
+							) : (
+								<Typography>No transactions found</Typography>
+							)}
+						</div>
+					</Collapse>
 				</div>
 			</div>
 		</div>

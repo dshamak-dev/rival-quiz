@@ -26,8 +26,6 @@ router.get("/self", async (req: any, res: any) => {
     getInvoices({ userId: user.id })
   );
 
-  console.log("Retrieved invoices for user:", user.id, invoices);
-
   if (error) {
     const errorMessage = error?.message || "Failed to retrieve invoices";
 
@@ -86,6 +84,11 @@ router.patch("/:id", async (req: any, res: any) => {
     return res.status(400).json({ error: { message: errorMessage } });
   }
 
+  if (Object.keys(payload).length === 0) {
+    res.statusMessage = "No changes provided";
+    return res.status(400).end();
+  }
+
   const [updatedInvoice, updateError] = await expandResponse(
     updateInvoice(id, { ...invoice, ...payload })
   );
@@ -97,7 +100,7 @@ router.patch("/:id", async (req: any, res: any) => {
     return res.status(500).json({ error: { message: errorMessage } });
   }
 
-  res.status(200).json(invoice);
+  res.status(200).json(updatedInvoice);
 });
 
 router.post("/:id/complete", async (req: any, res: any) => {

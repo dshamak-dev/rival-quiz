@@ -1,14 +1,16 @@
 import { ActionFunctionArgs, json } from '@remix-run/node';
 import { InvoiceDTO } from 'src/invoice/type';
-import Stripe from 'stripe';
+import { createStripePaymentIntent } from 'src/payment/api/payment.stripe-api';
+import { createTONPaymentDetails, validateTONPayment } from 'src/payment/api/payment.ton-api';
+import { PAYMENT_METHOD } from 'src/payment/constant';
 
 export const action = async ({ request }: ActionFunctionArgs) => {
 	const { search } = new URL(request.url);
 	const searchParams = new URLSearchParams(search);
 
-	const paymentMethod = searchParams.get('type') as string;
+	const actionType = searchParams.get('type') as string;
 
-	if (!paymentMethod) {
+	if (!actionType) {
 		throw new Error('Missing payment method header');
 	}
 
@@ -18,38 +20,26 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		throw new Error('Missing invoice body');
 	}
 
-	switch (paymentMethod) {
-		case 'stripe': {
-			const secretKey = process.env.STRIPE_SECRET_KEY;
-			const publicKey = process.env.STRIPE_PUBLIC_KEY || process.env.STRIPE_PUBLISHABLE_KEY;
+	if (actionType === 'validate') {
+		return validateTONPayment(invoice);
+	}
 
-			if (!secretKey) {
-				throw new Error('Missing Stripe secret key');
-			}
+	switch (actionType) {
+		case PAYMENT_METHOD.STRIPE: {
+			const payload: any = await createStripePaymentIntent(invoice).catch((err) => {
+				return { error: err?.message || 'Failed to create payment intent' };
+			});
+			const ok = payload.intent && !payload?.error;
 
-			const price = invoice.total; // dollars
-			const amount = Math.round(price * 100); // cents
+			return json(payload, { status: ok ? 200 : 500 });
+		}
+		case PAYMENT_METHOD.TELEGRAM: {
+			const payload: any = await createTONPaymentDetails(invoice).catch((err) => {
+				return { error: err?.message || 'Failed to resolve TON payment' };
+			});
+			const ok = (payload.qr || payload.link) && !payload?.error;
 
-			const stripe = new Stripe(secretKey);
-
-			const intent = await stripe.paymentIntents
-				.create({
-					amount: amount,
-					currency: invoice.currency || 'usd',
-					automatic_payment_methods: {
-						enabled: true,
-					},
-				})
-				.catch((err) => {
-					console.error('Error creating payment intent:', err);
-					return null;
-				});
-
-			if (intent != null) {
-				return json({ intent, publicKey, secretKey }, { status: 200 });
-			}
-
-			return json({ error: { message: 'Failed to create payment intent' }, status: 500 });
+			return json(payload, { status: ok ? 200 : 500 });
 		}
 		default:
 			throw new Error('Unsupported payment method');

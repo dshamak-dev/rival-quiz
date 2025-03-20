@@ -4,8 +4,9 @@ import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
 import { PropsWithChildren, useMemo } from 'react';
 import { WalletDepositWindow } from './wallet.deposit-window';
+import { InvoiceDTO } from 'src/invoice/type';
 
-type Props = PropsWithChildren & {};
+type Props = PropsWithChildren & { onSubmit?: (invoice: InvoiceDTO) => void };
 export function WalletDepositButton(props: Props) {
 	const { wallet } = useAuth();
 
@@ -31,5 +32,5 @@ export function WalletDepositButton(props: Props) {
 		);
 	}, [props.children, balance]);
 
-	return <WalletDepositWindow trigger={content} />;
+	return <WalletDepositWindow trigger={content} onSubmit={props.onSubmit} />;
 }

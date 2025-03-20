@@ -5,7 +5,7 @@ import { InvoiceCreateDTO, InvoiceDTO } from "./type";
 export async function createInvoice(
   invoice: InvoiceCreateDTO
 ): Promise<InvoiceDTO> {
-  return database.create(invoice);
+  return database.create(invoice).then(normalize);
 }
 
 export async function getInvoiceById(id): Promise<InvoiceDTO | null> {

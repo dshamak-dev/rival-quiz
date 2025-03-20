@@ -2,9 +2,11 @@ import { useMemo, useRef, useState } from 'react';
 import { InvoiceDTO } from 'src/invoice/type';
 import { PAYMENT_METHOD } from '../constant';
 import { Typography } from '@view/typography/typography';
-import StripePayment from './payment.card-form';
+import StripePayment from './form-layout/payment.card-form';
+import TelegramPaymentForm from './form-layout/payment.telegram-form';
 import { Button } from '@view/button/button';
-import { toCurrency } from '../helper';
+
+import styles from './payment.module.css';
 
 type Props = {
 	invoice: InvoiceDTO;
@@ -13,7 +15,7 @@ type Props = {
 export function PaymentForm({ invoice }: Props) {
 	const [updatedAt, setUpdateState] = useState(0);
 	const formRef = useRef({
-		paymentMethod: PAYMENT_METHOD.CARD,
+		paymentMethod: '',
 		errorMessage: '',
 		successMessage: '',
 		processing: false,
@@ -38,7 +40,10 @@ export function PaymentForm({ invoice }: Props) {
 	const paymentMethodForm = useMemo(() => {
 		// Add payment method specific form components
 		switch (state?.paymentMethod) {
-			case PAYMENT_METHOD.CARD:
+			case '': {
+				return <Typography>Select a payment method</Typography>;
+			}
+			case PAYMENT_METHOD.STRIPE:
 				return (
 					<StripePayment
 						invoice={invoice}
@@ -46,8 +51,14 @@ export function PaymentForm({ invoice }: Props) {
 						onChange={handlePaymentChange}
 					/>
 				);
-			// case PAYMENT_METHOD.TELEGRAM:
-			// 	return <TelegramForm />;
+			case PAYMENT_METHOD.TELEGRAM:
+				return (
+					<TelegramPaymentForm
+						invoice={invoice}
+						onReady={handlePaymentMethodReady}
+						onChange={handlePaymentChange}
+					/>
+				);
 			default:
 				return (
 					<Typography>
@@ -58,5 +69,29 @@ export function PaymentForm({ invoice }: Props) {
 		}
 	}, [state?.paymentMethod]);
 
-	return <div>{paymentMethodForm}</div>;
+	const paymentMethodOptions = useMemo(() => {
+		return [
+			{
+				type: PAYMENT_METHOD.STRIPE,
+				label: 'Credit Card',
+			},
+			{
+				type: PAYMENT_METHOD.TELEGRAM,
+				label: 'Telegram (TON)',
+			},
+		].map(({ type, label }) => {
+			return (
+				<Button key={type} onClick={() => handleChange({ paymentMethod: type })}>
+					{label}
+				</Button>
+			);
+		});
+	}, []);
+
+	return (
+		<div className={styles.container}>
+			<div className={styles.paymentList}>{paymentMethodOptions}</div>
+			<div>{paymentMethodForm}</div>
+		</div>
+	);
 }

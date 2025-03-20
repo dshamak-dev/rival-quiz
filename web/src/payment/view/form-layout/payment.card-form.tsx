@@ -2,12 +2,14 @@ import { Button } from '@view/button/button';
 import { useEffect, useRef, useState } from 'react';
 
 import { PaymentElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js';
-import { loadStripe, PaymentIntent, StripePaymentElementChangeEvent } from '@stripe/stripe-js';
+import { loadStripe, StripePaymentElementChangeEvent } from '@stripe/stripe-js';
 import { InvoiceDTO } from 'src/invoice/type';
-import { WEB_API } from '@control/api.control';
 
-import styles from './payment.module.css';
-import { toCurrency } from '../helper';
+import styles from '../payment.module.css';
+import { toCurrency } from '../../helper';
+import { PAYMENT_METHOD } from 'src/payment/constant';
+import { fetchPaymentDetails } from 'src/payment/api';
+import { StripePaymentDTO } from 'src/payment/type';
 
 type Props = {
 	invoice: InvoiceDTO;
@@ -21,14 +23,7 @@ export default function StripePayment({ invoice, onReady, onChange }: Props) {
 	const stripePromiseRef = useRef<any>(null);
 
 	const loadPaymentIntent = async () => {
-		const paymentDetails: { intent: PaymentIntent; publicKey: string } = await WEB_API.post(
-			'/payment?type=stripe',
-			{
-				remix: true,
-				body: JSON.stringify(invoice),
-				headers: { 'Content-Type': 'application/json' },
-			}
-		);
+		const paymentDetails = await fetchPaymentDetails<StripePaymentDTO>(invoice, PAYMENT_METHOD.STRIPE);
 
 		setPaymentDetails(paymentDetails);
 

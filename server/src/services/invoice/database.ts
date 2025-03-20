@@ -17,6 +17,7 @@ const schema = new mongoose.Schema<InvoiceDTO>(
     total: Number,
     discount: Number,
     currency: { type: String, required: true },
+    cost: Number,
     validUntil: {
       type: Date,
       default: () => {

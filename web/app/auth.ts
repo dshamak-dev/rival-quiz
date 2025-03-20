@@ -4,8 +4,9 @@ const NODE_ENV = process.env.NODE_ENV;
 const isProd = NODE_ENV === 'production';
 const isSecure = !!process.env.SECURE;
 const secInDay = 60 * 60 * 24;
+const authCookieKey = 'authToken';
 
-export const authCookie = createCookie('authToken', {
+export const authCookie = createCookie(authCookieKey, {
 	httpOnly: true,
 	path: '/',
 	sameSite: 'lax',
@@ -30,6 +31,11 @@ export async function getCookie(req: Request) {
 
 export async function getAuthCookie(request: Request) {
 	const cookieString = request.headers.get('Cookie');
+
+	if (!cookieString?.includes(authCookieKey)) {
+		// Return null if no auth cookie
+		return null;
+	}
 
 	return cookieString;
 }

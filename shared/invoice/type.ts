@@ -7,6 +7,7 @@ export type InvoiceCreateDTO = {
   metadata?: any;
   currency: string;
   total: number;
+  cost: number;
 };
 
 export type InvoiceDTO = InvoiceCreateDTO & {
@@ -33,4 +34,5 @@ export type InvoiceItem = {
   metadata?: any;
   total?: number;
   discount?: number;
+  cost?: number;
 };
