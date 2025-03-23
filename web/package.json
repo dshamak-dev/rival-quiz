@@ -16,6 +16,7 @@
 		"node": "22.x"
 	},
 	"dependencies": {
+		"@orbs-network/ton-access": "^2.3.3",
 		"@remix-run/dev": "2.13.1",
 		"@remix-run/express": "2.13.1",
 		"@remix-run/node": "2.13.1",

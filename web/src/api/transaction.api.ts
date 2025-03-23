@@ -17,12 +17,12 @@ export async function createTransaction(payload: TransactionCreateDTO, params = 
 
 export async function resolveTransaction(
 	id: TransactionDTO['id'],
-	payload: { paymentDetails: any },
+	payload?: { payment: any },
 	params = {}
 ): Promise<TransactionDTO> {
 	return WEB_API.patch<TransactionDTO>(`${rootPath}/${id}/validate`, {
 		...params,
-		body: JSON.stringify(payload),
+		body: JSON.stringify(payload || {}),
 	});
 }
 

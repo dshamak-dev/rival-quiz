@@ -129,7 +129,7 @@ function Form({ onSubmit, onChange, invoice }: FormProps) {
 				<Button type="submit" layout="primary" disabled={!state?.valid || state?.processing} className="w-full">
 					{state?.processing
 						? 'Processing...'
-						: `Pay ${toCurrency(invoice.total, 1, invoice.currency || '$')}`}
+						: `Pay ${toCurrency(invoice.cost, 1, invoice.currency || '$')}`}
 				</Button>
 			</div>
 		</form>

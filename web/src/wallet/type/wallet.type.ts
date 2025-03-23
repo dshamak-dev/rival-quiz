@@ -1,7 +1,7 @@
 import { CurrencyTypeEnum } from "@shared/payment/constant";
 
 export type WithdrawalRequestDTO = {
-	walletId: string;
+	walletAddress: string;
 	amount: number;
 	currency: CurrencyTypeEnum;
 	comment: string;

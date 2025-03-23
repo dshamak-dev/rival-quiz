@@ -1,12 +1,11 @@
 import { getAuthHeaders } from '@/auth';
 import { createTransaction, resolveTransaction } from '@api/transaction.api';
-import { WEB_API } from '@control/api.control';
 import { TransactionDTO } from '@model/transaction.model';
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from '@remix-run/node';
 import { expandResponse } from '@shared/async/helpers';
 import { CurrencyTypeEnum } from '@shared/payment/constant';
 import { TransactionCreateDTO, TransactionTypeEnum } from '@shared/transaction/type';
-import { createTonTransaction, fetchTONRate, getTonAddress } from 'src/payment/api/payment.ton-api';
+import { createTonTransfer, fetchTONRate, getTonAddress } from 'src/payment/api/payment.ton-api';
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const tonToUsd = await fetchTONRate('usd');
@@ -31,7 +30,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		return json({ error: 'Unauthorized' }, { status: 403 });
 	}
 
-	console.log('Processing withdrawal request');
 	const body = await request.json().catch((err) => {
 		console.error('Failed to parse JSON payload', err);
 		return null;
@@ -45,7 +43,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	let payload: TransactionCreateDTO = {
 		senderId: '',
 		senderType: 'system',
-		receiverId: body.senderId,
+		receiverId: body.userId,
 		receiverType: 'user',
 		type: TransactionTypeEnum.Withdrawal,
 		amount: body.totalAmount,
@@ -81,17 +79,23 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 	console.log('Processing withdrawal payload:', payload);
 
-	const transaction: TransactionDTO = await createTransaction(payload, { headers });
-
 	// Resolve TON transaction
-	const [paymentDetails, error] = await expandResponse(createTonTransaction(payload.receiverId, payload.amount));
+	const [transferDetails, error] = await expandResponse(createTonTransfer(body.walletAddress, payload.amount));
 
-	if (paymentDetails && !error) {
-		const [updatedTransaction, updateError] = await expandResponse(
-			resolveTransaction(transaction.id, {
-				paymentDetails,
-			})
+	if (transferDetails && !error) {
+		// Create transaction in the database after TON transaction is created
+		const transaction: TransactionDTO = await createTransaction(
+			{
+				...payload,
+				data: {
+					payment: transferDetails,
+					...payload.data,
+				},
+			},
+			{ headers }
 		);
+
+		const [updatedTransaction, updateError] = await expandResponse(resolveTransaction(transaction.id));
 
 		if (updateError) {
 			return json({ error: 'Failed to resolve transaction' }, { status: 500 });

@@ -83,12 +83,17 @@ export function WithdrawalForm() {
 
 			const { points, address, totalAmount, currency } = formRef.current;
 
-			WEB_API.post('/withdrawal', {
-				body: JSON.stringify({ senderId: user.id, points, walletAddress: address, totalAmount, currency }),
+			return WEB_API.post('/withdrawal', {
+				body: JSON.stringify({ userId: user.id, points, walletAddress: address, totalAmount, currency }),
 				remix: true,
-			});
-
-			setFormValues({ busy: false, error: 'Withdrawal failed' });
+			})
+				.then((res) => {
+					console.log('Withdrawal successful:', res);
+					setFormValues({ busy: false, error: null });
+				})
+				.catch((err) => {
+					setFormValues({ busy: false, error: err?.message || 'Withdrawal failed' });
+				});
 		} else {
 			console.log('Withdrawal in progress...');
 		}
