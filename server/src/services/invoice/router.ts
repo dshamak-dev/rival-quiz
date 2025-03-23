@@ -174,7 +174,8 @@ router.post("/:id/complete", async (req: any, res: any) => {
     res.statusMessage = errorMessage;
     return res.status(500).json({ error: { message: errorMessage } });
   }
-  res.status(201).json(invoice);
+
+  res.status(201).json(updatedInvoice);
 });
 
 export default router;

@@ -1,9 +1,9 @@
 import { InvoiceDTO } from 'src/invoice/type';
 
 export const toCurrency = (value: string | number, rate: number = 1, symbol = ''): string => {
-	const numberValue = Number(value) / rate;
+	const numberValue = !rate ? 0 : Number(value) / rate;
 	const isNegative = numberValue < 0;
-	const abs = Math.abs(numberValue);
+	const abs = Math.abs(numberValue || 0);
 	const formattedValue = isNegative ? `-${symbol}${abs.toFixed(2)}` : `${symbol}${abs.toFixed(2)}`;
 
 	return formattedValue;

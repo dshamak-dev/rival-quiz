@@ -22,7 +22,7 @@ export default function TelegramPaymentForm({ invoice, onReady, onChange }: Prop
 		processing: true,
 		valid: false,
 		ready: false,
-		qr: null,
+		qrCode: null,
 		link: null,
 	});
 	const [updatedAt, setUpdateState] = useState(0);
@@ -37,11 +37,11 @@ export default function TelegramPaymentForm({ invoice, onReady, onChange }: Prop
 	const loadPaymentDetails = async () => {
 		const paymentDetails = await fetchPaymentDetails<TelegramPaymentDTO>(invoice, PAYMENT_METHOD.TELEGRAM).catch(
 			(err) => {
-				return { error: err?.message || 'Failed to resolve Telegram payment', qr: null, link: null };
+				return { error: err?.message || 'Failed to resolve Telegram payment', qrCode: null, link: null };
 			}
 		);
 
-		if (paymentDetails?.qr || paymentDetails?.link) {
+		if (paymentDetails?.qrCode || paymentDetails?.link) {
 			handleStateChange(
 				{
 					...paymentDetails,
@@ -70,7 +70,7 @@ export default function TelegramPaymentForm({ invoice, onReady, onChange }: Prop
 		return <Typography className="text-center">Loading payment details...</Typography>;
 	}
 
-	if (state.errorMessage || (!state.qr && !state.link)) {
+	if (state.errorMessage || (!state.qrCode && !state.link)) {
 		return (
 			<Typography className="text-center text-red-500">
 				{state.errorMessage || 'Failed to fetch payment details'}
@@ -81,11 +81,13 @@ export default function TelegramPaymentForm({ invoice, onReady, onChange }: Prop
 	return (
 		<div className={styles.paymentForm}>
 			<div className="flex flex-col justify-center gap-2">
-				<Typography className="text-red-500">Click 'VALIDATE' on invoice to force validation</Typography>
-				{state.qr && (
+				<Typography className={styles.hint}>
+					Please <b>Confirm Transaction</b> after payment success
+				</Typography>
+				{state.qrCode && (
 					<div className="mx-auto">
 						<p className="text-center">Scan with Tonkeeper:</p>
-						<img src={state.qr} alt="Tonkeeper QR" className="w-48 h-48 ml-auto mr-auto" />
+						<img src={state.qrCode} alt="Tonkeeper QR" className="w-48 h-48 ml-auto mr-auto" />
 					</div>
 				)}
 				{state.link && (

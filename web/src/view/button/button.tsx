@@ -11,7 +11,7 @@ export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
 
 export type ButtonSizeType = 'base' | 'small' | 'large';
 
-export function Button({ className, layout, size = 'small', loading, children, faded = true, ...props }: ButtonProps) {
+export function Button({ className, layout = 'outline', size = 'small', loading, children, faded = true, ...props }: ButtonProps) {
 	const layoutClassName = useMemo(() => {
 		switch (layout) {
 			case 'custom':
@@ -40,7 +40,7 @@ export function Button({ className, layout, size = 'small', loading, children, f
 		}
 	}, [size]);
 
-	if (layout === 'text') {
+	if (!layout || ['text', 'custom'].includes(layout)) {
 		return <div {...props}>{children}</div>;
 	}
 

@@ -20,6 +20,7 @@ import { WalletWithdrawButton } from 'src/wallet/view/wallet.withdraw-button';
 import styles from './wallet.module.css';
 import { useMemo, useState } from 'react';
 import { Collapse } from '@view/collapse/collapse';
+import { WalletTransactionConfirmationButton } from 'src/wallet/view/wallet.transaction-confirmation';
 
 type LoaderPayload = { transactions: TransactionDTO[] | null; invoices: InvoiceDTO[] | null } | null;
 
@@ -57,8 +58,19 @@ export default function ProfileWalletPage() {
 	}, [invoices]);
 
 	const handleAddInvoice = (invoice: InvoiceDTO) => {
-		console.log('Adding invoice:', invoice);
 		setInvoices((current) => [...current, invoice]);
+	};
+
+	const handleInvoiceConfirm = (invoice: InvoiceDTO) => {
+		setInvoices((current) => {
+			return current.map((it) => {
+				if (it.id === invoice.id) {
+					return { ...it, ...invoice };
+				}
+
+				return it;
+			});
+		});
 	};
 
 	return (
@@ -89,6 +101,11 @@ export default function ProfileWalletPage() {
 							</Button>
 						</WalletWithdrawButton>
 					</div>
+					{!!draftInvoices?.length && (
+						<div>
+							<WalletTransactionConfirmationButton onConfirm={handleInvoiceConfirm} />
+						</div>
+					)}
 				</section>
 			</div>
 			<div className="relative h-full overflow-hidden flex flex-col gap-4 h-full overflow-y-auto">

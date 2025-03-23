@@ -1,12 +1,18 @@
+import { getAuthHeaders } from '@/auth';
 import { ActionFunctionArgs, json } from '@remix-run/node';
+import { expandResponse } from '@shared/async/helpers';
+import { InvoiceStatus } from '@shared/invoice/type';
+import { completeInvoice } from 'src/invoice/api';
 import { InvoiceDTO } from 'src/invoice/type';
 import { createStripePaymentIntent } from 'src/payment/api/payment.stripe-api';
-import { createTONPaymentDetails, validateTONPayment } from 'src/payment/api/payment.ton-api';
+import { createTonPaymentIntent, validateTonPayment } from 'src/payment/api/payment.ton-api';
 import { PAYMENT_METHOD } from 'src/payment/constant';
 
 export const action = async ({ request }: ActionFunctionArgs) => {
 	const { search } = new URL(request.url);
 	const searchParams = new URLSearchParams(search);
+
+	const headers = await getAuthHeaders(request).catch((err) => null);
 
 	const actionType = searchParams.get('type') as string;
 
@@ -14,14 +20,42 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		throw new Error('Missing payment method header');
 	}
 
-	const invoice: InvoiceDTO = (await request.json()) as InvoiceDTO;
+	const body = await request.json();
+
+	if (actionType === 'validate') {
+		const transactionDetails: any = await validateTonPayment(body.transactionHash).catch((err) => {
+			return { error: err?.message || 'Failed to validate TON transaction' };
+		});
+
+		// Confirm invoice if has linked invoice id
+		if (transactionDetails.invoiceId) {
+			const [updatedInvoice, updateError] = await expandResponse(
+				completeInvoice(
+					transactionDetails.invoiceId,
+					{
+						status: InvoiceStatus.PAID,
+						metadata: {
+							payment: transactionDetails,
+						},
+					},
+					{ headers }
+				)
+			);
+
+			if (!updatedInvoice || updateError) {
+				return { error: updateError || 'Failed to confirm invoice' };
+			}
+
+			return json(updatedInvoice, { status: 200 });
+		}
+
+		return json(transactionDetails, { status: transactionDetails.error ? 400 : 200 });
+	}
+
+	const invoice = body as InvoiceDTO;
 
 	if (!invoice) {
 		throw new Error('Missing invoice body');
-	}
-
-	if (actionType === 'validate') {
-		return validateTONPayment(invoice);
 	}
 
 	switch (actionType) {
@@ -34,10 +68,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 			return json(payload, { status: ok ? 200 : 500 });
 		}
 		case PAYMENT_METHOD.TELEGRAM: {
-			const payload: any = await createTONPaymentDetails(invoice).catch((err) => {
+			const payload: any = await createTonPaymentIntent(invoice).catch((err) => {
 				return { error: err?.message || 'Failed to resolve TON payment' };
 			});
-			const ok = (payload.qr || payload.link) && !payload?.error;
+			const ok = (payload.qrCode || payload.link) && !payload?.error;
 
 			return json(payload, { status: ok ? 200 : 500 });
 		}

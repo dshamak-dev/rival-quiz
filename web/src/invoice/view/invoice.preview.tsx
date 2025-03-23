@@ -3,7 +3,7 @@ import { InvoiceDTO } from '../type';
 
 import styles from './invoice.module.css';
 import { Button } from '@view/button/button';
-import { PaymentButton, PaymentValidateButton } from 'src/payment/view/payment.button';
+import { PaymentButton } from 'src/payment/view/payment.button';
 import { toCurrency } from 'src/payment/helper';
 import { usePayment } from 'src/payment/state';
 import { useEffect, useMemo, useState } from 'react';
@@ -81,7 +81,6 @@ export function InvoicePreview({ item, onChange }: Props) {
 					>
 						Pay {totalPrice}
 					</PaymentButton>
-					<PaymentValidateButton disabled={isLoading} invoice={item} />
 					<Button onClick={handleCancel} loading={isLoading} layout="danger">
 						{!isLoading && <Icon name="Trash" />}
 					</Button>

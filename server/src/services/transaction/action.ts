@@ -4,6 +4,7 @@ import { create, findById, findByIdAndUpdate, model } from "./api";
 import { TransactionStatusEnum } from "./model";
 import { TransactionParty, TransactionPayload } from "./type";
 import { addLog } from "../logger/api";
+import { TransactionDTO, TransactionTypeEnum } from "@shared/transaction/type";
 
 export async function createTransaction(
   from: TransactionParty,
@@ -85,14 +86,33 @@ export async function createTransaction(
     return null;
   }
 
-  if (
-    transaction.status === TransactionStatusEnum.Pending &&
-    transaction.type !== "reserve"
-  ) {
+  const canAttemptResolve = getReolveApproval(transaction);
+
+  if (canAttemptResolve) {
     return validateTransaction(transaction);
   }
 
   return transaction;
+}
+
+export function getReolveApproval(transaction: TransactionDTO) {
+  if (!transaction) {
+    return false;
+  }
+
+  if (![TransactionStatusEnum.Pending].includes(transaction.status)) {
+    return false;
+  }
+
+  if (
+    ![TransactionTypeEnum.Deposit, TransactionTypeEnum.TopUp].includes(
+      transaction.type
+    )
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export async function getTransactionsForUser(userId) {
@@ -173,6 +193,14 @@ export async function validateTransaction(transaction) {
   );
 }
 
+export async function findTransactionById(id) {
+  return findById(id);
+}
+
 export async function updateTransactionStatus(id, status) {
   return findByIdAndUpdate(id, { status });
+}
+
+export async function updateTransaction(id, payload) {
+  return findByIdAndUpdate(id, payload);
 }

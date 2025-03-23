@@ -41,7 +41,7 @@ export function PaymentForm({ invoice }: Props) {
 		// Add payment method specific form components
 		switch (state?.paymentMethod) {
 			case '': {
-				return <Typography>Select a payment method</Typography>;
+				return <Typography className="text-center">Select a payment method</Typography>;
 			}
 			case PAYMENT_METHOD.STRIPE:
 				return (
