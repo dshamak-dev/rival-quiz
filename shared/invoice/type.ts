@@ -1,7 +1,10 @@
 import { ID } from "../common/model";
 
 export type InvoiceCreateDTO = {
-  userId: ID;
+  senderId: ID;
+  senderType: "user" | "system";
+  recipientId: ID;
+  recipientType: "user" | "system";
   discount?: number;
   items?: InvoiceItem[];
   metadata?: any;

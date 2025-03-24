@@ -15,6 +15,7 @@ export const schema = new mongoose.Schema({
     default: "points"
   },
   balance: { type: Number, default: 0 },
+  locked: { type: Number, default: 0 },
   data: Object,
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },

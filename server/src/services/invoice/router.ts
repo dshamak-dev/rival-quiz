@@ -131,13 +131,14 @@ router.post("/:id/complete", async (req: any, res: any) => {
 
   const [transaction, transactionError] = await expandResponse(
     createTransaction(
-      { type: "invoice", id: invoice.id },
-      { type: "user", id: invoice.userId },
+      { type: invoice.senderType, id: invoice.senderId },
+      { type: invoice.recipientType, id: invoice.recipientId },
       {
         type: "top-up",
         amount: points,
         details: `Payment for invoice ${invoice.id}`,
         data: payload,
+        reference: invoice.id,
       }
     )
   );

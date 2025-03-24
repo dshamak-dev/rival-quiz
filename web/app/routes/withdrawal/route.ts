@@ -3,9 +3,12 @@ import { createTransaction, resolveTransaction } from '@api/transaction.api';
 import { TransactionDTO } from '@model/transaction.model';
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from '@remix-run/node';
 import { expandResponse } from '@shared/async/helpers';
+import { InvoiceCreateDTO } from '@shared/invoice/type';
 import { CurrencyTypeEnum } from '@shared/payment/constant';
 import { TransactionCreateDTO, TransactionTypeEnum } from '@shared/transaction/type';
+import { createInvoice } from 'src/invoice/api';
 import { createTonTransfer, fetchTONRate, getTonAddress } from 'src/payment/api/payment.ton-api';
+import { lockUserBalance } from 'src/wallet/api/wallet.api';
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const tonToUsd = await fetchTONRate('usd');
@@ -80,29 +83,71 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	console.log('Processing withdrawal payload:', payload);
 
 	// Resolve TON transaction
-	const [transferDetails, error] = await expandResponse(createTonTransfer(body.walletAddress, payload.amount));
+	// const [transferDetails, error] = await expandResponse(createTonTransfer(body.walletAddress, payload.amount));
 
-	if (transferDetails && !error) {
-		// Create transaction in the database after TON transaction is created
-		const transaction: TransactionDTO = await createTransaction(
+	// Create invoice for system to withdrawal
+	const invoicePayload: InvoiceCreateDTO = {
+		discount: 0,
+		items: [
 			{
-				...payload,
-				data: {
-					payment: transferDetails,
-					...payload.data,
-				},
+				productId: 'points',
+				quantity: body.points,
+				name: 'points',
+				description: 'Withdrawal from TON wallet',
 			},
-			{ headers }
-		);
+		],
+		senderType: 'system',
+		senderId: 'system',
+		recipientType: 'user',
+		recipientId: body.userId,
+		metadata: {
+			paymentDetails: {
+				recipientAddress: body.walletAddress,
+				paymentGateway: 'TON',
+				amount: payload.amount,
+				currency: CurrencyTypeEnum.TON,
+				details: `Withdraw ${payload.amount} TON`,
+			},
+		},
+		currency: CurrencyTypeEnum.TON,
+		total: payload.amount,
+		cost: payload.amount,
+	};
+	const [invoice, invoiceError] = await expandResponse(createInvoice(invoicePayload));
 
-		const [updatedTransaction, updateError] = await expandResponse(resolveTransaction(transaction.id));
+	if (invoice && !invoiceError) {
+		// Lock user balance
+		await lockUserBalance(body.userId, body.points, { headers }).catch((err) => {
+			console.error('Failed to lock user balance', err);
+			return null;
+		});
 
-		if (updateError) {
-			return json({ error: 'Failed to resolve transaction' }, { status: 500 });
-		}
-
-		return json(updatedTransaction, { status: 200 });
-	} else {
-		return json({ error: error }, { status: 500 });
+		return json(invoice, { status: 200 });
 	}
+
+	return json({ error: invoiceError || 'Failed to create invoice' }, { status: 500 });
+
+	// if (transferDetails && !error) {
+	// 	// Create transaction in the database after TON transaction is created
+	// 	const transaction: TransactionDTO = await createTransaction(
+	// 		{
+	// 			...payload,
+	// 			data: {
+	// 				payment: transferDetails,
+	// 				...payload.data,
+	// 			},
+	// 		},
+	// 		{ headers }
+	// 	);
+
+	// 	const [updatedTransaction, updateError] = await expandResponse(resolveTransaction(transaction.id));
+
+	// 	if (updateError) {
+	// 		return json({ error: 'Failed to resolve transaction' }, { status: 500 });
+	// 	}
+
+	// 	return json(updatedTransaction, { status: 200 });
+	// } else {
+	// 	return json({ error: error }, { status: 500 });
+	// }
 };

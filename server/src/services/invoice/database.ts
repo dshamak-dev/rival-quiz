@@ -12,7 +12,12 @@ const schema = new mongoose.Schema<InvoiceDTO>(
       required: true,
       default: InvoiceStatus.DRAFT,
     },
-    userId: { type: String, required: true },
+
+    senderId: { type: String, required: true },
+    senderType: { type: String, required: true },
+    recipientId: { type: String, required: true },
+    recipientType: { type: String, required: true },
+
     items: { type: Array, default: [] },
     total: Number,
     discount: Number,

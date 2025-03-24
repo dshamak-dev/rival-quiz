@@ -14,6 +14,7 @@ import {
 	WalletContractV4,
 	WalletContractV5R1,
 } from '@ton/ton';
+import { tonToNano } from '../api/payment.ton-api';
 
 export class TonManager {
 	wallet?: WalletContractV5R1 | WalletContractV2R2;
@@ -210,11 +211,6 @@ export class TonManager {
 		const contractState = await this.client.getContractState(wallet.address);
 		console.log('Open Contract:', contractState);
 
-		// if (contractState.state === 'active') {
-		// 	console.log('Wallet is already deployed.');
-		// 	return;
-		// }
-
 		const contract = this.client.open(wallet);
 		const seqno = await contract.getSeqno();
 
@@ -269,6 +265,7 @@ export class TonManager {
 				return Promise.reject(error);
 			});
 
+
 			return this.createWalletContractV4(wallet, amountTon, false);
 			*/
 		}
@@ -321,79 +318,53 @@ export class TonManager {
 					return Promise.reject(error);
 				}
 			}
-			// case 'v5': {
-			// const openedWallet = this.client.open(this.wallet as WalletContractV5R1);
-			// const seqno = await openedWallet.getSeqno();
-			// console.log('Seqno:', seqno);
-			// const tonAmountNano = tonToNano(amountTon);
+			case 'v5': {
+				const openedWallet = this.client.open(this.wallet as WalletContractV5R1);
+				const seqno = await openedWallet.getSeqno();
 
-			// const body = beginCell().storeUint(0, 32).storeStringTail(comment).endCell();
-			// const transferMessage: MessageRelaxed = {
-			// 	info: {
-			// 		src: Address.parse(toAddress),
-			// 		value: amountNano,
-			// 	},
-			// 	body,
-			// };
+				const tonAmountNano = tonToNano(Number(amountTon));
 
-			// const transferV5 = await openedWallet.sendTransfer({
-			// 	seqno,
-			// 	secretKey: this.keyPair.secretKey,
-			// 	messages: [transferMessage],
-			// });
+				// const body = beginCell().storeUint(0, 32).storeStringTail(comment).endCell();
+				// const transferMessage: MessageRelaxed = {
+				// 	info: {
+				// 		src: Address.parse(toAddress),
+				// 		value: {
+				// 			coins: tonAmountNano,
+				// 		},
+				// 	},
+				// 	body,
+				// };
 
-			// const contract = this.client.open(this.wallet);
-			// // const seqno = await contract.getSeqno();
+				// const transferV5 = await openedWallet.sendTransfer({
+				// 	seqno,
+				// 	secretKey: this.keyPair.secretKey,
+				// 	messages: [transferMessage],
+				// });
 
-			// const messages: any = [
-			// 	{
-			// 		to: toAddress,
-			// 		value: amountNano,
-			// 		body: comment,
-			// 	},
-			// ];
+				// const contract = this.client.open(this.wallet);
+				// const seqno = await contract.getSeqno();
 
-			// const transferV5 = contract.sendTransfer({
-			// 	seqno,
-			// 	sendMode: SendMode.IGNORE_ERRORS,
-			// 	secretKey: secretkey,
-			// 	messages,
-			// });
-			// 	return transferV5;
-			// }
+				const messages: any = [
+					{
+						to: toAddress,
+						value: tonAmountNano,
+						body: comment,
+					},
+				];
+
+				const transferV5 = openedWallet.sendTransfer({
+					seqno,
+					sendMode: SendMode.IGNORE_ERRORS,
+					secretKey: this.keyPair.secretKey,
+					messages,
+				});
+
+				// Wait for the transaction to be confirmed
+
+				return transferV5;
+			}
 			default:
 				throw new Error('Invalid wallet provider');
 		}
-	}
-
-	async signWithKey(message: Uint8Array, apiKey: string): Promise<Uint8Array | null> {
-		return null;
-		// const signature = await fetch(
-		// 	`https://testnet.ton.org/v3/sign?message=${encodeURIComponent(
-		// 		Buffer.from(message).toString('base64')
-		// 	)}&key=${apiKey}`
-		// ).then((res) => res.json());
-
-		// return Buffer.from(signature.signature, 'base64');
-
-		// if (signature.error) {
-		//     throw new Error(`Failed to sign message: ${signature.error}`);
-		// }
-
-		// return Buffer.from(signature.signature, "base64");
-
-		// const signature = await fetch(
-		//     `https://testnet.ton.org/v3/sign?message=${encodeURIComponent(
-		//         Buffer.from(message).toString("base64")
-		//     )}&key=${apiKey}`
-		// ).then((res) => res.json());
-
-		// return Buffer.from(signature.signature, "base64");
-
-		// if (signature.error) {
-		//     throw new Error(`Failed to sign message: ${signature.error}`);
-		// }
-
-		// return Buffer.from(signature.signature, "base64");
 	}
 }

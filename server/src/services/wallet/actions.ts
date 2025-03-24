@@ -32,6 +32,39 @@ export async function addWalletBalanceByUserId(userId, value) {
   return addWalletBalance(wallet.id, value);
 }
 
+export async function lockWalletBalanceByUserId(userId, value: number) {
+  const wallet = await getUserWallet(userId);
+
+  if (!wallet) {
+    return Promise.reject("User wallet not found");
+  }
+
+  if (Number.isNaN(value)) {
+    return Promise.reject("Invalid balance amount");
+  }
+
+  let nextBalance = Number(wallet.balance || 0) - value;
+
+  nextBalance = Number(nextBalance.toFixed(2));
+
+  return findByIdAndUpdate(wallet.id, {
+    $set: { balance: nextBalance },
+    $inc: { locked: value },
+  }).then((wallet) => {
+    broadcastManager.send({
+      entity: BroadcastEntityEnum.WALLET,
+      payload: {
+        id: wallet.id,
+        userId: wallet.userId,
+        balance: wallet.balance,
+      },
+      message: { text: `User wallet balance updated: ${wallet.balance}` },
+    });
+
+    return wallet;
+  });
+}
+
 export async function addWalletBalance(id, value) {
   const amount = Number(value);
 

@@ -6,9 +6,11 @@ import { WithdrawalSummary } from './wallet.withdrawal-summary';
 import { Button } from '@view/button/button';
 import { WEB_API } from '@control/api.control';
 import { useAuth } from '@state/auth.hook';
+import { useWallet } from '../state';
 
-export function WithdrawalForm() {
+export function WithdrawalForm({ onResult }: { onResult?: (payload: any, error: string | null) => void }) {
 	const { user, wallet } = useAuth();
+	const { set: setWalletBalance } = useWallet();
 	const [updatedAt, setUpdatedAt] = useState(new Date());
 	const formRef = useRef<any>({
 		points: 0,
@@ -89,9 +91,13 @@ export function WithdrawalForm() {
 			})
 				.then((res) => {
 					console.log('Withdrawal successful:', res);
+
+					setWalletBalance((wallet?.balance || 0) - points);
 					setFormValues({ busy: false, error: null });
+					onResult?.(res, null);
 				})
 				.catch((err) => {
+					onResult?.(null, err);
 					setFormValues({ busy: false, error: err?.message || 'Withdrawal failed' });
 				});
 		} else {
@@ -115,6 +121,10 @@ export function WithdrawalForm() {
 					id="points"
 					placeholder="Input amount of points"
 					onChange={handlePointsChange}
+					inputProps={{
+						max: wallet?.balance,
+						min: 0,
+					}}
 				/>
 			</div>
 			<div className="text-right">

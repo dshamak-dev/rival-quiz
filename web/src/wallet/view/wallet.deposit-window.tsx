@@ -85,7 +85,7 @@ export const WalletDepositWindow: FC<Props> = ({ trigger, onSubmit }) => {
 	};
 
 	const getInvoicePayload = () => {
-		const userId = user?.id as InvoiceCreateDTO['userId'];
+		const userId = user?.id as InvoiceCreateDTO['senderId'];
 		const { total, discount, discountCode, totalAmount, bundleId } = formState;
 		const cost = Number(toCurrency(totalAmount, currency.buy));
 
@@ -117,7 +117,10 @@ export const WalletDepositWindow: FC<Props> = ({ trigger, onSubmit }) => {
 		}
 
 		const payload: InvoiceCreateDTO = {
-			userId,
+			senderId: userId,
+			senderType: 'user',
+            recipientId: 'system',
+            recipientType: 'system',
 			total: total,
 			cost,
 			discount: discount,
