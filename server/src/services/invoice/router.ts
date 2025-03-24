@@ -131,8 +131,9 @@ router.post("/:id/complete", async (req: any, res: any) => {
 
   const [transaction, transactionError] = await expandResponse(
     createTransaction(
-      { type: invoice.senderType, id: invoice.senderId },
+      // Switch invoice recipient with sender to send points to one who paid
       { type: invoice.recipientType, id: invoice.recipientId },
+      { type: invoice.senderType, id: invoice.senderId },
       {
         type: "top-up",
         amount: points,

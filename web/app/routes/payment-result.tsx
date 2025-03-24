@@ -1,4 +1,3 @@
-
 import { expandResponse } from '@shared/async/helpers';
 import { useLoaderData } from '@remix-run/react';
 import { Typography } from '@view/typography/typography';
@@ -7,6 +6,8 @@ import { getAuthHeaders } from '@/auth';
 import { json, LoaderFunctionArgs } from '@remix-run/node';
 import { InvoiceStatus } from '@shared/invoice/type';
 import { completeInvoice } from 'src/invoice/api';
+import classNames from 'classnames';
+import { LinkButton } from '@view/anchor/link.button';
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const { search } = new URL(request.url);
@@ -74,10 +75,26 @@ export default function PaymentPage() {
 
 	return (
 		<div>
-			<Typography>{title}</Typography>
-			{invoice && <Typography>Invoice ID: {invoice.id}</Typography>}
-			{error && <Typography className="text-red-500">{error}</Typography>}
-			<a href={continueUrl}>Redirecting to: {continueUrl}</a>
+			<div className="text-center flex flex-col gap-4 border p-8 mx-auto w-fit shadow">
+				<Typography
+					className={classNames('uppercase', {
+						'text-red-500': error,
+						'text-cyan-600': !error,
+					})}
+				>
+					{title}
+				</Typography>
+				{error ? (
+					<Typography className="text-red-500">{error}</Typography>
+				) : (
+					<Typography>Balance points were sent to your wallet</Typography>
+				)}
+				<div className="flex justify-center">
+					<LinkButton href={continueUrl} layout="primary" className="px-8">
+						OK
+					</LinkButton>
+				</div>
+			</div>
 		</div>
 	);
 }

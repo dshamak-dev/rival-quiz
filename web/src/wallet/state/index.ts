@@ -4,9 +4,9 @@ import { useAuth } from '@state/auth.hook';
 export function useWallet() {
 	const { wallet, setWallet } = useAuth();
 
-	const set = (value: number) => {
+	const setBalance = (value: number) => {
 		setWallet({ ...wallet, balance: value } as WalletDTO);
 	};
 
-	return { wallet, set };
+	return { wallet, setBalance };
 }

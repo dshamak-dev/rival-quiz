@@ -10,7 +10,7 @@ import { useWallet } from '../state';
 
 export function WithdrawalForm({ onResult }: { onResult?: (payload: any, error: string | null) => void }) {
 	const { user, wallet } = useAuth();
-	const { set: setWalletBalance } = useWallet();
+	const { setBalance: setWalletBalance } = useWallet();
 	const [updatedAt, setUpdatedAt] = useState(new Date());
 	const formRef = useRef<any>({
 		points: 0,

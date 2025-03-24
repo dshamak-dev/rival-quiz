@@ -8,7 +8,9 @@ export type LinkButtonProps = ButtonProps & {
 export function LinkButton({ href, ...props }: LinkButtonProps) {
 	const navigate = useNavigate();
 	const handleNavigate = () => {
-		navigate(href);
+		const { pathname } = new URL(href);
+
+		navigate(pathname || href, { replace: true });
 	};
 
 	return <Button {...props} onClick={handleNavigate} />;
