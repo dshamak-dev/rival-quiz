@@ -1,5 +1,5 @@
 import { WEB_API } from '@control/api.control';
-import { InvoiceDTO, InvoiceCreateDTO } from '../type';
+import { InvoiceDTO, InvoiceCreateDTO, InvoicePaymentDTO } from '../type';
 import { InvoiceStatus } from '@shared/invoice/type';
 
 const rootPath = `/invoices`;
@@ -47,5 +47,11 @@ export async function cancelInvoice(id: InvoiceDTO['id'], params: any): Promise<
 		body: JSON.stringify({
 			status: InvoiceStatus.OVERDUE,
 		}),
+	});
+}
+
+export async function fetchSupportInvoices(params = {}): Promise<InvoicePaymentDTO[]> {
+	return WEB_API.get<InvoiceDTO[]>(`${rootPath}?support=true`, {
+		...params,
 	});
 }

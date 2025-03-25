@@ -44,6 +44,32 @@ export async function createTonPaymentIntent(invoice: InvoiceDTO) {
 	return TonApi.getPaymentDetails(invoice);
 }
 
+export async function getTonPaymentIntent(invoice: InvoiceDTO) {
+	const paymentDetails = invoice.metadata?.paymentDetails;
+
+	if (!paymentDetails || !paymentDetails.recipientAddress || paymentDetails.paymentGateway?.toLowerCase() !== 'ton') {
+		console.error('Invalid payment details', paymentDetails);
+		return null;
+	}
+
+	console.log('Valid payment details', paymentDetails);
+
+	const { recipientAddress, amount, details } = paymentDetails;
+
+	const tonAmountNano = tonToNano(amount);
+
+	const address = recipientAddress;
+
+	const link = `ton://transfer/${address}?amount=${tonAmountNano}&text=${encodeURI(details || invoice.id)}`;
+
+	const qr = await qrcode.toDataURL(link).catch((error) => {
+		console.error('Error generating QR code:', error);
+		return null;
+	});
+
+	return { link, qrCode: qr };
+}
+
 export async function validateTonPayment(tonTransactionId: string) {
 	return TonApi.findByTransactionId(tonTransactionId);
 }

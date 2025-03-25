@@ -10,10 +10,43 @@ import { getRequestUser } from "@/user/user.action";
 import { createTransaction } from "../transaction/action";
 import { calculateInvoicePoints } from "./helper";
 import { InvoiceStatus } from "./type";
+import { TransactionParty, TransactionPayload } from "../transaction/type";
 
 const router = express.Router();
 
 router.use(express.json());
+
+router.get("/", async (req: any, res: any) => {
+  const user = await getRequestUser(req);
+
+  if (!user) {
+    return res.status(403).end();
+  }
+
+  const isSupport = req.query.support === "true";
+
+  const query = {};
+
+  if (isSupport) {
+    query["status"] = { $in: [InvoiceStatus.DRAFT] };
+    query["senderType"] = { $in: ["system"] };
+  } else {
+    query["status"] = { $in: [InvoiceStatus.DRAFT] };
+    query["senderType"] = { $in: ["user"] };
+    query["senderId"] = user.id;
+  }
+
+  const [invoices, error] = await expandResponse(getInvoices(query));
+
+  if (error) {
+    const errorMessage = error?.message || "Failed to retrieve invoices";
+
+    res.statusMessage = errorMessage;
+    res.status(500).json({ error: { message: errorMessage } });
+  } else {
+    res.json(invoices);
+  }
+});
 
 router.get("/self", async (req: any, res: any) => {
   const user = await getRequestUser(req);
@@ -22,9 +55,13 @@ router.get("/self", async (req: any, res: any) => {
     return res.status(403).end();
   }
 
-  const [invoices, error] = await expandResponse(
-    getInvoices({ userId: user.id })
-  );
+  const query = {
+    status: { $in: [InvoiceStatus.DRAFT] },
+    senderType: { $in: ["user"] },
+    senderId: user.id,
+  };
+
+  const [invoices, error] = await expandResponse(getInvoices(query));
 
   if (error) {
     const errorMessage = error?.message || "Failed to retrieve invoices";
@@ -129,19 +166,51 @@ router.post("/:id/complete", async (req: any, res: any) => {
 
   const points = calculateInvoicePoints(invoice);
 
-  const [transaction, transactionError] = await expandResponse(
-    createTransaction(
-      // Switch invoice recipient with sender to send points to one who paid
-      { type: invoice.recipientType, id: invoice.recipientId },
-      { type: invoice.senderType, id: invoice.senderId },
-      {
+  let sender: TransactionParty | null = null;
+  let recipient: TransactionParty | null = null;
+  let transactionPayload: TransactionPayload | null = null;
+
+  switch (invoice.senderType) {
+    case "user": {
+      // Top-Up: Switch invoice recipient with sender to send points to one who paid
+      sender = { type: invoice.recipientType, id: invoice.recipientId };
+      recipient = { type: invoice.senderType, id: invoice.senderId };
+      transactionPayload = {
         type: "top-up",
         amount: points,
         details: `Payment for invoice ${invoice.id}`,
         data: payload,
         reference: invoice.id,
-      }
-    )
+      };
+      break;
+    }
+    case "system": {
+      // Withdrawal
+      sender = { type: invoice.senderType, id: invoice.senderId };
+      recipient = { type: invoice.recipientType, id: invoice.recipientId };
+      transactionPayload = {
+        type: "withdrawal",
+        amount: points,
+        details:
+          invoice.metadata?.paymentDetails?.details ||
+          `Withdrawal invoice ${invoice.id}`,
+        data: payload,
+        reference: invoice.id,
+      };
+      break;
+    }
+  }
+
+  if (!sender || !recipient || !transactionPayload) {
+    res.statusMessage = "Invalid invoice recipient or sender";
+    res
+      .status(400)
+      .json({ error: { message: "Invalid invoice recipient or sender" } });
+    return;
+  }
+
+  const [transaction, transactionError] = await expandResponse(
+    createTransaction(sender, recipient, transactionPayload)
   );
 
   if (transactionError || !transaction) {

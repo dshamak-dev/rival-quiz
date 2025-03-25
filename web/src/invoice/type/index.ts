@@ -5,3 +5,8 @@ export type InvoiceCreateDTO = _InvoiceCreateDTO;
 export type InvoiceDTO = _InvoiceDTO;
 
 export type InvoiceItem = _InvoiceItem;
+
+export type InvoicePaymentDTO = _InvoiceDTO & {
+	qrCode?: string;
+	link?: string;
+};
