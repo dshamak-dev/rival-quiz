@@ -8,5 +8,5 @@ export function useWallet() {
 		setWallet({ ...wallet, balance: value } as WalletDTO);
 	};
 
-	return { wallet, setBalance };
+	return { wallet, balance: wallet?.balance || 0,  setBalance };
 }

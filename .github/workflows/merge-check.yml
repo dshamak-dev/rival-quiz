@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        env:
+          WORKFLOW_SECRET: ${{ secrets.ENV_VARS }}
+
+      - name: Output secrets
+        run: echo "My variable: $WORKFLOW_SECRET"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

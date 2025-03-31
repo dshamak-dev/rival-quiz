@@ -39,16 +39,6 @@ export function InvoicePaymentCard({ invoice, onConfirm }: Props) {
 			{invoice.metadata?.paymentDetails && (
 				<Typography variant="body1">{invoice.metadata.paymentDetails.details}</Typography>
 			)}
-			{invoice.link && (
-				<a
-					href={invoice.link}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="underline text-center font-bold"
-				>
-					Open Tonkeeper with Link
-				</a>
-			)}
 			{invoice.qrCode && (
 				<ModalButton
 					okButtonProps={{
@@ -70,15 +60,22 @@ export function InvoicePaymentCard({ invoice, onConfirm }: Props) {
 							<p className="text-center">Scan with Tonkeeper:</p>
 							<img src={invoice.qrCode} alt="Tonkeeper QR" className="w-48 h-48 ml-auto mr-auto" />
 						</div>
+						{invoice.link && (
+							<a
+								href={invoice.link}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="underline text-center font-bold"
+							>
+								Open Tonkeeper with Link
+							</a>
+						)}
 						<div className="flex flex-col gap-2 items-center">
 							<TextInput
 								label="Transfer ID"
-								placeholder="Set Confirmation Transfer Id"
+								placeholder="Input Transfer Id"
 								onChange={(e) => handleFormFieldChange({ transferId: e.target.value })}
 							/>
-							{/* <Button layout="primary" size="small" className="w-full">
-								Confirm
-							</Button> */}
 						</div>
 					</div>
 				</ModalButton>

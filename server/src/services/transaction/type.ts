@@ -1,4 +1,5 @@
 import { ID } from "@shared/common/model";
+import { TransactionDTO } from "@shared/transaction/type";
 
 export type TransactionParty = {
   id: ID;
@@ -7,7 +8,7 @@ export type TransactionParty = {
 
 export type TransactionPayload = {
   amount: number;
-  type: "prize" | "withdrawal" | "deposit" | 'reserve' | 'income' | 'top-up';
+  type: TransactionDTO['type'];
   details: string;
   data?: Record<string, any>;
   reference?: string;

@@ -103,7 +103,7 @@ _router.get("/:id", async (req: any, res: any) => {
     (err) => null
   );
 
-  payload.questionData = questionData;
+  payload.questionData = questionData || undefined;
 
   res.status(200).json(payload);
 });
@@ -390,7 +390,7 @@ _router.post("/:id/users", async (req: any, res: any) => {
         USER_HISTORY_TYPE.JOIN_SESSION,
         {
           sessionId,
-          hash: session.hash
+          hash: session.hash,
         }
       );
 

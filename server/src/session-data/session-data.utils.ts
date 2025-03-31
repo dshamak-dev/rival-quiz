@@ -8,7 +8,7 @@ export type CalculateStatsDTO = {
 type VoteEntries = [string, QuestionDataDTO];
 
 export async function calculateUserSummaryFromVotes(
-  votes: Record<string, QuestionDataDTO>
+  votes: Record<QuestionDataDTO['id'], QuestionDataDTO>
 ): Promise<SessionDataDTO["userScores"]> {
   if (!votes) {
     return null;

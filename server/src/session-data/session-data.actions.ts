@@ -10,17 +10,19 @@ import { getSessionById } from "../session/session.action";
 import { findSessionData } from "./session-data.api";
 import { findManyQuestionData } from "../services/question-data/actions";
 import { QuestionDataStatusTypes } from "../services/question-data/model";
+import { QuestionDataDTO } from "@/question/quistion.model";
 
 export const sessionDataDBModel = mongoose.model(
   "sessions-data",
   SessionDataSchema
 );
 
-export async function createSessionData(session, isFinal = false) {
+export async function createSessionData(session) {
   const sessionId = session.id;
 
   const activeSessionData = await findActiveSessionDataBySessionId(sessionId);
 
+  // TODO: reset previous if possible
   if (activeSessionData) {
     await sessionDataDBModel.updateMany(
       {
@@ -57,15 +59,6 @@ export async function createSessionData(session, isFinal = false) {
     activeQuestionId,
   };
 
-  if (isFinal) {
-    data.state = SessionDataStateTypes.Completed;
-
-    const userScores =
-      (await calculateUserSummaryFromVotes(votesByQuestion)) || null;
-
-    data.userScores = userScores;
-  }
-
   return sessionDataDBModel.create(data);
 }
 
@@ -96,21 +89,9 @@ export async function completeSessionData(id, session) {
 
   const sessionId = session.id;
 
-  const questionDataList = await findManyQuestionData({
-    sessionId,
-    state: {
-      $in: [QuestionDataStatusTypes.Locked, QuestionDataStatusTypes.Completed],
-    },
-  });
-
-  const votesByQuestion = {};
-
-  questionDataList.forEach((qData) => {
-    votesByQuestion[qData.questionId] = qData;
-  });
-
-  const userScores =
-    (await calculateUserSummaryFromVotes(votesByQuestion)) || null;
+  const { userScores, votesByQuestion } = await calculateSessionDataUserScores(
+    sessionId
+  );
 
   return sessionDataDBModel
     .findByIdAndUpdate(
@@ -119,6 +100,29 @@ export async function completeSessionData(id, session) {
       { new: true }
     )
     .then(normalizeSessionData);
+}
+
+export async function calculateSessionDataUserScores(sessionId) {
+  const questionDataList = await findManyQuestionData({
+    sessionId,
+    state: {
+      $in: [QuestionDataStatusTypes.Locked, QuestionDataStatusTypes.Completed],
+    },
+  });
+
+  const votesByQuestion: Record<QuestionDataDTO["id"], QuestionDataDTO> = {};
+
+  questionDataList.forEach((qData) => {
+    votesByQuestion[qData.questionId] = qData;
+  });
+
+  const userScores = await calculateUserSummaryFromVotes(votesByQuestion).catch(
+    (err) => {
+      return null;
+    }
+  );
+
+  return { userScores, votesByQuestion };
 }
 
 export async function findSessionDataBySessionId(sessionId) {

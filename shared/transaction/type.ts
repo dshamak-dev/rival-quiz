@@ -23,6 +23,7 @@ export type TransactionCreateDTO = {
 
 export type TransactionType =
   | "prize"
+  | "bet"
   | "withdrawal"
   | "deposit"
   | "reserve"
@@ -36,7 +37,8 @@ export enum TransactionTypeEnum {
   Reserve = "reserve",
   Income = "income",
   TopUp = "top-up",
-};
+  Bet = "bet",
+}
 
 export type TransactionParty = {
   id: ID;
@@ -45,7 +47,7 @@ export type TransactionParty = {
 
 export type TransactionPayload = {
   amount: number;
-  type: "prize" | "withdrawal" | "deposit" | "reserve" | "income" | "top-up";
+  type: TransactionDTO["type"];
   details: string;
   data?: Record<string, any>;
   reference?: string;

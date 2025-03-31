@@ -1,0 +1,14 @@
+.slider {
+	@apply w-full min-h-[20vh] flex;
+
+	& .card {
+		@apply w-full;
+	}
+}
+
+.card {
+	--bg: #f4f4f4;
+
+	background-color: var(--bg);
+	@apply bg-right bg-contain bg-no-repeat p-6 flex items-center rounded;
+}

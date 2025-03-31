@@ -24,5 +24,6 @@ export enum SessionUserActionTypes {
 
 export type SessionUserActionData = {
 	value: any;
+	bet?: number;
 	transactionId?: ID;
 };

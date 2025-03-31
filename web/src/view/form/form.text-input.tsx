@@ -1,5 +1,13 @@
 import classNames from 'classnames';
-import { ChangeEvent, ComponentProps, FocusEvent, HTMLInputTypeAttribute, PropsWithRef, useCallback, useMemo } from 'react';
+import {
+	ChangeEvent,
+	ComponentProps,
+	FocusEvent,
+	HTMLInputTypeAttribute,
+	PropsWithRef,
+	useCallback,
+	useMemo,
+} from 'react';
 import { FormLabel } from './form.label';
 import { getRandomId } from '@control/random';
 
@@ -23,6 +31,7 @@ export type TextInputProps = {
 	onChange?: (e: ChangeEvent<HTMLInputElement>, value: any) => void;
 	inputProps?: Record<string, any>;
 	onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
+	layout?: 'outline' | 'error';
 };
 
 export function TextInput({

@@ -4,6 +4,7 @@ import { UserActionTypes } from "../../user-action/user-action.model";
 import { findQuestionById } from "../../question/question.action";
 import { QuestionDataStatusTypes } from "./model";
 import { SessionDataStateTypes } from "../../session-data/session-data.model";
+import { QuestionDataDTO } from "@/question/quistion.model";
 
 export async function createQuestionData(sessionId, questionId) {
   const question = await findQuestionById(sessionId, questionId).catch(
@@ -98,15 +99,21 @@ export async function syncQuestionData(id) {
     if (!totalByAnswers[vote.answer]) {
       totalByAnswers[vote.answer] = 0;
     }
-    totalByAnswers[vote.answer] += vote.value;
 
-    totalVotes += vote.value || 0;
+    const value = Number(vote.value) || 0;
+
+    totalByAnswers[vote.answer] += value;
+
+    totalVotes += value || 0;
   });
 
   return updateQuestionData(id, { votes, totalVotes, totalByAnswers });
 }
 
-export async function updateQuestionData(id, payload) {
+export async function updateQuestionData(
+  id,
+  payload
+): Promise<QuestionDataDTO> {
   return api.findByIdAndUpdate(id, payload);
 }
 
@@ -149,23 +156,25 @@ export async function getQuestionVotes(sessionId, question): Promise<any> {
     })
     .catch((err) => []);
   const votes: any[] = [];
+  // TODO: validate and normalize userActions
+  // TODO: Split session pool by questions for sponsorship game
+
   const { hasAnswer, answer } = question;
 
   userActions.forEach((action: any) => {
     if (action.type === UserActionTypes.SUBMIT_ANSWER) {
       // TODO: Use bet value if available
-      const valueCounter = action.data.bet ?? 1;
+      const bet = action.data.bet ?? 0;
+      const betValue = Number(bet) || 0;
+
+      // TODO: Simulate bet value for sponsorship game
 
       votes.push({
         questionId,
         sessionId,
         userId: action.userId,
         answer: action.data.value,
-        value: hasAnswer
-          ? answer === action.data.value
-            ? valueCounter
-            : 0
-          : valueCounter,
+        value: betValue,
       });
     }
   });

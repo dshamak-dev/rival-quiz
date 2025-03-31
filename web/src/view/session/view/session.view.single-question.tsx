@@ -9,12 +9,13 @@ import { SessionUserActionPayload, SessionUserActionTypes } from '@model/session
 import { postSessionUserAction, fetchSessionUserActions } from '@api/session.user.api';
 import { ID } from '@model/api.model';
 import { useSession } from '@state/session.state';
-import { ProgressStage, SessionStateType } from '@model/session.model';
+import { ProgressStage, SessionStateType, SessionTypes } from '@model/session.model';
 import { RadioList } from '@view/form/form.radio';
 import { useAuth } from '@state/auth.hook';
 import { SingleQuestionSession } from '@model/session/single-question';
 import { Icon } from '@view/icon';
 import { LinkButton } from '@view/anchor/link.button';
+import { SessionBetInput } from 'src/session/view/session.bet-input';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
@@ -41,7 +42,6 @@ export function SessionViewSingleQuestion() {
 		request: (sessionId: ID) => fetchSessionUserActions(sessionId),
 	});
 	const userActions = userActionsData || session?.userActions;
-	console.log('userActionsData', userActionsData);
 
 	const hasJoined = useMemo(() => {
 		if (!isLoggedIn || !user) {
@@ -76,6 +76,13 @@ export function SessionViewSingleQuestion() {
 
 				return accum;
 			}, {} as { [questionId: string]: string | undefined }),
+			bets: session?.questions?.reduce((accum, question) => {
+				const qAction = userActions?.find((it) => it.questionId === question?.id);
+
+				accum[question.id] = qAction?.data?.bet;
+
+				return accum;
+			}, {} as { [questionId: string]: number | undefined }),
 		};
 	}, [session?.questions, userActions]);
 
@@ -108,11 +115,25 @@ export function SessionViewSingleQuestion() {
 		return userData?.answers?.[questionId];
 	};
 
+	const getQuestionBet = (questionId?: string) => {
+		if (questionId == null) {
+			return undefined;
+		}
+
+		return userData?.bets?.[questionId];
+	};
+
 	const currentAnswer = useMemo(() => {
 		return getQuestionAnswer(question?.id);
 	}, [question?.id, userData]);
 
 	const [selectedAnswer, setSelectedAnswer] = useState<string | undefined>(currentAnswer);
+
+	const currentBet = useMemo(() => {
+		return getQuestionBet(question?.id);
+	}, [question?.id, userData]);
+
+	const [selectedBet, setSelectedBet] = useState<number | undefined>(currentBet);
 
 	const prizeData = useMemo(() => {
 		if (!questionData || !selectedAnswer) {
@@ -121,7 +142,7 @@ export function SessionViewSingleQuestion() {
 
 		const totalVotes = questionData?.totalVotes || 0;
 		const userTargetOption = questionData.totalByAnswers ? questionData.totalByAnswers[selectedAnswer] || 0 : 0;
-		const userShare = userTargetOption ? 1 / userTargetOption : 0;
+		const userShare = currentBet ? currentBet / userTargetOption : 0;
 
 		return {
 			userShare,
@@ -202,6 +223,35 @@ export function SessionViewSingleQuestion() {
 		return loading || loadingUserData;
 	}, [loading, loadingUserData]);
 
+	const allowBet = useMemo(() => {
+		if (!session?.type || ![SessionTypes.USER_BET].includes(session.type)) {
+			return false;
+		}
+
+		return (
+			hasJoined &&
+			[SessionStateType.Active, SessionStateType.Locked, SessionStateType.LockedForReview].includes(
+				session?.state
+			)
+		);
+	}, [hasJoined, session?.state, currentAnswer]);
+
+	const canBet = useMemo(() => {
+		if (!allowBet) {
+			return false;
+		}
+
+		return session?.state === SessionStateType.Active && !currentAnswer;
+	}, [allowBet, session?.state, currentAnswer]);
+
+	const hasAnswer = useMemo(() => {
+		return currentAnswer !== undefined;
+	}, [currentAnswer]);
+
+	const handleBetChange = (value: number) => {
+		setSelectedBet(value);
+	};
+
 	const canSave = useMemo(() => {
 		// TODO: Implement validation logic based on the question type and options
 		// TODO: Check if session require a Bid and if a bid has been placed
@@ -221,7 +271,12 @@ export function SessionViewSingleQuestion() {
 		// TODO: Update the session state to 'Answered'
 		// TODO: Update the user's bid if required
 
+		console.log('Saving answer:', { selectedAnswer, session, selectedBet, canBet, question })
 		if (!session || !question?.id || !selectedAnswer) {
+			return;
+		}
+
+		if (canBet && !selectedBet) {
 			return;
 		}
 
@@ -229,7 +284,7 @@ export function SessionViewSingleQuestion() {
 			sessionId: session.id,
 			questionId: question.id,
 			type: SessionUserActionTypes.SUBMIT_ANSWER,
-			data: { value: selectedAnswer },
+			data: { value: selectedAnswer, bet: selectedBet },
 		}).then(() => {
 			setSelectedAnswer(undefined);
 			fetchUserActions(session.id);
@@ -315,6 +370,9 @@ export function SessionViewSingleQuestion() {
 				return (
 					<>
 						{answerVariants}
+						{allowBet && (
+							<SessionBetInput disabled={!canBet} onChange={handleBetChange} initialValue={selectedBet} />
+						)}
 						{controls}
 					</>
 				);
@@ -334,6 +392,16 @@ export function SessionViewSingleQuestion() {
 				return (
 					<>
 						{answerVariants}
+						{allowBet && (
+							<div className="text-center">
+								<Typography>
+									Selected Bet
+								</Typography>
+								<Typography size="large">
+									<b>{selectedBet}</b>
+								</Typography>
+							</div>
+						)}
 						{prizeData ? (
 							<div className="px-8 py-4 bg-gray-100 rounded text-center">
 								<div>
@@ -349,6 +417,9 @@ export function SessionViewSingleQuestion() {
 			}
 			case SessionStateType.Completed: {
 				const userPrize = user?.id ? sessionData?.userScores?.summary?.[user.id] : 0;
+
+				console.log('Session data', sessionData);
+
 				const hasPrize = !!userPrize;
 
 				return (
@@ -364,8 +435,8 @@ export function SessionViewSingleQuestion() {
 							<Typography>Good luck next time!</Typography>
 						)}
 
-						<LinkButton layout="primary" href="/explore">
-							Leave Session
+						<LinkButton layout="primary" href="/explore" size='large' className="min-w-[100px]">
+							Ok
 						</LinkButton>
 					</div>
 				);
@@ -374,7 +445,7 @@ export function SessionViewSingleQuestion() {
 				return <>{answerVariants}</>;
 			}
 		}
-	}, [canAnswer, prizeData, hasJoined, currentAnswer, selectedAnswer, isLoading]);
+	}, [sessionData, canAnswer, prizeData, hasJoined, currentAnswer, selectedAnswer, selectedBet, isLoading]);
 
 	return (
 		<div className="flex flex-col gap-8 items-center">

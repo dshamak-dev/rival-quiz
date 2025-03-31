@@ -31,7 +31,7 @@ export function NavigationDesktop() {
 			{ link: '/explore', end: true, text: 'Explore' },
 		];
 
-		_items.push({ link: '/roadmap', end: true, text: 'roadmap' });
+		_items.push({ link: '/about', end: true, text: 'about' });
 
 		return _items;
 	}, [user]);

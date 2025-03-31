@@ -11,6 +11,7 @@ import { createTransaction } from "../transaction/action";
 import { calculateInvoicePoints } from "./helper";
 import { InvoiceStatus } from "./type";
 import { TransactionParty, TransactionPayload } from "../transaction/type";
+import { TransactionTypeEnum } from "@shared/transaction/type";
 
 const router = express.Router();
 
@@ -176,7 +177,7 @@ router.post("/:id/complete", async (req: any, res: any) => {
       sender = { type: invoice.recipientType, id: invoice.recipientId };
       recipient = { type: invoice.senderType, id: invoice.senderId };
       transactionPayload = {
-        type: "top-up",
+        type: TransactionTypeEnum.TopUp,
         amount: points,
         details: `Payment for invoice ${invoice.id}`,
         data: payload,
@@ -189,7 +190,7 @@ router.post("/:id/complete", async (req: any, res: any) => {
       sender = { type: invoice.senderType, id: invoice.senderId };
       recipient = { type: invoice.recipientType, id: invoice.recipientId };
       transactionPayload = {
-        type: "withdrawal",
+        type: TransactionTypeEnum.Withdrawal,
         amount: points,
         details:
           invoice.metadata?.paymentDetails?.details ||
