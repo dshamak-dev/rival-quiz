@@ -12,29 +12,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
-      - name: Get secret
-        run: |
-          echo "$WORKFLOW_SECRET" > secret.txt
-          echo "Secret file created successfully"
-          echo "DROPLET_SSH_HOST: $DROPLET_SSH_HOST" > all.txt
-          echo "DROPLET_SSH_PRIVATE_KEY: $DROPLET_SSH_PRIVATE_KEY"  >? all.txt
-          echo "DROPLET_SSH_USERNAME: $DROPLET_SSH_USERNAME"  >> all.txt
-          echo "DROPLET_SSH_PASSPHRASE: $DROPLET_SSH_PASSPHRASE"  >> all.txt
-          echo "DROPLET_SSH_PORT: $DROPLET_SSH_PORT"  >> all.txt
-        env:
-          WORKFLOW_SECRET: ${{ secrets.ENV_VARS }}
-          DROPLET_SSH_HOST: ${{ secrets.DROPLET_SSH_HOST }}
-          DROPLET_SSH_USERNAME: ${{ secrets.DROPLET_SSH_USERNAME }}
-          DROPLET_SSH_PRIVATE_KEY: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
-          DROPLET_SSH_PASSPHRASE: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-          DROPLET_SSH_PORT: ${{ secrets.DROPLET_SSH_PORT }}
-
-      - name: Upload secret file
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-debug
-          path: all.txt
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
