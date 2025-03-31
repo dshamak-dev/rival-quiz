@@ -17,6 +17,7 @@ jobs:
         run: |
           echo "$WORKFLOW_SECRET" > secret.txt
           echo "Secret file created successfully"
+          cat secret.txt
           echo "::add-mask::$(cat secret.txt)"
           echo "Secret file added to the workflow"
           echo "Workflow secret added to the workflow"
