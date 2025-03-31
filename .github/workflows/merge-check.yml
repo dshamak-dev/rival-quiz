@@ -14,6 +14,7 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Get secret
+        run: echo "Secret is set - ${{ secrets.ENV_VARS }}"
         env:
           WORKFLOW_SECRET: ${{ secrets.ENV_VARS }}
 
