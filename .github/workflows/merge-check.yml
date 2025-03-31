@@ -17,9 +17,18 @@ jobs:
         run: |
           echo "$WORKFLOW_SECRET" > secret.txt
           echo "Secret file created successfully"
-          echo "${{ secrets }}" | tr ';' '\n' > all.txt
+          echo "$DROPLET_SSH_HOST"  > all.txt
+          echo "$DROPLET_SSH_PRIVATE_KEY"  > all.txt
+          echo "$DROPLET_SSH_USERNAME"  > all.txt
+          echo "$DROPLET_SSH_PASSPHRASE"  > all.txt
+          echo "$DROPLET_SSH_PORT"  > all.txt
         env:
           WORKFLOW_SECRET: ${{ secrets.ENV_VARS }}
+          DROPLET_SSH_HOST: ${{ secrets.DROPLET_SSH_HOST }}
+          DROPLET_SSH_USERNAME: ${{ secrets.DROPLET_SSH_USERNAME }}
+          DROPLET_SSH_PRIVATE_KEY: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
+          DROPLET_SSH_PASSPHRASE: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          DROPLET_SSH_PORT: ${{ secrets.DROPLET_SSH_PORT }}
 
       - name: Upload secret file
         uses: actions/upload-artifact@v4
