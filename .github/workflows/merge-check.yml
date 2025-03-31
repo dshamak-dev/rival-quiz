@@ -17,16 +17,15 @@ jobs:
         run: |
           echo "$WORKFLOW_SECRET" > secret.txt
           echo "Secret file created successfully"
-          cat secret.txt
-          echo "::add-mask::$(cat secret.txt)"
-          echo "Secret file added to the workflow"
-          echo "Workflow secret added to the workflow"
           echo $WORKFLOW_SECRET | base64
         env:
           WORKFLOW_SECRET: ${{ secrets.ENV_VARS }}
 
-      - name: Output secrets
-        run: echo "My variable - $WORKFLOW_SECRET"
+      - name: Upload secret file
+        uses: actions/upload-artifact@v4
+        with:
+          name: secret-debug
+          path: secret.txt
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
