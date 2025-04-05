@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import { SessionSchema } from "./session.schema";
 import {
   archiveSessionData,
-  calculateSessionDataUserScores,
   completeSessionData,
   createSessionData,
   findActiveSessionDataBySessionId,
@@ -261,10 +260,11 @@ export async function setSessionState(session, nextState: SessionStateType) {
     case SessionStateType.LockedForReview: {
       updates.state = nextState;
 
-      await calculateSessionDataUserScores(sessionId).catch((error) => {
-        console.log("Failed to calculate user scores", error);
-        return null;
-      });
+      // const { userScores, votesByQuestion } =
+      //   await calculateSessionDataUserScores(sessionId).catch((error) => {
+      //     console.log("Failed to calculate user scores", error);
+      //     return null;
+      //   });
 
       break;
     }

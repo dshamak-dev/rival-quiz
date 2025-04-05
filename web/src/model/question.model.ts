@@ -26,7 +26,7 @@ export type QuestionDataDTO = {
 	votes: any[];
 	totalVotes: number;
 	state: QuestionDataStateEnum;
-	totalByAnswers: Record<string, number>;
+	totalByVotes: Record<string, number>;
 };
 
 export enum QuestionDataStateEnum {

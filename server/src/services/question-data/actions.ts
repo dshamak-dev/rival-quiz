@@ -33,6 +33,16 @@ export async function createQuestionData(sessionId, questionId) {
   return api.create(data);
 }
 
+export async function findQuestionDataAndUpdate(query, payload) {
+  const questionData = await findQuestionData(query);
+
+  if (!questionData) {
+    return Promise.reject("No question data found.");
+  }
+
+  return updateQuestionData(questionData.id, payload);
+}
+
 export async function syncQuestionDataAndUpdate(query, payload) {
   const questionData = await findQuestionData(query);
 
@@ -40,9 +50,9 @@ export async function syncQuestionDataAndUpdate(query, payload) {
     return Promise.reject("No question data found.");
   }
 
-  await syncQuestionData(questionData.id);
+  const updated = await updateQuestionData(questionData.id, payload);
 
-  return updateQuestionData(questionData.id, payload);
+  return syncQuestionData(questionData.id, updated);
 }
 
 export async function findQuestionDataAndComplete(query) {
@@ -75,8 +85,10 @@ export async function completeQuestionData(id) {
   return updateQuestionData(id, { state: SessionDataStateTypes.Completed });
 }
 
-export async function syncQuestionData(id) {
-  const questionData = await findQuestionDataById(id);
+export async function syncQuestionData(id, origin?: QuestionDataDTO) {
+  const questionData = await (origin
+    ? Promise.resolve(origin)
+    : findQuestionDataById(id));
 
   if (!questionData) {
     return Promise.reject("Question data not found");
@@ -94,20 +106,20 @@ export async function syncQuestionData(id) {
   const votes = await getQuestionVotes(questionData.sessionId, question);
 
   let totalVotes = 0;
-  const totalByAnswers = {};
+  const totalByVotes = {};
   votes.forEach((vote) => {
-    if (!totalByAnswers[vote.answer]) {
-      totalByAnswers[vote.answer] = 0;
+    if (!totalByVotes[vote.answer]) {
+      totalByVotes[vote.answer] = 0;
     }
 
     const value = Number(vote.value) || 0;
 
-    totalByAnswers[vote.answer] += value;
+    totalByVotes[vote.answer] += value;
 
     totalVotes += value || 0;
   });
 
-  return updateQuestionData(id, { votes, totalVotes, totalByAnswers });
+  return updateQuestionData(id, { votes, totalVotes, totalByVotes });
 }
 
 export async function updateQuestionData(
@@ -175,6 +187,7 @@ export async function getQuestionVotes(sessionId, question): Promise<any> {
         userId: action.userId,
         answer: action.data.value,
         value: betValue,
+        isMatch: !hasAnswer || action.data.value === answer
       });
     }
   });

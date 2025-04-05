@@ -1,13 +1,14 @@
 import { ProgressStage, SessionStateType } from '@model/session.model';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSession } from '@state/session.state';
 import classNames from 'classnames';
 import { useAPI } from '@api/api.hook';
 import { findSessionById } from '@api/session.api';
 import { useAuth } from '@state/auth.hook';
 import { useNavigate } from '@remix-run/react';
+import { fetchSessionUpdateState } from 'src/session/api';
 
 // TODO: Implement actual progress tracking and state updates
 const progressBar = {
@@ -35,15 +36,47 @@ const progressBar = {
 	],
 };
 
+const MS_IN_SEC = 1000;
+const MS_IN_MIN = 60 * MS_IN_SEC;
+const SESSION_UPDATE_CHECK_INTERVAL = 0.5 * MS_IN_MIN;
+
 export function SessionViewHeader() {
 	const { session, userProgress = 0, dispatch } = useSession();
 	const { user } = useAuth();
 	const natigate = useNavigate();
 	const { loading, dispatch: fetchSession } = useAPI({
 		initialState: null,
-		request: (id: string) => findSessionById(id),
+		request: (id: string) =>
+			findSessionById(id).then((res) => {
+				if (res) {
+					dispatch?.({ type: 'SET_SESSION', payload: res });
+				}
+			}),
 		minDuration: 1000,
 	});
+
+	const { loading: isCheckingUpdates, dispatch: checkUpdates } = useAPI({
+		initialState: null,
+		request: (date: string | number) => {
+			return session ? fetchSessionUpdateState(session.id, date) : Promise.reject(false);
+		},
+	});
+
+	useEffect(() => {
+		if (!session?.updatedAt || isCheckingUpdates) {
+			return;
+		}
+
+		const timeout = setTimeout(() => {
+			checkUpdates(session.updatedAt).then((hasUpdates) => {
+				if (hasUpdates) {
+					fetchSession(session.id);
+				}
+			});
+		}, SESSION_UPDATE_CHECK_INTERVAL);
+
+		return () => clearTimeout(timeout);
+	}, [session?.updatedAt, isCheckingUpdates]);
 
 	const progressBarStages = useMemo(() => {
 		switch (session?.state) {
@@ -122,9 +155,7 @@ export function SessionViewHeader() {
 					<div
 						className="p-2 cursor-pointer opacity-50 hover:opacity-100"
 						onClick={() => {
-							fetchSession(session.id).then((res) => {
-								dispatch?.({ type: 'SET_SESSION', payload: res });
-							});
+							fetchSession(session.id);
 						}}
 					>
 						<Icon

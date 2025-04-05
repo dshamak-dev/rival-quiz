@@ -19,7 +19,7 @@ import { findSessionData } from "../session-data/session-data.api";
 import { SessionDataStateTypes } from "../session-data/session-data.model";
 import {
   findQuestionData,
-  syncQuestionDataAndUpdate,
+  syncQuestionDataAndUpdate
 } from "../services/question-data/actions";
 import { QuestionDataStatusTypes } from "../services/question-data/model";
 import { findManySessions } from "./api";
@@ -27,10 +27,13 @@ import { formatSessionQueryValue } from "./session.utils";
 import { randomString } from "../tools/random.utils";
 import { addUserHistory, removeUserHistory } from "../user/api";
 import { USER_HISTORY_TYPE } from "../user/constants";
+import router from "./router";
 
 const _router = express.Router();
 
 _router.use(express.json());
+
+_router.use(router);
 
 _router.get("/", async (req: any, res: any) => {
   const query = req.query;

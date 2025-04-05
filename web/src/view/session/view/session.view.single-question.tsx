@@ -141,7 +141,7 @@ export function SessionViewSingleQuestion() {
 		}
 
 		const totalVotes = questionData?.totalVotes || 0;
-		const userTargetOption = questionData.totalByAnswers ? questionData.totalByAnswers[selectedAnswer] || 0 : 0;
+		const userTargetOption = questionData.totalByVotes ? questionData.totalByVotes[selectedAnswer] || 0 : 0;
 		const userShare = currentBet ? currentBet / userTargetOption : 0;
 
 		return {
@@ -181,7 +181,7 @@ export function SessionViewSingleQuestion() {
 		}
 
 		if (question.options?.length) {
-			const totalByAnswers = questionData?.totalByAnswers;
+			const totalByVotes = questionData?.totalByVotes;
 			const totalVotes = questionData?.totalVotes || 0;
 
 			question.options.forEach((it, index) => {
@@ -196,8 +196,8 @@ export function SessionViewSingleQuestion() {
 						session.state
 					)
 				) {
-					const _itVotes = totalByAnswers ? totalByAnswers[it] || 0 : 0;
-					let progress = !totalByAnswers ? 0 : _itVotes / totalVotes;
+					const _itVotes = totalByVotes ? totalByVotes[it] || 0 : 0;
+					let progress = !totalByVotes ? 0 : _itVotes / totalVotes;
 
 					if (progress) {
 						progress = Number(progress.toFixed(2));
@@ -271,7 +271,6 @@ export function SessionViewSingleQuestion() {
 		// TODO: Update the session state to 'Answered'
 		// TODO: Update the user's bid if required
 
-		console.log('Saving answer:', { selectedAnswer, session, selectedBet, canBet, question })
 		if (!session || !question?.id || !selectedAnswer) {
 			return;
 		}
@@ -394,9 +393,7 @@ export function SessionViewSingleQuestion() {
 						{answerVariants}
 						{allowBet && (
 							<div className="text-center">
-								<Typography>
-									Selected Bet
-								</Typography>
+								<Typography>Selected Bet</Typography>
 								<Typography size="large">
 									<b>{selectedBet}</b>
 								</Typography>
@@ -435,7 +432,7 @@ export function SessionViewSingleQuestion() {
 							<Typography>Good luck next time!</Typography>
 						)}
 
-						<LinkButton layout="primary" href="/explore" size='large' className="min-w-[100px]">
+						<LinkButton layout="primary" href="/explore" size="large" className="min-w-[100px]">
 							Ok
 						</LinkButton>
 					</div>
