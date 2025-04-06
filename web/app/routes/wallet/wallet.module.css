@@ -1,0 +1,5 @@
+.content {
+	max-height: calc(100vh - var(--headerHeight) - var(--footerHeight));
+
+	@apply grid grid-rows-[auto_1fr] gap-4 h-full p-4 h-screen overflow-hidden;
+}

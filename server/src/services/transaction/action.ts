@@ -1,9 +1,13 @@
 import { expandResponse } from "@shared/async/helpers";
-import { addWalletBalanceByUserId } from "../wallet/actions";
+import {
+  addWalletBalanceByUserId,
+  lockWalletBalanceByUserId,
+} from "../wallet/actions";
 import { create, findById, findByIdAndUpdate, model } from "./api";
 import { TransactionStatusEnum } from "./model";
 import { TransactionParty, TransactionPayload } from "./type";
 import { addLog } from "../logger/api";
+import { TransactionDTO, TransactionTypeEnum } from "@shared/transaction/type";
 
 export async function createTransaction(
   from: TransactionParty,
@@ -26,26 +30,7 @@ export async function createTransaction(
     return Promise.reject("Failed to create transaction");
   }
 
-  if (from.type === "user") {
-    const [ok, walletError] = await expandResponse(
-      addWalletBalanceByUserId(from.id, -amount)
-    );
-
-    if (!ok || walletError) {
-      addLog({
-        source: "create-transaction",
-        message: walletError,
-        data: {
-          from,
-          to,
-          payload,
-        },
-      });
-      return Promise.reject(walletError || "Failed to create transaction");
-    }
-  }
-
-  const transaction = await create({
+  const transactionPayload = {
     senderId: from.id,
     senderType: from.type,
     receiverId: to.id,
@@ -59,40 +44,69 @@ export async function createTransaction(
     },
     reference: payload?.reference || "",
     details: payload?.details || "",
-  }).catch(async (error) => {
-    if (from.type === "user") {
-      // Return to sender's wallet balance
-      await addWalletBalanceByUserId(from.id, amount);
-    }
+  };
 
-    addLog({
-      source: "create-transaction",
-      message: error,
-      data: {
-        from,
-        to,
-        payload,
-      },
+  const transaction = await create(transactionPayload)
+    .then(async (it) => {
+      if (from.type === "user") {
+        const [ok, walletError] = await expandResponse(
+          lockWalletBalanceByUserId(from.id, amount)
+        );
+
+        if (!ok || walletError) {
+          return Promise.reject(walletError || "Failed to lock balance");
+        }
+      }
+
+      return it;
+    })
+    .catch(async (error) => {
+      console.log("Failed to create transaction", error);
+
+      addLog({
+        source: "create-transaction",
+        message: error,
+        data: {
+          from,
+          to,
+          payload,
+        },
+      });
+
+      return null;
     });
-
-    return null;
-  });
-
-  // // TODO: unfreeze receiver balance
-  // await addWalletBalanceByUserId(to.id, amount);
 
   if (!transaction) {
     return null;
   }
 
-  if (
-    transaction.status === TransactionStatusEnum.Pending &&
-    transaction.type !== "deposit"
-  ) {
-    return validateTransactionById(transaction.id);
+  const canAttemptResolve = getReolveApproval(transaction);
+
+  if (canAttemptResolve) {
+    return validateTransaction(transaction);
   }
 
   return transaction;
+}
+
+export function getReolveApproval(transaction: TransactionDTO) {
+  if (!transaction) {
+    return false;
+  }
+
+  if (![TransactionStatusEnum.Pending].includes(transaction.status)) {
+    return false;
+  }
+
+  if (
+    ![TransactionTypeEnum.Deposit, TransactionTypeEnum.TopUp].includes(
+      transaction.type
+    )
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export async function getTransactionsForUser(userId) {
@@ -173,6 +187,14 @@ export async function validateTransaction(transaction) {
   );
 }
 
+export async function findTransactionById(id) {
+  return findById(id);
+}
+
 export async function updateTransactionStatus(id, status) {
   return findByIdAndUpdate(id, { status });
+}
+
+export async function updateTransaction(id, payload) {
+  return findByIdAndUpdate(id, payload);
 }

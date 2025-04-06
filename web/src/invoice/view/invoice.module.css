@@ -1,0 +1,7 @@
+.item {
+	@apply grid grid-cols-[1fr_auto] items-center gap-2 p-2 rounded border border-cyan-300 bg-cyan-100 text-xs;
+}
+
+.discount {
+	@apply text-emerald-500;
+}

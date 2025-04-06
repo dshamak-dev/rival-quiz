@@ -3,13 +3,12 @@ import { Anchor } from '@view/anchor';
 import { Badge } from '@view/badge/badge';
 import { Image } from '@view/image/image';
 import { Typography } from '@view/typography/typography';
-import { WalletBalance } from '@view/wallet/wallet.balance';
+import { WalletBalance } from 'src/wallet/view/wallet.balance';
 import { useBroadcast } from '@state/broadcast.state';
 import { APP_NAME } from 'src/constants/config.constants';
 import classNames from 'classnames';
 import { useMemo, useRef } from 'react';
 
-import logoImage from '@assets/logo.png';
 import { Icon } from '@view/icon';
 import { useTelegram } from 'src/hooks/telegram.hook';
 import { NavigationDrawer } from './navigation.drawer';
@@ -32,7 +31,7 @@ export function NavigationDesktop() {
 			{ link: '/explore', end: true, text: 'Explore' },
 		];
 
-		_items.push({ link: '/roadmap', end: true, text: 'roadmap' });
+		_items.push({ link: '/about', end: true, text: 'about' });
 
 		return _items;
 	}, [user]);
@@ -53,7 +52,7 @@ export function NavigationDesktop() {
 		>
 			<div>
 				<Anchor end href="/explore" className="relative -left-4 flex gap-2 items-center" activeClassName="">
-					<Image src={logoImage} style={{ width: 24 }} />
+					<Image src={'/logo'} style={{ width: 24 }} />
 					<Badge visible={isConnected} color="#71f8ce" transform="translateX(8px) translateY(4px)">
 						<Typography className="uppercase text-xs font-black">{APP_NAME}</Typography>
 					</Badge>

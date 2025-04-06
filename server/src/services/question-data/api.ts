@@ -13,7 +13,8 @@ const schema = new mongoose.Schema({
   },
   votes: Array,
   totalVotes: Number,
-  totalByAnswers: Object,
+  totalByVotes: Object,
+  answer: String,
 }, { timestamps: true });
 
 schema.virtual("json").get(function () {

@@ -4,6 +4,7 @@ import { UserActionTypes } from "../../user-action/user-action.model";
 import { findQuestionById } from "../../question/question.action";
 import { QuestionDataStatusTypes } from "./model";
 import { SessionDataStateTypes } from "../../session-data/session-data.model";
+import { QuestionDataDTO } from "@/question/quistion.model";
 
 export async function createQuestionData(sessionId, questionId) {
   const question = await findQuestionById(sessionId, questionId).catch(
@@ -32,6 +33,16 @@ export async function createQuestionData(sessionId, questionId) {
   return api.create(data);
 }
 
+export async function findQuestionDataAndUpdate(query, payload) {
+  const questionData = await findQuestionData(query);
+
+  if (!questionData) {
+    return Promise.reject("No question data found.");
+  }
+
+  return updateQuestionData(questionData.id, payload);
+}
+
 export async function syncQuestionDataAndUpdate(query, payload) {
   const questionData = await findQuestionData(query);
 
@@ -39,9 +50,9 @@ export async function syncQuestionDataAndUpdate(query, payload) {
     return Promise.reject("No question data found.");
   }
 
-  await syncQuestionData(questionData.id);
+  const updated = await updateQuestionData(questionData.id, payload);
 
-  return updateQuestionData(questionData.id, payload);
+  return syncQuestionData(questionData.id, updated);
 }
 
 export async function findQuestionDataAndComplete(query) {
@@ -74,8 +85,10 @@ export async function completeQuestionData(id) {
   return updateQuestionData(id, { state: SessionDataStateTypes.Completed });
 }
 
-export async function syncQuestionData(id) {
-  const questionData = await findQuestionDataById(id);
+export async function syncQuestionData(id, origin?: QuestionDataDTO) {
+  const questionData = await (origin
+    ? Promise.resolve(origin)
+    : findQuestionDataById(id));
 
   if (!questionData) {
     return Promise.reject("Question data not found");
@@ -93,20 +106,26 @@ export async function syncQuestionData(id) {
   const votes = await getQuestionVotes(questionData.sessionId, question);
 
   let totalVotes = 0;
-  const totalByAnswers = {};
+  const totalByVotes = {};
   votes.forEach((vote) => {
-    if (!totalByAnswers[vote.answer]) {
-      totalByAnswers[vote.answer] = 0;
+    if (!totalByVotes[vote.answer]) {
+      totalByVotes[vote.answer] = 0;
     }
-    totalByAnswers[vote.answer] += vote.value;
 
-    totalVotes += vote.value || 0;
+    const value = Number(vote.value) || 0;
+
+    totalByVotes[vote.answer] += value;
+
+    totalVotes += value || 0;
   });
 
-  return updateQuestionData(id, { votes, totalVotes, totalByAnswers });
+  return updateQuestionData(id, { votes, totalVotes, totalByVotes });
 }
 
-export async function updateQuestionData(id, payload) {
+export async function updateQuestionData(
+  id,
+  payload
+): Promise<QuestionDataDTO> {
   return api.findByIdAndUpdate(id, payload);
 }
 
@@ -149,23 +168,26 @@ export async function getQuestionVotes(sessionId, question): Promise<any> {
     })
     .catch((err) => []);
   const votes: any[] = [];
+  // TODO: validate and normalize userActions
+  // TODO: Split session pool by questions for sponsorship game
+
   const { hasAnswer, answer } = question;
 
   userActions.forEach((action: any) => {
     if (action.type === UserActionTypes.SUBMIT_ANSWER) {
       // TODO: Use bet value if available
-      const valueCounter = action.data.bet ?? 1;
+      const bet = action.data.bet ?? 0;
+      const betValue = Number(bet) || 0;
+
+      // TODO: Simulate bet value for sponsorship game
 
       votes.push({
         questionId,
         sessionId,
         userId: action.userId,
         answer: action.data.value,
-        value: hasAnswer
-          ? answer === action.data.value
-            ? valueCounter
-            : 0
-          : valueCounter,
+        value: betValue,
+        isMatch: !hasAnswer || action.data.value === answer
       });
     }
   });

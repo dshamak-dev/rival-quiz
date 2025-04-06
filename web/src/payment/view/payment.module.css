@@ -1,0 +1,15 @@
+.container {
+	@apply flex flex-col gap-4;
+}
+
+.paymentList {
+	@apply flex gap-4 justify-center items-center;
+}
+
+.form {
+	@apply flex flex-col gap-4;
+}
+
+.hint {
+	@apply text-base text-center text-amber-600;
+}

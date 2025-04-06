@@ -8,7 +8,7 @@ export type CalculateStatsDTO = {
 type VoteEntries = [string, QuestionDataDTO];
 
 export async function calculateUserSummaryFromVotes(
-  votes: Record<string, QuestionDataDTO>
+  votes: Record<QuestionDataDTO["id"], QuestionDataDTO>
 ): Promise<SessionDataDTO["userScores"]> {
   if (!votes) {
     return null;
@@ -33,50 +33,67 @@ export async function calculateUserSummaryFromVotes(
       { maxScore: 0, byQuestion: {} } as CalculateStatsDTO
     );
 
-  const rates: Record<string, number> = Object.entries(stats.byQuestion).reduce(
-    (accum, [questionId, usersData]: [any, any]) => {
-      const quiestion = votes[questionId];
-      const questionTotal = quiestion.totalVotes;
+  const ratesByUser: Record<string, number> = Object.entries(
+    stats.byQuestion
+  ).reduce((accum, [questionId, usersData]: [any, any]) => {
+    const quiestion = votes[questionId];
+    const questionTotal = quiestion.totalVotes;
 
-      Object.entries(usersData).forEach(([userId, userData]: [any, any]) => {
-        const summ = accum[userId] || 0;
-        const userValue = userData.value || 0;
-        let rate = userValue === 0 ? 0 : userValue / questionTotal;
+    Object.entries(usersData).forEach(([userId, userData]: [any, any]) => {
+      const summ = accum[userId] || 0;
+      const userValue = userData.value || 0;
+      let rate = userValue === 0 ? 0 : userValue / questionTotal;
 
-        rate = rate ? Number(rate.toFixed(2)) : 0;
+      rate = rate ? Number(rate.toFixed(2)) : 0;
 
-        accum[userId] = summ + Math.max(0, rate);
-      });
+      accum[userId] = summ + Math.max(0, rate);
+    });
+
+    return accum;
+  }, {});
+
+  const total = stats.maxScore;
+
+  const summaryByUser = Object.entries(ratesByUser).reduce(
+    (accum, [userId, inQuestionRate]) => {
+      accum[userId] = total * inQuestionRate;
 
       return accum;
     },
     {}
   );
 
-  const total = stats.maxScore;
-
-  const summary = Object.entries(rates).reduce((accum, [userId, rate]) => {
-    accum[userId] = total * rate;
-
-    return accum;
-  }, {});
-
-  return { ...stats, rates, summary };
+  return { ...stats, rates: ratesByUser, summary: summaryByUser };
 }
 
 export function calculateUserScoresFromQuestionVotes(
   questionData: QuestionDataDTO
 ): Record<string, QuiestionVoteDTO> {
-  const { totalVotes, totalByAnswers, votes } = questionData;
+  const {
+    totalVotes,
+    totalByVotes,
+    votes,
+    answer: questionAnswer,
+  } = questionData;
+
+  const hasAnswer = questionAnswer != null && questionAnswer !== "";
 
   return votes.reduce(
     (accum, { userId, answer, value, questionId, sessionId }) => {
-      const rate = value / totalByAnswers[answer];
+      let rate = value / totalByVotes[answer];
+
+      const isMatchAnswer = !hasAnswer || answer === questionAnswer;
+
+      if (!isMatchAnswer) {
+        rate = 0;
+      }
+
       accum[userId] = {
         questionId,
         sessionId,
         rate,
         value: totalVotes * rate,
+        isMatch: isMatchAnswer,
       };
 
       return accum;

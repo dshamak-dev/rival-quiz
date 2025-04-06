@@ -15,13 +15,18 @@
 	"engines": {
 		"node": "22.x"
 	},
-	"proxy": "http://localhost:3004",
 	"dependencies": {
+		"@orbs-network/ton-access": "^2.3.3",
 		"@remix-run/dev": "2.13.1",
 		"@remix-run/express": "2.13.1",
 		"@remix-run/node": "2.13.1",
 		"@remix-run/react": "2.13.1",
 		"@remix-run/serve": "2.13.1",
+		"@stripe/react-stripe-js": "^3.4.0",
+		"@ton/core": "^0.60.1",
+		"@ton/crypto": "^3.3.0",
+		"@ton/ton": "^15.2.1",
+		"buffer": "^6.0.3",
 		"classnames": "2.5.1",
 		"cookie": "1.0.1",
 		"cookie-parser": "1.4.7",
@@ -34,17 +39,21 @@
 		"js-cookie": "3.0.5",
 		"jsonwebtoken": "9.0.2",
 		"mongoose": "^8.9.4",
+		"qrcode": "^1.5.4",
 		"react": "18.3.1",
 		"react-bootstrap-icons": "1.11.4",
 		"react-dom": "18.3.1",
+		"stripe": "17.7.0",
 		"uuid": "10.0.0",
 		"ws": "8.18.0"
 	},
 	"devDependencies": {
+		"@stripe/stripe-js": "^6.0.0",
 		"@types/cookie-parser": "1.4.8",
 		"@types/express": "5.0.0",
 		"@types/js-cookie": "3.0.6",
 		"@types/node": "22.10.5",
+		"@types/qrcode": "^1.5.5",
 		"@types/react": "18.3.12",
 		"@types/react-dom": "18.3.1",
 		"@types/uuid": "10.0.0",
@@ -53,7 +62,7 @@
 		"postcss": "8.4.47",
 		"tailwindcss": "3.4.14",
 		"typescript": "5.6.3",
-		"vite": "5.4.10",
+		"vite": "^5.4.14",
 		"vite-tsconfig-paths": "5.0.1"
 	}
 }

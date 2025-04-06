@@ -19,7 +19,7 @@ import { findSessionData } from "../session-data/session-data.api";
 import { SessionDataStateTypes } from "../session-data/session-data.model";
 import {
   findQuestionData,
-  syncQuestionDataAndUpdate,
+  syncQuestionDataAndUpdate
 } from "../services/question-data/actions";
 import { QuestionDataStatusTypes } from "../services/question-data/model";
 import { findManySessions } from "./api";
@@ -27,10 +27,13 @@ import { formatSessionQueryValue } from "./session.utils";
 import { randomString } from "../tools/random.utils";
 import { addUserHistory, removeUserHistory } from "../user/api";
 import { USER_HISTORY_TYPE } from "../user/constants";
+import router from "./router";
 
 const _router = express.Router();
 
 _router.use(express.json());
+
+_router.use(router);
 
 _router.get("/", async (req: any, res: any) => {
   const query = req.query;
@@ -103,7 +106,7 @@ _router.get("/:id", async (req: any, res: any) => {
     (err) => null
   );
 
-  payload.questionData = questionData;
+  payload.questionData = questionData || undefined;
 
   res.status(200).json(payload);
 });
@@ -390,7 +393,7 @@ _router.post("/:id/users", async (req: any, res: any) => {
         USER_HISTORY_TYPE.JOIN_SESSION,
         {
           sessionId,
-          hash: session.hash
+          hash: session.hash,
         }
       );
 

@@ -29,7 +29,7 @@ export const meta: MetaFunction<typeof loader> = ({ params, data }) => {
 		return [];
 	}
 
-	const title = data?.title || APP_NAME || 'Hype Hub';
+	const title = data?.title || APP_NAME;
 	const description = data?.description;
 	const imageUrl = data?.image || placeholderImage;
 

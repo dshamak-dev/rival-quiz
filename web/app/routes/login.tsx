@@ -65,6 +65,14 @@ export default function LoginPage() {
 			}).then((response) => {
 				if (response.ok) {
 					window.location.href = continueUrl;
+				} else {
+					setAuthResponse({
+						error:
+							response.status == 400
+								? 'Invalid credentials'
+								: 'Failed to authenticate. Please try again.',
+						payload,
+					});
 				}
 			});
 		},
@@ -82,7 +90,6 @@ export default function LoginPage() {
 
 		dispatch({ action, payload })
 			.catch((err) => {
-				console.error('Auth error:', err);
 				setAuthResponse({
 					error: getErrorMessage(err),
 					payload,

@@ -13,11 +13,6 @@ import {
   validateTransactionById,
 } from "../services/transaction/action";
 import {
-  createQuestionData,
-  findQuestionDataAndSync,
-  syncQuestionData,
-} from "../services/question-data/actions";
-import {
   SessionDataDTO,
   SessionDataStateTypes,
 } from "../session-data/session-data.model";
@@ -33,6 +28,8 @@ import {
 } from "@/services/transaction/type";
 import { createNotification } from "@/services/notification/api";
 import { TransactionStatusEnum } from "@/services/transaction/model";
+import { lockSessionQuestion } from "./control/session.admin-actions";
+import { TransactionTypeEnum } from "@shared/transaction/type";
 
 export const sessionDBModel = mongoose.model("sessions", SessionSchema);
 
@@ -164,56 +161,7 @@ export async function setSessionState(session, nextState: SessionStateType) {
 
   switch (nextState) {
     case SessionStateType.Locked: {
-      // session.lockedBy = session.info.createdBy;
-      /**
-       * 1. Check previous locked data and remove it
-       * 2. Calculate session data and stats
-       * 3. Lock session
-       * 4. Create lock record in session-data table
-       * 5. Return updated session
-       */
-      // 2. Calculate session data and stats
-      // const data = await createSessionData(session);
-      // const question = session.questions.find(
-      //   (question) => question.id === session.activeQuestionId
-      // );
-
-      const [questionData, questionDataError] = await findQuestionDataAndSync({
-        sessionId,
-        questionId: session.activeQuestionId,
-      })
-        .then((result) => {
-          return [result, null];
-        })
-        .catch((error) => {
-          return [null, error];
-        });
-
-      if (!questionData) {
-        return Promise.reject(
-          questionDataError || "Failed to create question data"
-        );
-      }
-
-      // 3. Lock session
-      updates.state = nextState;
-
-      if (session.state === SessionStateType.Published) {
-        updates.pool = updates.pool || session.users?.length || 0;
-      }
-
-      const activeQuestionIndex = session.questions.findIndex(
-        (question, index) => question.hasAnswer === false
-      );
-
-      const hasNextQuestion = session.questions.some(
-        (question, index) =>
-          index !== activeQuestionIndex && question.hasAnswer === false
-      );
-
-      updates.hasNextQuestion = hasNextQuestion;
-
-      break;
+      return lockSessionQuestion(session, session.activeQuestionId);
     }
     case SessionStateType.Published: {
       // If previous state was locked, unlock it and remove lock record
@@ -222,7 +170,7 @@ export async function setSessionState(session, nextState: SessionStateType) {
         const to: TransactionParty = { id: "0", type: "system" };
         const payload: TransactionPayload = {
           unique: true,
-          type: "deposit",
+          type: TransactionTypeEnum.Deposit,
           amount: session.settings.pool,
           details: `Sponsorship deposit for session ${session.title}`,
         };
@@ -282,7 +230,7 @@ export async function setSessionState(session, nextState: SessionStateType) {
         },
         type: "info",
         url: `/sessions/${session.hash || session.id}`,
-        preview: session.image,
+        preview: session.image || "/logo",
       }).catch((error) => {
         console.log("Failed to send notification", error);
 
@@ -297,7 +245,27 @@ export async function setSessionState(session, nextState: SessionStateType) {
       );
 
       updates.activeQuestionId = nextQuestion?.id;
+
+      // TODO: replace with question status / stage
+      const hasNextQuestion = session.questions.some(
+        (it) => it.id !== updates.activeQuestionId && !it.hasAnswer
+      );
+
+      // Check if there are more one question
+      updates.hasNextQuestion = hasNextQuestion && session.questions.length > 1;
+
       updates.state = nextState;
+      break;
+    }
+    case SessionStateType.LockedForReview: {
+      updates.state = nextState;
+
+      // const { userScores, votesByQuestion } =
+      //   await calculateSessionDataUserScores(sessionId).catch((error) => {
+      //     console.log("Failed to calculate user scores", error);
+      //     return null;
+      //   });
+
       break;
     }
     default: {
@@ -338,7 +306,7 @@ export async function completeSession(sessionId) {
   })
     .then((result): Promise<[SessionDataDTO | null, any]> => {
       if (!result?.id) {
-        return createSessionData(session, true).then((result) => [
+        return completeSessionData(session, true).then((result) => [
           result as SessionDataDTO,
           null,
         ]);
@@ -397,7 +365,7 @@ export async function distributePrizePool(session, prizePool) {
     const to: TransactionParty = { id: userId, type: "user" };
     const transactionData: TransactionPayload = {
       amount: Number(score),
-      type: "prize",
+      type: TransactionTypeEnum.Prize,
       details: `Prize distribution for session ${session.title}`,
     };
 

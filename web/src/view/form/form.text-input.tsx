@@ -1,5 +1,13 @@
 import classNames from 'classnames';
-import { ChangeEvent, ComponentProps, FocusEvent, HTMLInputTypeAttribute, useCallback, useMemo } from 'react';
+import {
+	ChangeEvent,
+	ComponentProps,
+	FocusEvent,
+	HTMLInputTypeAttribute,
+	PropsWithRef,
+	useCallback,
+	useMemo,
+} from 'react';
 import { FormLabel } from './form.label';
 import { getRandomId } from '@control/random';
 
@@ -8,20 +16,22 @@ export type TextInputType = 'text' | 'email' | 'password' | 'number';
 export type TextInputSizeType = 'base' | 'small' | 'large';
 
 export type TextInputProps = {
+	onRef?: (el: HTMLInputElement) => void;
 	label?: string | React.ReactNode;
 	postfix?: string | React.ReactNode;
 	type?: TextInputType;
 	required?: boolean;
-	value?: string;
+	value?: string | number;
 	id?: string;
 	placeholder?: string;
 	className?: string;
-	defaultValue?: string;
+	defaultValue?: string | number;
 	size?: TextInputSizeType;
 	disabled?: boolean;
 	onChange?: (e: ChangeEvent<HTMLInputElement>, value: any) => void;
 	inputProps?: Record<string, any>;
 	onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
+	layout?: 'outline' | 'error';
 };
 
 export function TextInput({
@@ -31,6 +41,7 @@ export function TextInput({
 	className,
 	onChange,
 	postfix,
+	onRef,
 	...props
 }: TextInputProps) {
 	const id = useMemo(() => {
@@ -92,7 +103,7 @@ export function TextInput({
 					{props.label}
 				</FormLabel>
 			)}
-			<input {...inputProps} className={inputClassName} onChange={handleChange} />
+			<input ref={onRef} {...inputProps} className={inputClassName} onChange={handleChange} />
 		</div>
 	);
 }

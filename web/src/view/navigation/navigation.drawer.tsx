@@ -15,6 +15,8 @@ import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
 import { ReactNode, Suspense, useMemo, useRef, useState } from 'react';
 import { PERMISSION_TYPE } from 'src/constants/permission.constants';
+import { WalletDepositButton } from 'src/wallet/view/wallet.deposit-button';
+import { WalletWithdrawButton } from 'src/wallet/view/wallet.withdraw-button';
 
 type NavigationDrawerProps = {
 	children?: ReactNode | ((open: boolean) => ReactNode);
@@ -121,7 +123,7 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 		return (
 			<div className="h-full grid grid-rows-[1fr_auto] gap-6 p-4">
 				<div className="flex flex-col gap-6">
-					<div>
+					<div data-testid="profile-info" className="flex flex-col gap-4">
 						<div
 							className={classNames('grid gap-4', {
 								'grid-cols-[auto_1fr]': !isNullOrEmpty(user.photoUrl),
@@ -146,6 +148,10 @@ export function NavigationDrawer({ children, offsetY = 0 }: NavigationDrawerProp
 								</Typography>
 							</div>
 						</div>
+						<section data-testid="payment-section">
+							{/* <WalletWithdrawButton /> */}
+							<WalletDepositButton />
+						</section>
 					</div>
 					{/* SHOW LAST X ACTIVE SESSIONS */}
 					<div className="flex flex-col gap-4">

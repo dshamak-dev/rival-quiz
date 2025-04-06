@@ -5,6 +5,7 @@ import { USER_ROLE_TYPE } from '@model/user.role';
 import { useAPI } from '@api/api.hook';
 import { postUserRoleRequest } from '@api/user.api';
 import { UserDTO } from '@model/user.model';
+import { WalletDTO } from '@model/wallet.model';
 
 export function useAuth() {
 	const { dispatch, user, wallet } = useContext(AppContext);
@@ -43,9 +44,17 @@ export function useAuth() {
         }
     };
 
+	const setWallet = (wallet: WalletDTO) => {
+		if (dispatch) {
+            dispatch((current: AppState) => {
+                return {...current, wallet };
+            });
+        }
+    };
+
 	const isLoggedIn = useMemo(() => {
 		return !!user;
 	}, [user]);
 
-	return { user, wallet, processing, isLoggedIn, logOut, requestRoleUpdate, setUser };
+	return { user, wallet, processing, isLoggedIn, logOut, requestRoleUpdate, setUser, setWallet };
 }

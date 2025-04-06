@@ -9,6 +9,8 @@ COPY ./web/app/ ./app
 COPY ./web/assets/ ./assets
 COPY ./web/src/ ./src
 
+ENV CHOKIDAR_USEPOLLING=true
+
 RUN npm install
 
 EXPOSE 80

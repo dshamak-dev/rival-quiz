@@ -92,7 +92,11 @@ class BroadcastProvider {
 
   send(broadcast: BroadcastData, ignore: WebSocket[] = []) {
     if (this.wss) {
-      console.log("Broadcast to clients", { size: this.wss.clients.size });
+      const clients = this.wss.clients;
+
+      if (!clients.size) return;
+
+      console.log("Broadcast to clients", { size: clients.size });
 
       this.wss.clients.forEach((client) => {
         if (client.isAlive === false) return client.terminate();

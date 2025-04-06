@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { ButtonHTMLAttributes, PropsWithChildren, useMemo } from 'react';
 
 export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
-	layout?: 'primary' | 'secondary' | 'tertiary' | 'outline';
+	layout?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'danger' | 'text' | 'custom';
 	size?: ButtonSizeType;
 	loading?: boolean;
 	faded?: boolean;
@@ -11,15 +11,19 @@ export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
 
 export type ButtonSizeType = 'base' | 'small' | 'large';
 
-export function Button({ className, layout, size = 'small', loading, children, faded = true, ...props }: ButtonProps) {
+export function Button({ className, layout = 'outline', size = 'small', loading, children, faded = true, ...props }: ButtonProps) {
 	const layoutClassName = useMemo(() => {
 		switch (layout) {
+			case 'custom':
+				return '';
+			case 'danger':
+				return 'text-white bg-red-600 hover:bg-red-500 border border-black/20';
 			case 'primary':
 				return 'bg-black text-white';
 			case 'secondary':
-				return 'bg-sky-300 text-black';
+				return 'border border-black/20 bg-sky-300 text-black';
 			case 'tertiary':
-				return 'bg-amber-300 text-black';
+				return 'border border-black/20 bg-amber-300 text-black';
 			default:
 				return 'border border-black bg-white text-black';
 		}
@@ -35,6 +39,10 @@ export function Button({ className, layout, size = 'small', loading, children, f
 				return 'text-base py-2 px-4';
 		}
 	}, [size]);
+
+	if (!layout || ['text', 'custom'].includes(layout)) {
+		return <div {...props}>{children}</div>;
+	}
 
 	return (
 		<button

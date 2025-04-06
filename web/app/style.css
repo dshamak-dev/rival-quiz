@@ -3,30 +3,39 @@
 @tailwind utilities;
 
 body {
-  background-color: white;
+	background-color: white;
+}
+
+main {
+	--headerHeight: 56px;
+	--footerHeight: 0px;
+}
+
+main.mobile {
+	--footerHeight: 77px;
 }
 
 main:after {
-  content: attr(data-build);
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 10;
-  color: rgba(255, 255, 255, .2);
-  mix-blend-mode: difference;
-  font-size: 0.5rem;
+	content: attr(data-build);
+	position: fixed;
+	bottom: 1rem;
+	right: 1rem;
+	z-index: 10;
+	color: rgba(255, 255, 255, 0.2);
+	mix-blend-mode: difference;
+	font-size: 0.5rem;
 }
 
-@media (max-width:580px) {
-  .form-field:where(.css-dev-only-do-not-override-1uq9j6g).ant-form-item-vertical .ant-form-item-row {
-    flex-direction: unset;
-  }
+@media (max-width: 580px) {
+	.form-field:where(.css-dev-only-do-not-override-1uq9j6g).ant-form-item-vertical .ant-form-item-row {
+		flex-direction: unset;
+	}
 }
 
 .form-field .ant-form-item-control {
-  flex: 1;
+	flex: 1;
 }
 
 .form-field .ant-form-item-label {
-  padding: 0;
+	padding: 0;
 }

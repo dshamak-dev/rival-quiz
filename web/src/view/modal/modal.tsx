@@ -15,13 +15,14 @@ export type ModalProps = {
 	okButtonProps?: ButtonProps | null;
 	cancelButtonProps?: ButtonProps | null;
 	zIndex?: number;
+	hideFooter?: boolean;
 };
 
 export type DispatchType = (action: ActionType) => void;
 export type ActionType = { type: 'open' | 'close'; payload: boolean } | { type: 'loading'; payload: boolean };
 
 export function Modal(props: ModalProps) {
-	const { open, title, children, onClose, onOpen, beforeOpen, beforeClose } = props;
+	const { open, title, children, hideFooter, onClose, onOpen, beforeOpen, beforeClose } = props;
 	const [isOpen, setIsOpen] = useState(open || false);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -96,31 +97,33 @@ export function Modal(props: ModalProps) {
 						)}
 					</div>
 					<div className={styles.content}>{content}</div>
-					<div className={styles.footer}>
-						{props.cancelButtonProps !== null && (
-							<Button
-								{...props.cancelButtonProps}
-								size="small"
-								onClick={() => handleVisibilityChange('cancel')}
-								disabled={isLoading}
-							>
-								Cancel
-							</Button>
-						)}
-						{props.okButtonProps !== null && (
-							<Button
-								{...props.okButtonProps}
-								layout="primary"
-								size="small"
-								className="min-w-[80px]"
-								onClick={() => handleVisibilityChange('close')}
-								disabled={props.okButtonProps?.disabled || isLoading}
-								loading={isLoading}
-							>
-								OK
-							</Button>
-						)}
-					</div>
+					{hideFooter ? null : (
+						<div className={styles.footer}>
+							{props.cancelButtonProps !== null && (
+								<Button
+									size="small"
+									{...props.cancelButtonProps}
+									onClick={() => handleVisibilityChange('cancel')}
+									disabled={isLoading}
+								>
+									{props.cancelButtonProps?.children || 'Cancel'}
+								</Button>
+							)}
+							{props.okButtonProps !== null && (
+								<Button
+									layout="primary"
+									size="small"
+									className="min-w-[80px]"
+									{...props.okButtonProps}
+									onClick={() => handleVisibilityChange('close')}
+									disabled={props.okButtonProps?.disabled || isLoading}
+									loading={isLoading}
+								>
+									{props.okButtonProps?.children || 'OK'}
+								</Button>
+							)}
+						</div>
+					)}
 				</div>
 			</div>
 		);
