@@ -63,7 +63,11 @@ export function SessionViewHeader() {
 	});
 
 	useEffect(() => {
-		if (!session?.updatedAt || isCheckingUpdates) {
+		if (
+			!session?.updatedAt ||
+			isCheckingUpdates ||
+			[SessionStateType.Completed, SessionStateType.Canceled, SessionStateType.Archived].includes(session.state)
+		) {
 			return;
 		}
 

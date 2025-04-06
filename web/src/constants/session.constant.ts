@@ -43,7 +43,7 @@ export const SESSION_TYPE_OPTIONS: {
 		value: SessionTypes.SPONSOR,
 		text: 'The creator is drawing the prize',
 		label: 'Sponsorship',
-		enabled: true,
+		enabled: false,
 	},
 	{
 		icon: 'Shuffle',
