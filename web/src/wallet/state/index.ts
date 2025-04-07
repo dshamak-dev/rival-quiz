@@ -1,3 +1,5 @@
+import { getUserWallet } from '@api/wallet.api';
+import { ID } from '@model/api.model';
 import { WalletDTO } from '@model/wallet.model';
 import { useAuth } from '@state/auth.hook';
 
@@ -8,5 +10,13 @@ export function useWallet() {
 		setWallet({ ...wallet, balance: value } as WalletDTO);
 	};
 
-	return { wallet, balance: wallet?.balance || 0,  setBalance };
+	const fetch = async () => {
+		getUserWallet()
+			.then((res) => {
+				setWallet({ ...wallet, ...res });
+			})
+			.catch((err) => null);
+	};
+
+	return { wallet, balance: wallet?.balance || 0, setBalance, fetch };
 }

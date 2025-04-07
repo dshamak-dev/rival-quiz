@@ -152,12 +152,16 @@ export function SessionViewSingleQuestion() {
 	}, [sessionData, questionData]);
 
 	useEffect(() => {
+		if (session?.state == null || [SessionStateType.Draft, SessionStateType.Published].includes(session.state)) {
+			return;
+		}
+
 		const qAnswer = getQuestionAnswer(question?.id);
 
 		if (qAnswer != null) {
 			dispatch?.({ type: 'SET_USER_PROGRESS', payload: ProgressStage.Pending });
 		} else {
-			dispatch?.({ type: 'SET_USER_PROGRESS', payload: 0 });
+			dispatch?.({ type: 'SET_USER_PROGRESS', payload: ProgressStage.Question });
 		}
 
 		if (selectedAnswer != null || qAnswer == null) {

@@ -20,7 +20,7 @@ import { Typography } from '@view/typography/typography';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SESSION_TYPE_OPTIONS, sessionStateLabels } from 'src/constants/session.constant';
 import { SingleQuestionSessionForm } from '@view/session/single-question/single-question.form';
-import { SessionparticipantsForm } from '@view/session/session.participants-form';
+import { SessionParticipantsForm } from '@view/session/session.participants-form';
 import { Session } from '@model/session';
 import classNames from 'classnames';
 import { useAuth } from '@state/auth.hook';
@@ -160,28 +160,29 @@ export default function ProfileSessionPage() {
 
 	const handleUpdate = (path: string, value: any) => {
 		return dispatchPatch({ path, value }).then((res) => {
-			setSessionState((current: any) => {
-				let next = current ? { ...current } : new Session(current);
-				const [target, targetId] = path.split('.');
+			setSessionState(res);
+			// setSessionState((current: any) => {
+			// 	let next = current ? { ...current } : new Session(current);
+			// 	const [target, targetId] = path.split('.');
 
-				switch (target) {
-					case 'questions': {
-						const questions = next.questions || [value];
+			// 	switch (target) {
+			// 		case 'questions': {
+			// 			const questions = next.questions || [value];
 
-						next = {
-							...next,
-							questions: questions.map((it: QuestionDTO) => (it.id === targetId ? value : it)),
-						};
-						break;
-					}
-					default: {
-						next = { ...next, ...value };
-						break;
-					}
-				}
+			// 			next = {
+			// 				...next,
+			// 				questions: questions.map((it: QuestionDTO) => (it.id === targetId ? value : it)),
+			// 			};
+			// 			break;
+			// 		}
+			// 		default: {
+			// 			next = { ...next, ...value };
+			// 			break;
+			// 		}
+			// 	}
 
-				return next;
-			});
+			// 	return next;
+			// });
 
 			return res;
 		});
@@ -280,7 +281,7 @@ export default function ProfileSessionPage() {
 					title={`Participants (${sessionState?.users?.length || 0})`}
 					initialState={!sessionState?.users?.length || sessionState.users.length < 3}
 				>
-					<SessionparticipantsForm
+					<SessionParticipantsForm
 						session={sessionState}
 						loading={loading || isBusy}
 						onUpdate={handleUpdate}
