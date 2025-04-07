@@ -9,6 +9,7 @@ import { findSessionById } from '@api/session.api';
 import { useAuth } from '@state/auth.hook';
 import { useNavigate } from '@remix-run/react';
 import { fetchSessionUpdateState } from 'src/session/api';
+import { useWallet } from 'src/wallet/state';
 
 // TODO: Implement actual progress tracking and state updates
 const progressBar = {
@@ -43,6 +44,7 @@ const SESSION_UPDATE_CHECK_INTERVAL = 0.5 * MS_IN_MIN;
 export function SessionViewHeader() {
 	const { session, userProgress = 0, dispatch } = useSession();
 	const { user } = useAuth();
+	const { fetch } = useWallet();
 	const natigate = useNavigate();
 	const { loading, dispatch: fetchSession } = useAPI({
 		initialState: null,
@@ -71,6 +73,20 @@ export function SessionViewHeader() {
 			return;
 		}
 
+		// Prevent reload before user set vote
+		if ([ProgressStage.Question].includes(userProgress)) {
+			return;
+		}
+
+		switch (session.state) {
+			case SessionStateType.Locked:
+			case SessionStateType.Canceled:
+			case SessionStateType.Archived:
+			case SessionStateType.Completed:
+				fetch();
+				break;
+		}
+
 		const timeout = setTimeout(() => {
 			checkUpdates(session.updatedAt).then((hasUpdates) => {
 				if (hasUpdates) {
@@ -80,7 +96,7 @@ export function SessionViewHeader() {
 		}, SESSION_UPDATE_CHECK_INTERVAL);
 
 		return () => clearTimeout(timeout);
-	}, [session?.updatedAt, isCheckingUpdates]);
+	}, [session?.updatedAt, userProgress, isCheckingUpdates]);
 
 	const progressBarStages = useMemo(() => {
 		switch (session?.state) {

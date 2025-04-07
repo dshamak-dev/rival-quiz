@@ -3,8 +3,9 @@ import { SessionDTO, SessionStateType, SessionTypes } from '@model/session.model
 import { TextInput } from '@view/form/form.text-input';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { sessionStateLabels } from 'src/constants/session.constant';
+import { debounce } from 'src/hooks/debounce.hook';
 
 export type SessionInfoFormProps = {
 	initialValue: SessionDTO;
@@ -15,11 +16,21 @@ export type SessionInfoFormProps = {
 export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInfoFormProps) {
 	const [formState, setFormState] = useState({ ...initialValue });
 
+	const submitDebounced = useCallback(debounce(onSubmit, 2000), []);
+
 	const isDirty = useMemo(() => {
-		return JSON.stringify(initialValue) !== JSON.stringify(formState);
+		return !compareObjects(initialValue, formState);
 	}, [formState]);
 
 	const state = formState.state || SessionStateType.Draft;
+
+	useEffect(() => {
+		if (!isDirty || disabled) {
+            return;
+        }
+
+        submitDebounced(formState);
+	}, [formState, isDirty]);
 
 	// const canSave = useMemo(() => {
 	// 	return (
@@ -40,21 +51,21 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 		});
 	};
 
-	const handleCancel = () => {
-		const _state = { ...initialValue };
+	// const handleCancel = () => {
+	// 	const _state = { ...initialValue };
 
-		setFormState(_state);
-	};
+	// 	setFormState(_state);
+	// };
 
 	useEffect(() => {
 		setFormState(initialValue);
 	}, [initialValue]);
 
-	const handleSubmit = () => {
-		if (!compareObjects(formState, initialValue)) {
-			onSubmit(formState);
-		}
-	};
+	// const handleSubmit = () => {
+	// 	if (!compareObjects(formState, initialValue)) {
+	// 		onSubmit(formState);
+	// 	}
+	// };
 
 	const isSponsored = useMemo(() => {
 		return formState?.type === SessionTypes.SPONSOR;
@@ -80,7 +91,6 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 					value={formState?.title}
 					defaultValue={initialValue?.title || ''}
 					onChange={(e, value) => handleChange(e.target.name, value)}
-					onBlur={(e) => handleSubmit()}
 					className="flex-grow"
 				/>
 				{isSponsored && (
@@ -93,7 +103,6 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 							value={String(formState?.settings?.pool ?? '')}
 							defaultValue={String(initialValue?.settings?.pool || '')}
 							onChange={(e, value) => handleChangeSettings(e.target.name, value)}
-							onBlur={(e) => handleSubmit()}
 						/>
 					</div>
 				)}
@@ -105,7 +114,6 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 				value={formState?.description}
 				defaultValue={initialValue?.description || ''}
 				onChange={(e, value) => handleChange(e.target.name, value)}
-				onBlur={(e) => handleSubmit()}
 			/>
 			<TextInput
 				id="image"
@@ -113,7 +121,6 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 				value={formState?.image || ''}
 				defaultValue={initialValue?.image || ''}
 				onChange={(e, value) => handleChange(e.target.name, value)}
-				onBlur={(e) => handleSubmit()}
 				disabled={!canEdit}
 			/>
 			{/* <Select
