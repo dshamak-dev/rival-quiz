@@ -1,6 +1,6 @@
 import { useAPI } from '@api/api.hook';
-import { getSessionUsers } from '@api/session.user.api';
-import { Session } from '@model/session';
+// import { getSessionUsers } from '@api/session.user.api';
+// import { Session } from '@model/session';
 import { SessionDTO } from '@model/session.model';
 import { SessionUserDTO } from '@model/session.user.model';
 import { Button } from '@view/button/button';
@@ -15,7 +15,7 @@ export type SessionparticipantsFormProps = {
 	onUpdate: (path: string, value: any) => Promise<SessionDTO>;
 };
 
-export function SessionparticipantsForm({ session, loading, onUpdate }: SessionparticipantsFormProps) {
+export function SessionParticipantsForm({ session, loading, onUpdate }: SessionparticipantsFormProps) {
 	const {
 		loading: isLoadingUsers,
 		data: users,
@@ -33,7 +33,7 @@ export function SessionparticipantsForm({ session, loading, onUpdate }: Sessionp
 				}) || []
 			);
 
-			return getSessionUsers(id);
+			// return getSessionUsers(id);
 		},
 	});
 
