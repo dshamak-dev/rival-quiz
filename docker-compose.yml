@@ -17,12 +17,19 @@ services:
       - WS_PORT=8080
       - JWT_SECRET=quizlo-secret
       - SECRET_SALT=quizlo-salt
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     networks:
       - api
 
   web:
     image: dshamak/quizlo-web:${TAG:-latest}
     container_name: web
+    restart: always
     build:
       context: ./
       dockerfile: ./web/Dockerfile.prod

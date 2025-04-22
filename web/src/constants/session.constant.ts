@@ -22,6 +22,7 @@ export const sessionTypeLabels: Record<SessionTypes, string> = {
 	[SessionTypes.SPONSOR]: 'Sponsor',
 	[SessionTypes.SYSTEM_PRIZE]: 'System Prize',
 	[SessionTypes.LOTTERY]: 'Lottery',
+	[SessionTypes.CUSTOM]: 'Custom',
 };
 
 export const SESSION_TYPE_OPTIONS: {
@@ -50,6 +51,13 @@ export const SESSION_TYPE_OPTIONS: {
 		value: SessionTypes.LOTTERY,
 		text: 'A random winner is chosen',
 		label: 'Lottery',
+		enabled: false,
+	},
+	{
+		icon: 'CurrencyExchange',
+		value: SessionTypes.CUSTOM,
+		text: 'Self Made Casino',
+		label: 'Casino',
 		enabled: false,
 	},
 ];

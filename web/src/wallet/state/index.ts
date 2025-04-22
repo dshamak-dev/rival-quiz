@@ -1,5 +1,4 @@
 import { getUserWallet } from '@api/wallet.api';
-import { ID } from '@model/api.model';
 import { WalletDTO } from '@model/wallet.model';
 import { useAuth } from '@state/auth.hook';
 

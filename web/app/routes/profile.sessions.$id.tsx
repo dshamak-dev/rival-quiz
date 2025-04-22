@@ -104,7 +104,7 @@ export default function ProfileSessionPage() {
 	}, [data]);
 
 	const handleFetchSession = useCallback(() => {
-		dispatch(sessionId);
+		return dispatch(sessionId);
 	}, [dispatch]);
 
 	const handleAddQuestion = useCallback(async () => {
@@ -224,7 +224,8 @@ export default function ProfileSessionPage() {
 								<div
 									key={it.value}
 									className={classNames(
-										'grid grid-rows-[1fr_auto] gap-8 lg:h-full min-h-[200px] border-2 border-gray-200 p-8 rounded-md max-w-full w-[360px]',
+										'grid grid-rows-[1fr_auto] gap-8 lg:h-full min-h-[200px] border-2 border-gray-200 p-8 rounded-md lg:min-w-[240px] max-w-full',
+										'overflow-hidden',
 										{
 											'text-gray-400 pointer-events-none': !it.enabled,
 										}
@@ -302,6 +303,7 @@ export default function ProfileSessionPage() {
 				loading={loading || isBusy}
 				onUpdate={handleUpdate}
 				onDelete={handleDeleteSession}
+				onRefetch={handleFetchSession}
 			/>
 		);
 	}, [sessionState, loading, isBusy]);

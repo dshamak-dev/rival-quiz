@@ -24,13 +24,17 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 
 	const state = formState.state || SessionStateType.Draft;
 
-	useEffect(() => {
-		if (!isDirty || disabled) {
-            return;
-        }
+	const canEdit = useMemo(() => {
+		return !disabled && [SessionStateType.Draft].includes(state);
+	}, [disabled, state]);
 
-        submitDebounced(formState);
-	}, [formState, isDirty]);
+	useEffect(() => {
+		if (!isDirty || disabled || !canEdit) {
+			return;
+		}
+
+		submitDebounced(formState);
+	}, [formState, isDirty, canEdit]);
 
 	// const canSave = useMemo(() => {
 	// 	return (
@@ -70,10 +74,6 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 	const isSponsored = useMemo(() => {
 		return formState?.type === SessionTypes.SPONSOR;
 	}, [formState?.type]);
-
-	const canEdit = useMemo(() => {
-		return !disabled && [SessionStateType.Draft].includes(state);
-	}, [disabled, state]);
 
 	return (
 		<div className="flex flex-col gap-4 p-4">

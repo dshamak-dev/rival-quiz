@@ -42,6 +42,7 @@ export function TextInput({
 	onChange,
 	postfix,
 	onRef,
+	layout = 'outline',
 	...props
 }: TextInputProps) {
 	const id = useMemo(() => {
@@ -59,11 +60,20 @@ export function TextInput({
 		}
 	}, [size]);
 
+	const layoutClassName = useMemo(() => {
+		switch (layout) {
+            case 'error':
+                return 'border border-red-500';
+            default:
+                return 'border-gray-300';
+        }
+    }, [layout]);
+
 	const inputClassName = useMemo(() => {
-		return classNames(className, sizeClassName, 'rounded border border-gray-300', {
+		return classNames(className, sizeClassName, layoutClassName, 'rounded border', {
 			'opacity-50': props.disabled,
 		});
-	}, [sizeClassName, className, props.disabled]);
+	}, [sizeClassName, className, layoutClassName, props.disabled]);
 
 	const inputProps = useMemo(() => {
 		const { inputProps, ...other } = props;

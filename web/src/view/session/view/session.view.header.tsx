@@ -82,9 +82,10 @@ export function SessionViewHeader() {
 			case SessionStateType.Locked:
 			case SessionStateType.Canceled:
 			case SessionStateType.Archived:
-			case SessionStateType.Completed:
+			case SessionStateType.Completed: {
 				fetch();
 				break;
+			}
 		}
 
 		const timeout = setTimeout(() => {

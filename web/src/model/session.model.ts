@@ -8,6 +8,7 @@ export enum SessionTypes {
 	SPONSOR = SharedSessionTypes.SPONSOR,
 	SYSTEM_PRIZE = SharedSessionTypes.SYSTEM_PRIZE,
 	LOTTERY = SharedSessionTypes.LOTTERY,
+	CUSTOM = 'custom',
 }
 
 export type SessionType = Omit<SessionDTO, '_id' | 'id' | 'ownerId'>;

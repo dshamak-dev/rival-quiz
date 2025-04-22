@@ -135,7 +135,7 @@ export async function patchSession(id, payload) {
           return Promise.reject(error || "Failed to change session state");
         }
 
-        Object.assign(session, updates || {});
+        Object.assign(session, updates || {}, { users: session.users });
       }
       break;
     }
@@ -240,6 +240,13 @@ export async function setSessionState(session, nextState: SessionStateType) {
       break;
     }
     case SessionStateType.Active: {
+      // Note: Validate session data, sync session status and validate participants
+      if (session.users?.length < 2) {
+        return Promise.reject(
+          "Not enough participants to start the session. Please add more participants."
+        );
+      }
+
       const nextQuestion = session.questions.find(
         (question) => !question.hasAnswer
       );

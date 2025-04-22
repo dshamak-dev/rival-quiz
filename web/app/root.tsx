@@ -1,5 +1,5 @@
 import { LinksFunction, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { Links, Meta, Outlet, Scripts, useLoaderData, useNavigation } from '@remix-run/react';
+import { Links, Meta, Outlet, Scripts, useLoaderData, useLocation, useNavigation } from '@remix-run/react';
 
 import { useEffect, useMemo } from 'react';
 
@@ -135,6 +135,7 @@ export const meta: MetaFunction = () => {
 export default function App() {
 	const initialData = useLoaderData<typeof loader>();
 	const { state } = useNavigation();
+	const location = useLocation();
 	const { deviceType } = useUI();
 	const isLoading = useMemo(() => {
 		return state === 'loading';
@@ -150,6 +151,10 @@ export default function App() {
 		WEB_API.setEnv({ ...initialData.envVariables, API_URL: '/api' });
 	}, []);
 
+	const isScreenHeight = useMemo(() => {
+		return ['/profile/sessions/'].some((route) => location?.pathname?.includes(route));
+	}, [location]);
+
 	return (
 		<html suppressHydrationWarning={false}>
 			<head>
@@ -161,9 +166,12 @@ export default function App() {
 				<Links />
 			</head>
 			<body>
-				<main className={classNames('min-h-screen', {
-					'mobile': isMobileView
-				})} data-build={buildNumber}>
+				<main
+					className={classNames('min-h-screen', {
+						mobile: isMobileView,
+					})}
+					data-build={buildNumber}
+				>
 					{isLoading ? (
 						<ClientComponent>
 							<div className="h-screen max-h-full flex items-center justify-center">
@@ -174,7 +182,7 @@ export default function App() {
 						<BroadcastProvider env={initialData.envVariables}>
 							<AppContextProvider value={initialData}>
 								<div
-									className={classNames('min-h-screen', {
+									className={classNames(isScreenHeight ? 'h-screen' : 'min-h-screen', {
 										'grid grid-rows-[auto_1fr]': !isMobileView && deviceType != null,
 										'grid grid-rows-[auto_1fr_auto]': isMobileView,
 									})}

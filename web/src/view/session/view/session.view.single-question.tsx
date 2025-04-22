@@ -204,14 +204,14 @@ export function SessionViewSingleQuestion() {
 					let progress = !totalByVotes ? 0 : _itVotes / totalVotes;
 
 					if (progress) {
-						progress = Number(progress.toFixed(2));
+						progress = Number((progress * 100).toFixed(1));
 					}
 
 					_option.label = (
 						<div className="flex gap-2 items-center">
 							<Typography>{_option.label}</Typography>
 							<span>-</span>
-							<Typography size="small">{progress * 100}%</Typography>
+							<Typography size="small">{progress}%</Typography>
 						</div>
 					);
 				}
@@ -259,9 +259,10 @@ export function SessionViewSingleQuestion() {
 	const canSave = useMemo(() => {
 		// TODO: Implement validation logic based on the question type and options
 		// TODO: Check if session require a Bid and if a bid has been placed
+		const isValidBet = canBet ? selectedBet && selectedBet > 0 : true;
 
-		return question?.id && selectedAnswer !== undefined && currentAnswer == null;
-	}, [currentAnswer, question, selectedAnswer]);
+		return question?.id && selectedAnswer !== undefined && currentAnswer == null && isValidBet;
+	}, [currentAnswer, question, selectedAnswer, canBet, selectedBet]);
 
 	const handleJoinSession = () => {
 		join?.();
@@ -374,7 +375,12 @@ export function SessionViewSingleQuestion() {
 					<>
 						{answerVariants}
 						{allowBet && (
-							<SessionBetInput disabled={!canBet} onChange={handleBetChange} initialValue={selectedBet} />
+							<SessionBetInput
+								disabled={!canBet}
+								onChange={handleBetChange}
+								initialValue={selectedBet}
+								draft={!selectedAnswer}
+							/>
 						)}
 						{controls}
 					</>
@@ -392,6 +398,9 @@ export function SessionViewSingleQuestion() {
 					);
 				}
 
+				const share = prizeData ? prizeData.userShare * 100 : 0;
+				const shareText =  share % 1 > 0 ? `${share.toFixed(1)}` : `${share.toFixed(0)}`;
+
 				return (
 					<>
 						{answerVariants}
@@ -406,7 +415,10 @@ export function SessionViewSingleQuestion() {
 						{prizeData ? (
 							<div className="px-8 py-4 bg-gray-100 rounded text-center">
 								<div>
-									Your share is <b>{prizeData.userShare * 100}%</b>
+									Total <b>{questionData?.totalVotes}</b> points
+								</div>
+								<div>
+									Your share is <b>{shareText}%</b>
 								</div>
 								<div>
 									Potential prize is <b>{prizeData.userTotal}</b> points
@@ -418,8 +430,6 @@ export function SessionViewSingleQuestion() {
 			}
 			case SessionStateType.Completed: {
 				const userPrize = user?.id ? sessionData?.userScores?.summary?.[user.id] : 0;
-
-				console.log('Session data', sessionData);
 
 				const hasPrize = !!userPrize;
 
