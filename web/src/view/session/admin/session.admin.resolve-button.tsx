@@ -7,15 +7,20 @@ import { useMemo } from 'react';
 export function SessionAdminResolveButton({
 	session,
 	buttonProps,
+	onSubmit
 }: {
 	session: SessionDTO;
 	buttonProps?: ButtonProps;
+	onSubmit?: () => Promise<any>;
 }) {
 	const { loading, dispatch } = useAPI({ request: (sessionId: SessionDTO['id']) => resolveSession(sessionId) });
 	const sessionId = session?.id;
 
 	const handleSubmit = async (): Promise<void> => {
-		dispatch(sessionId).catch((err) => {
+		dispatch(sessionId).then(res => {
+			onSubmit?.();
+			return res;
+		}).catch((err) => {
 			console.error(err);
 		});
 	};

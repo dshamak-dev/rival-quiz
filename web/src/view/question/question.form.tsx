@@ -14,17 +14,25 @@ export type QuestionFormProps = {
 	onDelete?: () => void;
 	sessionId: ID;
 	active?: boolean;
+	minOptions?: number;
 };
 
-export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: QuestionFormProps) {
+export function QuestionForm({ initialValue, disabled, minOptions = 2, onSubmit, onDelete }: QuestionFormProps) {
 	const [formState, setFormState] = useState({ ...initialValue });
 
 	// const questionId = initialValue.id;
 	// const isActive = active;
 
 	useEffect(() => {
-		setFormState(initialValue);
-	}, [initialValue])
+		const data: QuestionDTO = Object.assign({}, initialValue);
+
+		if (minOptions && data.options?.length < minOptions) {
+			const missingCount = minOptions - data.options?.length;
+			data.options = [...data.options, ...Array(missingCount).fill('')];
+		}
+
+		setFormState(data);
+	}, [initialValue]);
 
 	const isDirty = useMemo(() => {
 		return JSON.stringify(initialValue) !== JSON.stringify(formState) && !disabled;
@@ -40,12 +48,17 @@ export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: Que
 				errors.push({ field, message: 'Field is required.' });
 			}
 		});
+		const validOptions = formState.options?.filter((option: string) => option?.trim() !== '');
+
+		if (!validOptions?.length || validOptions.length < minOptions) {
+			errors.push({ field: 'options', message: `At least${minOptions} options required` });
+		}
 
 		return { isValid: !errors?.length, errors };
 	}, [formState]);
 
 	const canSave = useMemo(() => {
-		return (isDirty && !disabled) || !check.isValid;
+		return isDirty && !disabled && check.isValid;
 	}, [isDirty, disabled, check]);
 
 	const handleChange = (name: string, value: any) => {
@@ -64,7 +77,10 @@ export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: Que
 
 	const handleSubmit = () => {
 		if (onSubmit) {
-			onSubmit(formState);
+			onSubmit({
+				...formState,
+				options: formState.options?.filter((option: string) => option?.trim() !== ''),
+			});
 		}
 	};
 
@@ -112,28 +128,30 @@ export function QuestionForm({ initialValue, disabled, onSubmit, onDelete }: Que
 					onChange={handleOptionsChange}
 				/>
 			</div>
-			{canEdit && <div className="flex justify-end gap-4">
-				{onDelete && (
-					<Button disabled={disabled} size="small" onClick={handleDelete}>
-						Delete
+			{canEdit && (
+				<div className="flex justify-end gap-4">
+					{onDelete && (
+						<Button disabled={disabled} size="small" onClick={handleDelete}>
+							Delete
+						</Button>
+					)}
+					<Button size="small" disabled={!isDirty} className="min-w-[100px]" onClick={handleCancel}>
+						Cancel
 					</Button>
-				)}
-				<Button size="small" disabled={!isDirty} className="min-w-[100px]" onClick={handleCancel}>
-					Cancel
-				</Button>
-				{/* {isActive && <Button size="small" layout="tertiary" onClick={handleSync}>
+					{/* {isActive && <Button size="small" layout="tertiary" onClick={handleSync}>
 					Sync Data
 				</Button>} */}
-				<Button
-					layout="primary"
-					size="small"
-					disabled={!canSave}
-					className="min-w-[100px]"
-					onClick={handleSubmit}
-				>
-					Save
-				</Button>
-			</div>}
+					<Button
+						layout="primary"
+						size="small"
+						disabled={!canSave}
+						className="min-w-[100px]"
+						onClick={handleSubmit}
+					>
+						Save
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 }

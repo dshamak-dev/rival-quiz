@@ -21,7 +21,7 @@ export function SingleQuestionSessionForm({
 	loading,
 	onUpdate,
 	onAdd,
-	onDelete,
+	onDelete
 }: SingleQuestionSessionFormProps) {
 	if (!session) {
 		return null;
@@ -75,6 +75,7 @@ export function SingleQuestionSessionForm({
 								disabled={loading || !canEditQuestion}
 								onSubmit={canEditQuestion ? (questionData) => onUpdate(`questions.${question.id}`, questionData) : undefined}
 								onDelete={() => onDelete(question.id)}
+								minOptions={2}
 							/>
 						</Collapse>
 					);

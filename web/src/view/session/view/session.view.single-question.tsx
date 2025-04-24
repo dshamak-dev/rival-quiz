@@ -137,7 +137,7 @@ export function SessionViewSingleQuestion() {
 
 	const prizeData = useMemo(() => {
 		if (!questionData || !selectedAnswer) {
-			return 0;
+			return null;
 		}
 
 		const totalVotes = questionData?.totalVotes || 0;
@@ -400,6 +400,7 @@ export function SessionViewSingleQuestion() {
 
 				const share = prizeData ? prizeData.userShare * 100 : 0;
 				const shareText =  share % 1 > 0 ? `${share.toFixed(1)}` : `${share.toFixed(0)}`;
+				const prizeAmount = (prizeData?.userTotal || 0).toFixed(2);
 
 				return (
 					<>
@@ -421,7 +422,7 @@ export function SessionViewSingleQuestion() {
 									Your share is <b>{shareText}%</b>
 								</div>
 								<div>
-									Potential prize is <b>{prizeData.userTotal}</b> points
+									Potential prize is <b>{prizeAmount}</b> points
 								</div>
 							</div>
 						) : null}

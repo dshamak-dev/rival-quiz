@@ -2,7 +2,7 @@ import { DateType, ID } from '@model/api.model';
 import { QuestionDTO } from '@model/question.model';
 import { SessionData, SessionDTO, SessionStateType, SessionTypes } from '@model/session.model';
 
-export type SessionModelType = Omit<SessionDTO, 'id' | 'ownerId'>;
+export type SessionModelType = Omit<SessionDTO, 'id' | 'ownerId' | 'hash'>;
 
 export class Session implements SessionModelType {
 	id?: ID;
@@ -24,6 +24,7 @@ export class Session implements SessionModelType {
 	get json(): SessionDTO {
 		return {
 			...this.origin,
+			hash: this.origin?.hash || '',
 			id: this.id as string,
 			description: this.description,
 			state: this.state,
@@ -52,6 +53,10 @@ export class Session implements SessionModelType {
 
 	getActiveQuestion() {
 		const json = this.json;
+
+		if ([SessionStateType.Draft, SessionStateType.Published].includes(json.state)) {
+			return null;
+		}
 
 		if (json.activeQuestionId) {
 			json.questions?.find((question) => question.id === json.activeQuestionId);

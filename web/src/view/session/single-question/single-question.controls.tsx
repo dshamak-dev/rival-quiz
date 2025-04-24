@@ -116,7 +116,7 @@ export function SingleQuestionSessionHeader({
 		case SessionStateType.LockedForReview: {
 			return (
 				<>
-					<SessionAdminResolveButton session={session} buttonProps={buttonCommonProps} />
+					<SessionAdminResolveButton session={session} buttonProps={buttonCommonProps} onSubmit={onRefetch} />
 				</>
 			);
 		}

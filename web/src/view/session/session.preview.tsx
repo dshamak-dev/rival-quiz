@@ -79,7 +79,7 @@ export function SessionPreview({ session }: SessionPreviewProps) {
 			)}
 			<div className="relative grid grid-rows-[1fr_auto] bg-gray-100">
 				<Image
-					className="h-[200px] w-full object-cover rounded"
+					className="h-[200px] w-full object-cover object-top rounded"
 					src={session.image}
 					placeholderImage={placeholderImage}
 				/>
