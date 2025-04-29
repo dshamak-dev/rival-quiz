@@ -333,7 +333,7 @@ export default function ProfileSessionPage() {
 
 				<Collapse
 					title={`Participants (${sessionState?.users?.length || 0})`}
-					initialState={!sessionState?.users?.length || sessionState.users.length < 3}
+					initialState={[SessionStateType.Active].includes(sessionState.state)}
 				>
 					<SessionParticipantsForm
 						session={sessionState}

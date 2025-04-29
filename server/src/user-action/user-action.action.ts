@@ -10,6 +10,9 @@ export const userActionDBModel = mongoose.model(
 );
 
 export async function createUserAction(payload) {
+  const questionId = payload.questionId;
+  const sessionId = payload.sessionId;
+
   switch (payload.type) {
     case UserActionTypes.SUBMIT_ANSWER: {
       // const updated = await addSessionUser(payload.sessionId, payload.userId).catch(err => {
@@ -21,10 +24,11 @@ export async function createUserAction(payload) {
       //   return Promise.reject("Failed to add user to session");
       // }
 
-      const questionId = payload.questionId;
-      const sessionId = payload.sessionId;
+      const userActions = await userActionDBModel
+        .create(payload)
+        .catch((err) => null);
 
-      if (questionId && sessionId) {
+      if (userActions && questionId && sessionId) {
         await findQuestionDataAndSync(
           {
             questionId,
@@ -38,15 +42,28 @@ export async function createUserAction(payload) {
         });
       }
 
-      return userActionDBModel.create(payload);
+      return userActions;
     }
     case UserActionTypes.REMOVE_ANSWER: {
-      // await removeSessionUser(payload.sessionId, payload.userId);
-      return userActionDBModel.deleteOne({
+      const userAction = await userActionDBModel.deleteOne({
         userId: payload.userId,
         sessionId: payload.sessionId,
         questionId: payload.questionId,
       });
+
+      await findQuestionDataAndSync(
+        {
+          questionId,
+          sessionId,
+          state: QuestionDataStatusTypes.Draft,
+        },
+        false
+      ).catch((err) => {
+        console.error("Error syncing question data:", err);
+        return null;
+      });
+
+      return userAction;
     }
   }
 

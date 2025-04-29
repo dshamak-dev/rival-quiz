@@ -7,16 +7,44 @@ import classNames from 'classnames';
 import { useUI } from '@control/ui.control';
 import { SessionDTO, SessionStateType } from '@model/session.model';
 import { LoaderFunctionArgs } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, useRevalidator } from '@remix-run/react';
 import { EventsSlider } from 'src/event/view/event.slider';
 import { fetchHighlightEvents } from 'src/event/api/event.api';
+import { useCallback } from 'react';
+import { useTimeout } from 'src/hooks/time.hook';
+import { findUserByToken } from '@api/user.api';
 
 export async function loader({ request }: LoaderFunctionArgs): Promise<{ sessions: SessionDTO[]; events: any }> {
-	const sessions = await findSessions(`state=${[SessionStateType.Active, SessionStateType.Published]}`)
+	const user = await findUserByToken(request);
+
+	const sessions = await findSessions(
+		`state=${[
+			SessionStateType.Active,
+			SessionStateType.Published,
+			SessionStateType.Locked,
+			SessionStateType.LockedForReview,
+		]}`
+	)
 		.then((sessions) =>
-			sessions?.sort((a, b) => {
-				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-			})
+			sessions
+				?.filter((item) => {
+					switch (item.state) {
+						case SessionStateType.Active:
+						case SessionStateType.Locked:
+						case SessionStateType.LockedForReview: {
+							if (!user?.id) {
+								return false;
+							}
+
+							return user.id === item.ownerId || item.users?.includes(user.id);
+						}
+						default:
+							return true;
+					}
+				})
+				?.sort((a, b) => {
+					return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+				})
 		)
 		.catch(() => undefined);
 
@@ -28,6 +56,16 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<{ session
 export default function LandingPage() {
 	const { isMobile } = useUI();
 	const { sessions, events } = useLoaderData<typeof loader>();
+	const revalidator = useRevalidator();
+
+	const refetch = useCallback(
+		() => {
+			revalidator.revalidate();
+		},
+		[revalidator] as const
+	);
+
+	const timeout = useTimeout(refetch, 60 * 1000);
 
 	return (
 		<div

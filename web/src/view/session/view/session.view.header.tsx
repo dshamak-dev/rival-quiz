@@ -10,6 +10,7 @@ import { useAuth } from '@state/auth.hook';
 import { useNavigate } from '@remix-run/react';
 import { fetchSessionUpdateState } from 'src/session/api';
 import { useWallet } from 'src/wallet/state';
+import { Image } from '@view/image/image';
 
 // TODO: Implement actual progress tracking and state updates
 const progressBar = {
@@ -42,7 +43,7 @@ const MS_IN_MIN = 60 * MS_IN_SEC;
 const SESSION_UPDATE_CHECK_INTERVAL = 0.5 * MS_IN_MIN;
 
 export function SessionViewHeader() {
-	const { session, userProgress = 0, dispatch } = useSession();
+	const { session, userProgress = 0, updateRequested, dispatch } = useSession();
 	const { user } = useAuth();
 	const { fetch } = useWallet();
 	const natigate = useNavigate();
@@ -74,22 +75,27 @@ export function SessionViewHeader() {
 		}
 
 		// Prevent reload before user set vote
-		if ([ProgressStage.Question].includes(userProgress)) {
-			return;
-		}
-
-		switch (session.state) {
-			case SessionStateType.Locked:
-			case SessionStateType.Canceled:
-			case SessionStateType.Archived:
-			case SessionStateType.Completed: {
-				fetch();
-				break;
+		if (![ProgressStage.Question].includes(userProgress)) {
+			switch (session.state) {
+				case SessionStateType.Locked:
+				case SessionStateType.Canceled:
+				case SessionStateType.Archived:
+				case SessionStateType.Completed: {
+					fetch();
+					break;
+				}
 			}
 		}
 
+		const lastUpdatedAt = [session.questionData?.updatedAt, session.updatedAt].sort((a, b) => {
+			const aTime = a ? new Date(a as string).getTime() : 0;
+			const bTime = b ? new Date(b as string).getTime() : 0;
+
+			return bTime - aTime;
+		})[0];
+
 		const timeout = setTimeout(() => {
-			checkUpdates(session.updatedAt).then((hasUpdates) => {
+			checkUpdates(lastUpdatedAt).then((hasUpdates) => {
 				if (hasUpdates) {
 					fetchSession(session.id);
 				}
@@ -97,7 +103,13 @@ export function SessionViewHeader() {
 		}, SESSION_UPDATE_CHECK_INTERVAL);
 
 		return () => clearTimeout(timeout);
-	}, [session?.updatedAt, userProgress, isCheckingUpdates]);
+	}, [session?.updatedAt, session?.questionData?.updatedAt, isCheckingUpdates]);
+
+	useEffect(() => {
+		if (updateRequested && !isCheckingUpdates && session?.id) {
+			fetchSession(session.id);
+		}
+	}, [updateRequested]);
 
 	const progressBarStages = useMemo(() => {
 		switch (session?.state) {
@@ -119,6 +131,20 @@ export function SessionViewHeader() {
 				return [];
 		}
 	}, [session?.state]);
+
+	const questionProgressLabel = useMemo(() => {
+		if (session?.state !== SessionStateType.Active) {
+			return null;
+		}
+		const userCount = session?.users?.length || 0;
+		const votesCount = session?.questionData?.metadata?.votesCount || 0;
+
+		if (!userCount) {
+			return null;
+		}
+
+		return `Ready (${votesCount} / ${userCount})`;
+	}, [session?.state, session?.questionData]);
 
 	const stageIndex = useMemo(() => {
 		const stagesLength = progressBarStages.length;
@@ -156,11 +182,14 @@ export function SessionViewHeader() {
 	return (
 		<div className="relative z-10 flex flex-col gap-2 w-full">
 			<div className="grid grid-cols-[1fr_auto] gap-4 items-center">
-				<div>
-					<Typography className="text-lg" size="custom">
-						{session.title}
-					</Typography>
-					{session.description && <Typography className="text-xs">{session.description}</Typography>}
+				<div className="flex items-center gap-4">
+					{session.image !== null && <Image className="h-12 object-contain object-top" src={session.image} />}
+					<div>
+						<Typography className="text-lg" size="custom">
+							{session.title}
+						</Typography>
+						{session.description && <Typography className="text-xs">{session.description}</Typography>}
+					</div>
 				</div>
 				<div className="flex items-center gap-2">
 					{isSessionAdmin && (
@@ -189,55 +218,48 @@ export function SessionViewHeader() {
 					</div>
 				</div>
 			</div>
-			<div
-				className={classNames(`grid gap-2 sm:gap-6`)}
-				style={{
-					gridTemplateColumns: `repeat(${progressBarStages.length}, 1fr)`,
-				}}
-			>
-				{progressBarStages.map((it, index) => {
-					const isPassed = index < stageIndex;
-					const isActive = index === stageIndex;
-					// TODO: Implement progress tracking and next state preview
-					const isNext = false; //index === stageIndex + 1;
+			<div>
+				{questionProgressLabel && (
+					<Typography className="text-sm text-center">{questionProgressLabel}</Typography>
+				)}
+				<div
+					className={classNames(`grid gap-2 sm:gap-6`)}
+					style={{
+						gridTemplateColumns: `repeat(${progressBarStages.length}, 1fr)`,
+					}}
+				>
+					{progressBarStages.map((it, index) => {
+						const isPassed = index < stageIndex;
+						const isActive = index === stageIndex;
+						// TODO: Implement progress tracking and next state preview
+						const isNext = false; //index === stageIndex + 1;
 
-					return (
-						<div
-							key={index}
-							className={classNames('relative flex justify-center h-3 w-full rounded-md border', {
-								'bg-black': isPassed || isActive,
-								'text-black': isActive,
-								'text-gray-400': isNext,
-								'text-transparent': !isActive && !isNext,
-							})}
-						>
-							<Typography
-								className={classNames(
-									'absolute -bottom-6 text-nowrap text-center text-sm pointer-events-none',
-									{
-										'left-0': index === 0,
-										'right-0': index === progressBar.stages.length - 1,
-									}
-								)}
+						return (
+							<div
+								key={index}
+								className={classNames('relative flex justify-center h-3 w-full rounded-md border', {
+									'bg-black': isPassed || isActive,
+									'text-black': isActive,
+									'text-gray-400': isNext,
+									'text-transparent': !isActive && !isNext,
+								})}
 							>
-								{it.label}
-							</Typography>
-						</div>
-					);
-				})}
+								<Typography
+									className={classNames(
+										'absolute -bottom-6 text-nowrap text-center text-sm pointer-events-none',
+										{
+											'left-0': index === 0,
+											'right-0': index === progressBar.stages.length - 1,
+										}
+									)}
+								>
+									{it.label}
+								</Typography>
+							</div>
+						);
+					})}
+				</div>
 			</div>
-			{/* <Progress
-				className="h-[8px] w-full"
-				value={progressState.value}
-				max="100"
-				prefix={<Typography className="text-sm">{progressState.label}</Typography>}
-				postfix={
-					<div className="flex gap-2 items-center">
-						<span>0</span>
-						<Icon name="People" size={16} />
-					</div>
-				}
-			/> */}
 		</div>
 	);
 }

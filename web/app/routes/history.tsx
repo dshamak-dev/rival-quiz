@@ -5,7 +5,7 @@ import { SessionStateType } from '@model/session.model';
 import { LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { USER_HISTORY_TYPE } from '@shared/user/constants';
-import { UserHistoryDTO } from 'shared/user/model';
+import { UserHistoryDTO } from '@shared/user/model';
 import { Anchor } from '@view/anchor';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
@@ -19,7 +19,13 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<UserHisto
 		return null;
 	}
 
-	const items = await getUserHistory({ headers }).catch((err) => null);
+	const items = await getUserHistory({ headers })
+		.then((items) => {
+			return items?.sort(
+				(a, b) => new Date(b.updatedAt as any).getTime() - new Date(a.updatedAt as any).getTime()
+			);
+		})
+		.catch((err) => null);
 
 	return items;
 }

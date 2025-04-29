@@ -1,3 +1,4 @@
+import { formatDecimal } from '@control/format.helpers';
 import { CurrencyTypeEnum } from '@model/wallet.model';
 import { useAuth } from '@state/auth.hook';
 import { Anchor } from '@view/anchor';
@@ -6,7 +7,9 @@ import { useMemo } from 'react';
 
 export function WalletBalance() {
 	const { wallet } = useAuth();
-	const balance = wallet?.balance || 0;
+	const balance = useMemo(() => {
+		return formatDecimal(wallet?.balance || 0, 2);
+	}, [wallet?.balance]);
 
 	const currencyIcon = useMemo(() => {
 		switch (wallet?.currency) {
@@ -20,7 +23,7 @@ export function WalletBalance() {
 	}, [wallet?.currency]);
 
 	return (
-		<Anchor activeClassName='' href="/wallet" className="flex gap-1 items-center">
+		<Anchor activeClassName="" href="/wallet" className="flex gap-1 items-center">
 			<span>{balance}</span>
 			<Icon name={currencyIcon} size={16} />
 		</Anchor>

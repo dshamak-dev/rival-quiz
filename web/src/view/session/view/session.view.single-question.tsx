@@ -16,6 +16,7 @@ import { SingleQuestionSession } from '@model/session/single-question';
 import { Icon } from '@view/icon';
 import { LinkButton } from '@view/anchor/link.button';
 import { SessionBetInput } from 'src/session/view/session.bet-input';
+import classNames from 'classnames';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
@@ -135,6 +136,10 @@ export function SessionViewSingleQuestion() {
 
 	const [selectedBet, setSelectedBet] = useState<number | undefined>(currentBet);
 
+	useEffect(() => {
+		setSelectedBet(currentBet);
+	}, [currentBet]);
+
 	const prizeData = useMemo(() => {
 		if (!questionData || !selectedAnswer) {
 			return null;
@@ -153,6 +158,7 @@ export function SessionViewSingleQuestion() {
 
 	useEffect(() => {
 		if (session?.state == null || [SessionStateType.Draft, SessionStateType.Published].includes(session.state)) {
+			setSelectedAnswer(undefined);
 			return;
 		}
 
@@ -165,7 +171,7 @@ export function SessionViewSingleQuestion() {
 		}
 
 		if (selectedAnswer != null || qAnswer == null) {
-			return;
+			return setSelectedAnswer(qAnswer || selectedAnswer);
 		}
 
 		setSelectedAnswer(qAnswer);
@@ -188,7 +194,7 @@ export function SessionViewSingleQuestion() {
 			const totalByVotes = questionData?.totalByVotes;
 			const totalVotes = questionData?.totalVotes || 0;
 
-			question.options.forEach((it, index) => {
+			question.options.forEach((it) => {
 				const _option: SelectOption = {
 					label: it,
 					value: it,
@@ -201,6 +207,7 @@ export function SessionViewSingleQuestion() {
 					)
 				) {
 					const _itVotes = totalByVotes ? totalByVotes[it] || 0 : 0;
+					const votesNum = questionData.votes.filter((vote) => it === vote.answer).length || 0;
 					let progress = !totalByVotes ? 0 : _itVotes / totalVotes;
 
 					if (progress) {
@@ -211,7 +218,9 @@ export function SessionViewSingleQuestion() {
 						<div className="flex gap-2 items-center">
 							<Typography>{_option.label}</Typography>
 							<span>-</span>
-							<Typography size="small">{progress}%</Typography>
+							<Typography size="small">
+								{votesNum} ({progress}%)
+							</Typography>
 						</div>
 					);
 				}
@@ -292,6 +301,7 @@ export function SessionViewSingleQuestion() {
 		}).then(() => {
 			setSelectedAnswer(undefined);
 			fetchUserActions(session.id);
+			dispatch?.({ type: 'SYNC_STATE' });
 		});
 	};
 
@@ -312,7 +322,9 @@ export function SessionViewSingleQuestion() {
 			data: { value: selectedAnswer },
 		}).then(() => {
 			setSelectedAnswer(undefined);
+			setSelectedBet(undefined);
 			fetchUserActions(session.id);
+			dispatch?.({ type: 'SYNC_STATE' });
 		});
 	};
 
@@ -379,14 +391,13 @@ export function SessionViewSingleQuestion() {
 								disabled={!canBet}
 								onChange={handleBetChange}
 								initialValue={selectedBet}
-								draft={!selectedAnswer}
+								seed={hasAnswer ? currentBet : currentAnswer}
 							/>
 						)}
 						{controls}
 					</>
 				);
-			case SessionStateType.Locked:
-			case SessionStateType.LockedForReview: {
+			case SessionStateType.Locked: {
 				if (!answerVariants && !prizeData) {
 					return (
 						<div className="flex flex-col justify-center items-center">
@@ -399,7 +410,7 @@ export function SessionViewSingleQuestion() {
 				}
 
 				const share = prizeData ? prizeData.userShare * 100 : 0;
-				const shareText =  share % 1 > 0 ? `${share.toFixed(1)}` : `${share.toFixed(0)}`;
+				const shareText = share % 1 > 0 ? `${share.toFixed(1)}` : `${share.toFixed(0)}`;
 				const prizeAmount = (prizeData?.userTotal || 0).toFixed(2);
 
 				return (
@@ -429,8 +440,78 @@ export function SessionViewSingleQuestion() {
 					</>
 				);
 			}
+			case SessionStateType.LockedForReview: {
+				const lastQuestion = session.questions?.filter((it) => it.hasAnswer).slice(-1)[0];
+
+				if (!lastQuestion) {
+					return (
+						<div className="flex flex-col justify-center items-center">
+							<Icon size={48} name="PiggyBank" className="relative -top-6 animate-bounce" />
+							<Typography className="text-center relative -right-2">
+								Almost done. Calculating stage summary..
+							</Typography>
+						</div>
+					);
+				}
+
+				const userAnswer = userActions?.find((it) => it.questionId === lastQuestion.id)?.data?.value;
+				const isMatch = userAnswer === lastQuestion.answer;
+
+				return (
+					<div className="flex flex-col gap-4 justify-center items-center text-center">
+						<div>
+							<Typography size="large">{lastQuestion.title}</Typography>
+							{lastQuestion.description && (
+								<Typography size="small">{lastQuestion.description}</Typography>
+							)}
+						</div>
+						<div className="flex gap-4 justify-center items-center">
+							{userAnswer ? (
+								<div>
+									<div className="flex gap-2 justify-center items-center">
+										<Typography
+											size="large"
+											className={classNames('font-bold', {
+												'line-through text-red-400': !isMatch,
+											})}
+										>
+											{userAnswer}
+										</Typography>
+										{!isMatch ? (
+											<Typography size="large" className={classNames('font-bold')}>
+												({lastQuestion.answer})
+											</Typography>
+										) : null}
+									</div>
+									<Typography size="small">answer</Typography>
+								</div>
+							) : (
+								<div>
+									<Typography size="large" className="font-bold">
+										{lastQuestion.answer}
+									</Typography>
+									<Typography size="small">correct</Typography>
+								</div>
+							)}
+						</div>
+					</div>
+				);
+			}
 			case SessionStateType.Completed: {
-				const userPrize = user?.id ? sessionData?.userScores?.summary?.[user.id] : 0;
+				const userPrize = user?.id
+					? Object.values(sessionData?.userScores?.byQuestion).reduce((summ: number, qSummByUser: any) => {
+							const userData = qSummByUser?.[user.id];
+
+							if (!userData || !userData.isMatch) {
+								return summ;
+							}
+
+							const userPrize = userData.value || 0;
+
+							return summ + Number(userPrize);
+					  }, 0)
+					: 0;
+				const prizeText = userPrize % 1 > 0 ? `${userPrize.toFixed(1)}` : `${userPrize.toFixed(0)}`;
 
 				const hasPrize = !!userPrize;
 
@@ -439,7 +520,7 @@ export function SessionViewSingleQuestion() {
 						{hasPrize ? (
 							<div className="text-center">
 								<Typography size="large">
-									YOU WON <b className="text-[1.25em]">{userPrize}</b> point(s).
+									YOU WON <b className="text-[1.25em]">{prizeText}</b> point(s).
 								</Typography>
 								<Typography size="small">The Prize was transferred to your account</Typography>
 							</div>

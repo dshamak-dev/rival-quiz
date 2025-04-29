@@ -1,18 +1,19 @@
 import { Anchor } from '@view/anchor';
 import { TextInput } from '@view/form/form.text-input';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useWallet } from 'src/wallet/state';
 
 type Props = {
 	onChange: (value: number) => void;
 	initialValue?: number;
 	disabled?: boolean;
-	draft?: boolean;
+	seed?: number | string;
 };
 
-export function SessionBetInput({ disabled, initialValue, draft, onChange }: Props) {
+export function SessionBetInput({ disabled, initialValue, seed, onChange }: Props) {
 	const { balance } = useWallet();
 	const [error, setError] = useState<string | undefined>();
+	const ref = useRef<HTMLInputElement>(null);
 
 	const handleValidate = (value: number) => {
 		if (Number.isNaN(value)) {
@@ -35,22 +36,29 @@ export function SessionBetInput({ disabled, initialValue, draft, onChange }: Pro
 	};
 
 	const handleChange = (value: number) => {
+		const isValid = !Number.isNaN(value);
+
+		if (isValid && String(value).includes('.') && value > Number(value)) {
+			// Wait for decimals
+			return;
+		}
+
 		handleValidate(value);
 
 		onChange(value);
 	};
 
 	useEffect(() => {
-		if (draft) {
-			return;
+		if (ref.current) {
+			ref.current.value = String(initialValue || '');
 		}
-
 		handleValidate(Number(initialValue));
-	}, [draft, initialValue]);
+	}, [seed]);
 
 	return (
 		<div>
 			<TextInput
+				onRef={(el) => ((ref as any).current = el)}
 				label="Bet amount"
 				required
 				defaultValue={initialValue}

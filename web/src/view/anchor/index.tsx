@@ -17,8 +17,8 @@ export function Anchor({
 	href,
 	className,
 	activeClassName = 'text-amber-600',
-	inactiveClassName = '',
-	pendingClassName = 'text-amber-300 animate-pulse',
+	inactiveClassName = 'cursor-pointer',
+	pendingClassName = 'cursor-pointer text-amber-300 animate-pulse',
 	redirect = false,
 	onClick,
 	...props

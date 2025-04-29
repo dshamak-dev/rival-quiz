@@ -1,18 +1,30 @@
 import { useMemo } from 'react';
 import { SessionDTO } from '@model/session.model';
 import { SessionPreview } from './session.preview';
-import { LinkButton } from '@view/anchor/link.button';
 import { SessionCreateButton } from './session.create-button';
 import { Icon } from '@view/icon';
+import { SESSION_TYPE_OPTIONS } from 'src/constants/session.constant';
+import { useAuth } from '@state/auth.hook';
 
 export function SessionList({ sessions }: { sessions?: SessionDTO[] }) {
+	const { user } = useAuth();
+	const availableSessions = useMemo(() => {
+		return sessions?.filter((session) => {
+			if (user?.id && (user.id === session.ownerId || session.users?.includes(user.id))) {
+				return true;
+			}
+
+			return !!SESSION_TYPE_OPTIONS.find((option) => option.value === session.type)?.enabled;
+		});
+	}, [user, sessions]);
+
 	const content = useMemo(() => {
-		return sessions?.map((item) => {
+		return availableSessions?.map((item) => {
 			return <SessionPreview key={item.id} session={item} />;
 		});
-	}, [sessions]);
+	}, [availableSessions]);
 
-	if (!sessions?.length) {
+	if (!availableSessions?.length) {
 		return (
 			<div className="mt-[20vh] flex flex-col gap-4 items-center justify-center">
 				<div>

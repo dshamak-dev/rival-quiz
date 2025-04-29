@@ -12,7 +12,7 @@ export function NavigationRedirectLinks() {
 	}, [location.pathname]);
 
 	const redirectLinks = useMemo(() => {
-		if (!redirectUrl) {
+		if (!redirectUrl || location.pathname.includes('/login')) {
 			return [];
 		}
 

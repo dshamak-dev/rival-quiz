@@ -23,6 +23,7 @@ export function WithdrawalForm({ onResult }: { onResult?: (payload: any, error: 
 		busy: false,
 		exchange: null,
 		rate: 0,
+
 	});
 	const state = formRef.current ? { ...formRef.current } : null;
 
@@ -128,7 +129,7 @@ export function WithdrawalForm({ onResult }: { onResult?: (payload: any, error: 
 				/>
 			</div>
 			<div className="text-right">
-				<WithdrawalSummary points={state?.points} currency={state?.currency} rate={state?.rate} />
+				<WithdrawalSummary points={state?.points} currency={state?.currency} rates={state?.exchange} />
 				{state?.error && <Typography className="text-red-500">{state.error}</Typography>}
 			</div>
 			<div className="flex justify-center">

@@ -79,15 +79,12 @@ export function SessionView({ session }: SessionViewProps) {
 				data-testid="session-cover"
 			>
 				<SessionViewHeader />
-				<div style={{ minWidth: 'min(50vw, 100%)', maxWidth: '100%' }} className="relative z-10 w-fit mx-auto p-6 mt-[12vh]">
+				<div
+					style={{ minWidth: 'min(50vw, 100%)', maxWidth: '100%' }}
+					className="relative z-10 w-fit mx-auto p-6 mt-[12vh]"
+				>
 					{sessionStateContent}
 				</div>
-				{session.image !== null && (
-					<div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-						<Image className="h-full w-full object-contain object-top" src={session.image} />
-						<div className="absolute top-0 left-0 w-full h-full z-10 bg-white/80 backdrop-blur-[2px]"></div>
-					</div>
-				)}
 			</div>
 		</SessionContextProvider>
 	);

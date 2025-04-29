@@ -152,7 +152,7 @@ export default function App() {
 	}, []);
 
 	const isScreenHeight = useMemo(() => {
-		return ['/profile/sessions/'].some((route) => location?.pathname?.includes(route));
+		return ['/profile/sessions'].some((route) => location?.pathname?.includes(route));
 	}, [location]);
 
 	return (

@@ -27,13 +27,16 @@ export type QuestionDataDTO = {
 	totalVotes: number;
 	state: QuestionDataStateEnum;
 	totalByVotes: Record<string, number>;
+	metadata?: { votesCount?: number };
+	createdAt: DateType;
+	updatedAt?: DateType;
 };
 
 export enum QuestionDataStateEnum {
 	DRAFT = 0,
 	ACTIVE = 1,
-    COMPLETED = 2,
-    ARCHIVED = 3,
+	COMPLETED = 2,
+	ARCHIVED = 3,
 }
 
 export enum QuestionDataActionEnum {
