@@ -135,7 +135,7 @@ export async function patchSession(id, payload) {
           return Promise.reject(error || "Failed to change session state");
         }
 
-        Object.assign(session, updates || {});
+        Object.assign(session, updates || {}, { users: session.users });
       }
       break;
     }
@@ -240,6 +240,13 @@ export async function setSessionState(session, nextState: SessionStateType) {
       break;
     }
     case SessionStateType.Active: {
+      // Note: Validate session data, sync session status and validate participants
+      if (session.users?.length < 2) {
+        return Promise.reject(
+          "Not enough participants to start the session. Please add more participants."
+        );
+      }
+
       const nextQuestion = session.questions.find(
         (question) => !question.hasAnswer
       );
@@ -306,10 +313,9 @@ export async function completeSession(sessionId) {
   })
     .then((result): Promise<[SessionDataDTO | null, any]> => {
       if (!result?.id) {
-        return completeSessionData(session, true).then((result) => [
-          result as SessionDataDTO,
-          null,
-        ]);
+        return Promise.reject(
+          "Session data not found for session " + sessionId
+        );
       }
 
       return completeSessionData(result.id, session).then((result) => [
@@ -328,7 +334,28 @@ export async function completeSession(sessionId) {
     );
   }
 
-  const prizePool = sessionData?.userScores?.summary;
+  // const prizePool = sessionData?.userScores?.summary;
+  const prizePool: Record<string, number> | undefined = sessionData?.userScores
+    ?.byQuestion
+    ? Object.values(sessionData?.userScores?.byQuestion).reduce(
+        (accum, questionStatsByUser) => {
+          if (!questionStatsByUser) {
+            return accum;
+          }
+
+          Object.entries(questionStatsByUser).forEach(([userId, stats]) => {
+            if (!accum[userId]) {
+              accum[userId] = 0;
+            }
+
+            accum[userId] += stats.isMatch ? Number(stats.value) || 0 : 0;
+          });
+
+          return accum;
+        },
+        {} as Record<string, number>
+      )
+    : sessionData?.userScores?.summary;
 
   //  Distribute prize pool among users
   const [ok, error] = await distributePrizePool(session, prizePool)

@@ -8,6 +8,8 @@ type Props = Omit<ComponentProps<typeof NavLink>, 'to'> & {
 	activeClassName?: string;
 	inactiveClassName?: string;
 	pendingClassName?: string;
+	/** @param {boolean | string} redirect - Used to specify a url to redirect to (True for the current one) */
+	redirect?: boolean | string;
 };
 
 export function Anchor({
@@ -15,20 +17,30 @@ export function Anchor({
 	href,
 	className,
 	activeClassName = 'text-amber-600',
-	inactiveClassName = '',
-	pendingClassName = 'text-amber-300 animate-pulse',
+	inactiveClassName = 'cursor-pointer',
+	pendingClassName = 'cursor-pointer text-amber-300 animate-pulse',
+	redirect = false,
 	onClick,
 	...props
 }: PropsWithChildren<Props>) {
 	const disabled = useMemo(() => {
 		return props.disabled || (!href && !onClick);
 	}, [props.disabled, onClick, href]);
+	const toPath = useMemo(() => {
+		if (!redirect || !href) {
+			return href;
+		}
+
+		const redirectUrl = typeof redirect === 'string' ? redirect : window.location.pathname;
+
+		return `${href}?continue=${redirectUrl}`;
+	}, [href, redirect]);
 
 	return (
 		<NavLink
 			{...props}
 			aria-disabled={disabled}
-			to={href || ''}
+			to={toPath || ''}
 			onClick={(e) => {
 				// const isActive = (e.currentTarget as Element).classList.contains('active');
 

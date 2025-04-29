@@ -8,12 +8,13 @@ interface IState {
 	dispatch?: (action: Action) => void;
 	join?: () => void;
 	leave?: () => void;
+	updateRequested?: any;
 }
 
 type Action =
 	| { type: 'SET_SESSION'; payload: SessionDTO }
 	| { type: 'SET_USER_PROGRESS'; payload: ProgressStage }
-	| { type: 'SYNC_STATE'; payload?: undefined };
+	| { type: 'SYNC_STATE' };
 
 export const SessionContext = createContext<IState>({ session: undefined });
 
@@ -49,6 +50,9 @@ function reducer(state: IState, action: Action) {
 		}
 		case 'SET_USER_PROGRESS': {
 			return { ...state, userProgress: action.payload };
+		}
+		case 'SYNC_STATE': {
+			return { ...state, updateRequested: Date.now() };
 		}
 		default: {
 			return state;

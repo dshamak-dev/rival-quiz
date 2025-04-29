@@ -11,6 +11,7 @@ export type SingleQuestionSessionHeaderProps = {
 	loading: boolean;
 	onUpdate: (path: string, value: any) => Promise<SessionDTO>;
 	onDelete?: () => Promise<void>;
+	onRefetch?: () => Promise<any>;
 };
 
 export function SingleQuestionSessionHeader({
@@ -18,6 +19,7 @@ export function SingleQuestionSessionHeader({
 	loading,
 	onUpdate,
 	onDelete,
+	onRefetch,
 }: SingleQuestionSessionHeaderProps) {
 	// const questionModel = new SingleQuestionSession(session);
 	const buttonCommonProps: { className: string; size: ButtonSizeType; disabled: boolean } = {
@@ -107,14 +109,14 @@ export function SingleQuestionSessionHeader({
 					>
 						Unlock
 					</Button>
-					<SessionAdminQuestionAnswerModalButton session={session} buttonProps={buttonCommonProps} />
+					<SessionAdminQuestionAnswerModalButton session={session} buttonProps={buttonCommonProps} onSubmit={onRefetch} />
 				</>
 			);
 		}
 		case SessionStateType.LockedForReview: {
 			return (
 				<>
-					<SessionAdminResolveButton session={session} buttonProps={buttonCommonProps} />
+					<SessionAdminResolveButton session={session} buttonProps={buttonCommonProps} onSubmit={onRefetch} />
 				</>
 			);
 		}

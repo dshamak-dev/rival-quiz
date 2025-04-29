@@ -62,6 +62,15 @@ export function SessionParticipantsForm({ session, loading, onUpdate }: Sessionp
 
 	return (
 		<div className="flex flex-col p-4">
+			<Typography className="text-lg">
+				In Session: <b>{session?.users?.length || 0}</b>
+			</Typography>
+			{session?.questionData != null && (
+				<Typography className="text-lg">
+					Set Question Answer: <b>{session?.questionData?.metadata?.votesCount || 0}</b>
+				</Typography>
+			)}
+			{/* TODO: Implement participant management functionality
 			{users?.map((user: SessionUserDTO, index: number) => (
 				<Participant
 					key={user.userId}
@@ -70,7 +79,7 @@ export function SessionParticipantsForm({ session, loading, onUpdate }: Sessionp
 						'border-t': index !== 0,
 					})}
 				/>
-			))}
+			))} */}
 		</div>
 	);
 }

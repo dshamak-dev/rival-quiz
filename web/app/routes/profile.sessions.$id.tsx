@@ -53,6 +53,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		});
 	});
 }
+enum FormStages {
+	Draft,
+	Info,
+	Questions,
+	Participants,
+}
 
 export default function ProfileSessionPage() {
 	const { user } = useAuth();
@@ -88,6 +94,7 @@ export default function ProfileSessionPage() {
 	});
 
 	const [sessionState, setSessionState] = useState<StateType | null>(undefined);
+	const [formStage, setFormStage] = useState<FormStages>(FormStages.Draft);
 
 	const isBusy = useMemo(() => {
 		return loading || isPatching || isDeletingQuestion || isCreatingQuestion;
@@ -97,6 +104,16 @@ export default function ProfileSessionPage() {
 		if (data != null) {
 			const _it = new Session(data).json;
 
+			switch (_it?.state) {
+				case SessionStateType.Draft: {
+					setFormStage(!data.title ? FormStages.Info : FormStages.Questions);
+					break;
+				}
+				default:
+					setFormStage(FormStages.Questions);
+					break;
+			}
+
 			setSessionState(_it);
 		} else {
 			setSessionState(null);
@@ -104,7 +121,7 @@ export default function ProfileSessionPage() {
 	}, [data]);
 
 	const handleFetchSession = useCallback(() => {
-		dispatch(sessionId);
+		return dispatch(sessionId);
 	}, [dispatch]);
 
 	const handleAddQuestion = useCallback(async () => {
@@ -224,7 +241,8 @@ export default function ProfileSessionPage() {
 								<div
 									key={it.value}
 									className={classNames(
-										'grid grid-rows-[1fr_auto] gap-8 lg:h-full min-h-[200px] border-2 border-gray-200 p-8 rounded-md max-w-full w-[360px]',
+										'grid grid-rows-[1fr_auto] gap-8 lg:h-full min-h-[200px] border-2 border-gray-200 p-8 rounded-md lg:min-w-[240px] max-w-full',
+										'overflow-hidden',
 										{
 											'text-gray-400 pointer-events-none': !it.enabled,
 										}
@@ -237,17 +255,44 @@ export default function ProfileSessionPage() {
 										</Typography>
 										<Typography>{it.text}</Typography>
 									</div>
-									{it.enabled ? <Button
-										layout={it.enabled ? 'primary' : undefined}
-										onClick={() => handleSelectType(it.value)}
-										disabled={!it.enabled || isBusy}
-									>
-										Select
-									</Button> : <Typography size="custom" className="py-2 text-center text-gray-400">Not available</Typography>}
+									{it.enabled ? (
+										<Button
+											layout={it.enabled ? 'primary' : undefined}
+											onClick={() => handleSelectType(it.value)}
+											disabled={!it.enabled || isBusy}
+										>
+											Select
+										</Button>
+									) : (
+										<Typography size="custom" className="py-2 text-center text-gray-400">
+											Not available
+										</Typography>
+									)}
 								</div>
 							);
 						})}
 					</div>
+				</div>
+			);
+		}
+
+		if (formStage === FormStages.Info) {
+			return (
+				<div className="border rounded-sm">
+					<SessionInfoForm
+						onSubmit={(values: any) =>
+							handleUpdate('info', values).then(() => {
+								setFormStage(FormStages.Questions);
+							})
+						}
+						onCancel={() => {
+							if (!!sessionState.title?.trim()) {
+								setFormStage(FormStages.Questions);
+							}
+						}}
+						initialValue={sessionState}
+						disabled={isBusy}
+					/>
 				</div>
 			);
 		}
@@ -260,11 +305,20 @@ export default function ProfileSessionPage() {
 					}
 					initialState={[SessionStateType.Draft, SessionStateType.Published].includes(sessionState.state)}
 				>
-					<SessionInfoForm
-						initialValue={sessionState}
-						onSubmit={(values: any) => handleUpdate('info', values)}
-						disabled={isBusy}
-					/>
+					<SessionInfoForm preview initialValue={sessionState} disabled>
+						{sessionState.state === SessionStateType.Draft && (
+							<div>
+								<Button
+									type="submit"
+									size="small"
+									disabled={isBusy}
+									onClick={() => setFormStage(FormStages.Info)}
+								>
+									Edit
+								</Button>
+							</div>
+						)}
+					</SessionInfoForm>
 				</Collapse>
 
 				<Collapse title={`Questions (${sessionState?.questions?.length || 0})`} initialState={true}>
@@ -279,7 +333,7 @@ export default function ProfileSessionPage() {
 
 				<Collapse
 					title={`Participants (${sessionState?.users?.length || 0})`}
-					initialState={!sessionState?.users?.length || sessionState.users.length < 3}
+					initialState={[SessionStateType.Active].includes(sessionState.state)}
 				>
 					<SessionParticipantsForm
 						session={sessionState}
@@ -289,7 +343,7 @@ export default function ProfileSessionPage() {
 				</Collapse>
 			</>
 		);
-	}, [sessionState, loading, isBusy, handleAddQuestion, handleDeleteQuestion]);
+	}, [sessionState, formStage, loading, isBusy, handleAddQuestion, handleDeleteQuestion]);
 
 	const controls = useMemo(() => {
 		if (!sessionState) {
@@ -302,6 +356,7 @@ export default function ProfileSessionPage() {
 				loading={loading || isBusy}
 				onUpdate={handleUpdate}
 				onDelete={handleDeleteSession}
+				onRefetch={handleFetchSession}
 			/>
 		);
 	}, [sessionState, loading, isBusy]);

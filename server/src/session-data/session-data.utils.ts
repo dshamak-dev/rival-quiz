@@ -54,9 +54,30 @@ export async function calculateUserSummaryFromVotes(
 
   const total = stats.maxScore;
 
-  const summaryByUser = Object.entries(ratesByUser).reduce(
-    (accum, [userId, inQuestionRate]) => {
-      accum[userId] = total * inQuestionRate;
+  // const summaryByUser = Object.entries(ratesByUser).reduce(
+  //   (accum, [userId, inQuestionRate]) => {
+  //     accum[userId] = total * inQuestionRate;
+
+  //     return accum;
+  //   },
+  //   {}
+  // );
+
+  //
+
+  const summaryByUser = Object.entries(stats.byQuestion).reduce(
+    (accum, [questionId, questionDataByUser]) => {
+      const quiestion = votes[questionId];
+      const questionTotal = quiestion.totalVotes;
+
+      Object.entries(questionDataByUser).forEach(
+        ([userId, { rate, isMatch }]) => {
+          const summ = isMatch ? Number(accum[userId]) || 0 : 0;
+          const userValue = Number(questionTotal * (rate || 0)) || 0;
+
+          accum[userId] = summ + userValue;
+        }
+      );
 
       return accum;
     },

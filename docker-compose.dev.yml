@@ -44,6 +44,12 @@ services:
       - JWT_SECRET=quizlo-secret
       - SECRET_SALT=quizlo-salt
       - ALLOW_API_ACCESS=http://localhost:3003
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     networks:
       - api-local
     depends_on:

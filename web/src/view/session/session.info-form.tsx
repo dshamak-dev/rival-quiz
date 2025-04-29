@@ -1,5 +1,6 @@
 import { compareObjects } from '@control/object.utils';
 import { SessionDTO, SessionStateType, SessionTypes } from '@model/session.model';
+import { Button } from '@view/button/button';
 import { TextInput } from '@view/form/form.text-input';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
@@ -9,14 +10,17 @@ import { debounce } from 'src/hooks/debounce.hook';
 
 export type SessionInfoFormProps = {
 	initialValue: SessionDTO;
-	onSubmit: (session: SessionDTO) => void;
+	onSubmit?: (session: SessionDTO) => void;
+	onCancel?: () => void;
 	disabled?: boolean;
+	preview?: boolean;
+	children?: React.ReactNode;
 };
 
-export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInfoFormProps) {
+export function SessionInfoForm({ initialValue, onSubmit, disabled, preview, children, onCancel }: SessionInfoFormProps) {
 	const [formState, setFormState] = useState({ ...initialValue });
 
-	const submitDebounced = useCallback(debounce(onSubmit, 2000), []);
+	// const submitDebounced = useCallback(debounce(onSubmit, 2000), []);
 
 	const isDirty = useMemo(() => {
 		return !compareObjects(initialValue, formState);
@@ -24,20 +28,24 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 
 	const state = formState.state || SessionStateType.Draft;
 
+	const canEdit = useMemo(() => {
+		return !disabled && [SessionStateType.Draft].includes(state);
+	}, [disabled, state]);
+
 	useEffect(() => {
-		if (!isDirty || disabled) {
-            return;
-        }
+		if (!isDirty || disabled || !canEdit) {
+			return;
+		}
 
-        submitDebounced(formState);
-	}, [formState, isDirty]);
+		// submitDebounced(formState);
+	}, [formState, isDirty, canEdit]);
 
-	// const canSave = useMemo(() => {
-	// 	return (
-	// 		(isDirty && !disabled) ||
-	// 		[SessionStateType.Archived, SessionStateType.Completed, SessionStateType.Canceled].includes(state)
-	// 	);
-	// }, [isDirty, disabled, state]);
+	const canSave = useMemo(() => {
+		return (
+			(isDirty && !disabled) ||
+			[SessionStateType.Archived, SessionStateType.Completed, SessionStateType.Canceled].includes(state)
+		);
+	}, [isDirty, disabled, state]);
 
 	const handleChange = (name: string, value: any) => {
 		setFormState((state) => {
@@ -51,11 +59,12 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 		});
 	};
 
-	// const handleCancel = () => {
-	// 	const _state = { ...initialValue };
+	const handleCancel = () => {
+		const _state = { ...initialValue };
 
-	// 	setFormState(_state);
-	// };
+		setFormState(_state);
+		onCancel?.();
+	};
 
 	useEffect(() => {
 		setFormState(initialValue);
@@ -70,10 +79,6 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 	const isSponsored = useMemo(() => {
 		return formState?.type === SessionTypes.SPONSOR;
 	}, [formState?.type]);
-
-	const canEdit = useMemo(() => {
-		return !disabled && [SessionStateType.Draft].includes(state);
-	}, [disabled, state]);
 
 	return (
 		<div className="flex flex-col gap-4 p-4">
@@ -132,21 +137,28 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled }: SessionInf
 				className="flex flex-col"
 			/> */}
 
-			{/* Hide to allow auto-save  */}
-			{/* <div className="flex justify-end gap-4">
-				<Button
-					layout="primary"
-					size="small"
-					className="min-w-[100px]"
-					disabled={!canSave}
-					onClick={() => onSubmit(formState)}
-				>
-					Save
-				</Button>
-				<Button size="small" className="min-w-[100px]" disabled={!isDirty || disabled} onClick={handleCancel}>
-					Cancel
-				</Button>
-			</div> */}
+			{!preview && (
+				<div className="flex justify-end gap-4">
+					<Button
+						size="small"
+						className="min-w-[100px]"
+						disabled={disabled}
+						onClick={handleCancel}
+					>
+						Cancel
+					</Button>
+					<Button
+						layout="primary"
+						size="small"
+						className="min-w-[100px]"
+						disabled={!canSave}
+						onClick={() => onSubmit?.(formState)}
+					>
+						Save and Continue
+					</Button>
+				</div>
+			)}
+			{children}
 		</div>
 	);
 }

@@ -15,6 +15,7 @@ const schema = new mongoose.Schema({
   totalVotes: Number,
   totalByVotes: Object,
   answer: String,
+  metadata: Object,
 }, { timestamps: true });
 
 schema.virtual("json").get(function () {

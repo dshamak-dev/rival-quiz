@@ -14,6 +14,7 @@ import { useTelegram } from 'src/hooks/telegram.hook';
 import { NavigationDrawer } from './navigation.drawer';
 import { LinkButton } from '@view/anchor/link.button';
 import { useLocation } from '@remix-run/react';
+import { NavigationRedirectLinks } from './navigation.redirect-links';
 
 export function NavigationDesktop() {
 	const location = useLocation();
@@ -72,6 +73,7 @@ export function NavigationDesktop() {
 				))}
 			</div>
 			<div className="flex items-center justify-end gap-6">
+				<NavigationRedirectLinks />
 				<div className="flex items-center justify-end gap-6">
 					{isLoggedIn ? (
 						<>

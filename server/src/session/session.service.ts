@@ -19,7 +19,7 @@ import { findSessionData } from "../session-data/session-data.api";
 import { SessionDataStateTypes } from "../session-data/session-data.model";
 import {
   findQuestionData,
-  syncQuestionDataAndUpdate
+  syncQuestionDataAndUpdate,
 } from "../services/question-data/actions";
 import { QuestionDataStatusTypes } from "../services/question-data/model";
 import { findManySessions } from "./api";
@@ -439,6 +439,8 @@ _router.delete("/:id/user", async (req: any, res: any) => {
           sessionId,
         }
       );
+      
+      console.log('remove user', { sessionId, userId }, updated);
 
       res.status(200).json(updated);
     })

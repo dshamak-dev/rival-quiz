@@ -68,7 +68,7 @@ export async function findQuestionDataAndComplete(query) {
 export async function findQuestionDataAndSync(query, createIfMissing = false) {
   let questionData = await findQuestionData(query);
 
-  if (createIfMissing) {
+  if (createIfMissing && !questionData) {
     questionData = await createQuestionData(query.sessionId, query.questionId);
   }
 
@@ -107,6 +107,9 @@ export async function syncQuestionData(id, origin?: QuestionDataDTO) {
 
   let totalVotes = 0;
   const totalByVotes = {};
+
+  const votesCount = votes.length;
+
   votes.forEach((vote) => {
     if (!totalByVotes[vote.answer]) {
       totalByVotes[vote.answer] = 0;
@@ -119,7 +122,12 @@ export async function syncQuestionData(id, origin?: QuestionDataDTO) {
     totalVotes += value || 0;
   });
 
-  return updateQuestionData(id, { votes, totalVotes, totalByVotes });
+  return updateQuestionData(id, {
+    votes,
+    totalVotes,
+    totalByVotes,
+    metadata: { votesCount },
+  });
 }
 
 export async function updateQuestionData(
@@ -173,8 +181,8 @@ export async function getQuestionVotes(sessionId, question): Promise<any> {
 
   const { hasAnswer, answer } = question;
 
-  userActions.forEach((action: any) => {
-    if (action.type === UserActionTypes.SUBMIT_ANSWER) {
+  userActions?.forEach((action: any) => {
+    if (action.type == UserActionTypes.SUBMIT_ANSWER) {
       // TODO: Use bet value if available
       const bet = action.data.bet ?? 0;
       const betValue = Number(bet) || 0;
@@ -187,7 +195,7 @@ export async function getQuestionVotes(sessionId, question): Promise<any> {
         userId: action.userId,
         answer: action.data.value,
         value: betValue,
-        isMatch: !hasAnswer || action.data.value === answer
+        isMatch: !hasAnswer || action.data.value === answer,
       });
     }
   });

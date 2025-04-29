@@ -14,6 +14,7 @@ import { useBroadcast } from '@state/broadcast.state';
 import { APP_NAME } from 'src/constants/config.constants';
 import { LinkButton } from '@view/anchor/link.button';
 import classNames from 'classnames';
+import { NavigationRedirectLinks } from '@view/navigation/navigation.redirect-links';
 
 export function HeaderMobile() {
 	const location = useLocation();
@@ -54,6 +55,7 @@ export function HeaderMobile() {
 			</div>
 			<div></div>
 			<div className="flex items-center justify-end gap-6">
+				<NavigationRedirectLinks />
 				{isLoggedIn ? (
 					<>
 						<Badge visible>

@@ -8,7 +8,7 @@
 
 .container {
 	@apply flex flex-col gap-4 items-center;
-	@apply relative py-4 px-8 max-w-full min-w-[420px];
+	@apply relative py-4 px-8 max-w-full min-w-[420px] max-h-[90vh] overflow-y-auto;
 	@apply  bg-white;
 
 	& .close {

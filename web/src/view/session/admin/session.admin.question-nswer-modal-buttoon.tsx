@@ -8,9 +8,11 @@ import { useState } from 'react';
 export function SessionAdminQuestionAnswerModalButton({
 	session,
 	buttonProps,
+	onSubmit,
 }: {
 	session: SessionDTO;
 	buttonProps?: ButtonProps;
+	onSubmit?: () => Promise<any>;
 }) {
 	const [{ payload, isValid }, setFormData] = useState<{
 		isValid: boolean;
@@ -25,7 +27,7 @@ export function SessionAdminQuestionAnswerModalButton({
 
 		return postSessionQuestionAnswer(sessionId as SessionDTO['id'], payload)
 			.then((res) => {
-				return;
+				return onSubmit?.();
 			})
 			.catch((err) => {
 				console.error(err);

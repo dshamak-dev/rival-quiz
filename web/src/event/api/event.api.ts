@@ -1,4 +1,4 @@
-import { EventDTO } from "../type";
+import { EventDTO } from '../type';
 
 export async function fetchHighlightEvents(): Promise<EventDTO[]> {
 	return [
@@ -11,7 +11,7 @@ export async function fetchHighlightEvents(): Promise<EventDTO[]> {
 			location: 'Global',
 			date: '01.05.2025',
 			description:
-				'The Beta test will available for limitted access.<br />Be the first to join and experience the latest features and updates.',
+				'The Beta test will be available for limited access.<br />Be the first to join and experience new features and updates.',
 		},
 	];
 }

@@ -8,8 +8,10 @@ export type QuestionDataDTO = {
 	totalByVotes: Record<string, number>;
 	votes: QuiestionVoteDTO[];
 	answer?: string;
+	updatedAt?: string;
+	createdAt?: string;
 };
 
 export type QuiestionVoteDTO = {
-	userId, answer, value, questionId, sessionId, isMatch?: boolean;
+	userId, answer, value, questionId, sessionId, isMatch?: boolean; rate?: number;
 };
