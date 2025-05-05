@@ -18,6 +18,7 @@ import { SessionStateType } from "./session.model";
 import { findSessionData } from "../session-data/session-data.api";
 import { SessionDataStateTypes } from "../session-data/session-data.model";
 import {
+  findManyQuestionData,
   findQuestionData,
   syncQuestionDataAndUpdate,
 } from "../services/question-data/actions";
@@ -28,6 +29,12 @@ import { randomString } from "../tools/random.utils";
 import { addUserHistory, removeUserHistory } from "../user/api";
 import { USER_HISTORY_TYPE } from "../user/constants";
 import router from "./router";
+import { SessionDTO } from "@shared/session/model";
+import {
+  calculateSessionDataHistory,
+  findSessionDataBySessionId,
+  updateSessionData,
+} from "@/session-data/session-data.actions";
 
 const _router = express.Router();
 
@@ -62,7 +69,7 @@ _router.get("/:id", async (req: any, res: any) => {
   const sessionId = session.id;
   const user = await getRequestUser(req);
 
-  const userActions = await getUserActions({
+  const userActions: any = await getUserActions({
     sessionId,
     userId: user?.id,
   })
@@ -77,24 +84,43 @@ _router.get("/:id", async (req: any, res: any) => {
     .catch((err) => []);
   const _session = session;
 
-  const payload = { ..._session, userActions };
+  const payload: SessionDTO = { ..._session, userActions };
 
-  if (
-    [
-      SessionStateType.Locked,
-      SessionStateType.Completed,
-      SessionStateType.LockedForReview,
-    ].includes(_session.state)
-  ) {
-    const data = await findSessionData({
-      sessionId,
-      state:
-        session.state === SessionStateType.Completed
-          ? SessionDataStateTypes.Completed
-          : SessionDataStateTypes.Active,
-    }).catch((err) => null);
+  switch (_session.state) {
+    case SessionStateType.Locked:
+    case SessionStateType.Completed:
+    case SessionStateType.LockedForReview: {
+      const data = await findSessionData({
+        sessionId,
+        state:
+          session.state === SessionStateType.Completed
+            ? SessionDataStateTypes.Completed
+            : SessionDataStateTypes.Active,
+      }).catch((err) => null);
 
-    payload.data = data ?? undefined;
+      payload.data = data ?? undefined;
+
+      // Migration/Data check
+      if (data?.id && payload.data && !payload.data.history?.length) {
+        const history = await findManyQuestionData({
+          sessionId,
+          state: {
+            $in: [
+              QuestionDataStatusTypes.Draft,
+              QuestionDataStatusTypes.Completed,
+            ],
+          },
+        })
+          .then((it) => {
+            return calculateSessionDataHistory(data, it);
+          })
+          .catch(() => null);
+
+        await updateSessionData(data?.id, { history }).catch(() => null);
+
+        payload.data.history = history;
+      }
+    }
   }
 
   const questionDataQuery = {
@@ -247,6 +273,27 @@ _router.post("/:id/answer", async (req: any, res: any) => {
   ).catch((err) => {
     console.error("Error syncing question data:", err);
   });
+
+  const sessionData = await findSessionDataBySessionId(sessionId).catch(
+    () => null
+  );
+
+  const sessionDataId = sessionData?.id;
+
+  if (sessionDataId) {
+    const history = await findManyQuestionData({
+      sessionId,
+      state: {
+        $in: [QuestionDataStatusTypes.Draft, QuestionDataStatusTypes.Completed],
+      },
+    })
+      .then((it) => {
+        return calculateSessionDataHistory(sessionData, it);
+      })
+      .catch(() => null);
+
+    await updateSessionData(sessionDataId, { history }).catch(() => null);
+  }
 
   res.status(200).json(updates);
 });
@@ -439,8 +486,6 @@ _router.delete("/:id/user", async (req: any, res: any) => {
           sessionId,
         }
       );
-      
-      console.log('remove user', { sessionId, userId }, updated);
 
       res.status(200).json(updated);
     })

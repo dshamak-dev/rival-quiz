@@ -16,7 +16,7 @@ import { SingleQuestionSession } from '@model/session/single-question';
 import { Icon } from '@view/icon';
 import { LinkButton } from '@view/anchor/link.button';
 import { SessionBetInput } from 'src/session/view/session.bet-input';
-import classNames from 'classnames';
+import { SessionResultsTable } from './session.results-table';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
@@ -441,63 +441,10 @@ export function SessionViewSingleQuestion() {
 				);
 			}
 			case SessionStateType.LockedForReview: {
-				const lastQuestion = session.questions?.filter((it) => it.hasAnswer).slice(-1)[0];
-
-				if (!lastQuestion) {
-					return (
-						<div className="flex flex-col justify-center items-center">
-							<Icon size={48} name="PiggyBank" className="relative -top-6 animate-bounce" />
-							<Typography className="text-center relative -right-2">
-								Almost done. Calculating stage summary..
-							</Typography>
-						</div>
-					);
-				}
-
-				const userAnswer = userActions?.find((it) => it.questionId === lastQuestion.id)?.data?.value;
-				const isMatch = userAnswer === lastQuestion.answer;
-
-				return (
-					<div className="flex flex-col gap-4 justify-center items-center text-center">
-						<div>
-							<Typography size="large">{lastQuestion.title}</Typography>
-							{lastQuestion.description && (
-								<Typography size="small">{lastQuestion.description}</Typography>
-							)}
-						</div>
-						<div className="flex gap-4 justify-center items-center">
-							{userAnswer ? (
-								<div>
-									<div className="flex gap-2 justify-center items-center">
-										<Typography
-											size="large"
-											className={classNames('font-bold', {
-												'line-through text-red-400': !isMatch,
-											})}
-										>
-											{userAnswer}
-										</Typography>
-										{!isMatch ? (
-											<Typography size="large" className={classNames('font-bold')}>
-												({lastQuestion.answer})
-											</Typography>
-										) : null}
-									</div>
-									<Typography size="small">answer</Typography>
-								</div>
-							) : (
-								<div>
-									<Typography size="large" className="font-bold">
-										{lastQuestion.answer}
-									</Typography>
-									<Typography size="small">correct</Typography>
-								</div>
-							)}
-						</div>
-					</div>
-				);
+				return <SessionResultsTable session={session} />;
 			}
-			case SessionStateType.Completed: {
+			case SessionStateType.Completed:
+			case SessionStateType.Archived: {
 				const userPrize = user?.id
 					? Object.values(sessionData?.userScores?.byQuestion).reduce((summ: number, qSummByUser: any) => {
 							const userData = qSummByUser?.[user.id];
@@ -527,7 +474,7 @@ export function SessionViewSingleQuestion() {
 						) : (
 							<Typography>Good luck next time!</Typography>
 						)}
-
+						<SessionResultsTable session={session} />
 						<LinkButton layout="primary" href="/explore" size="large" className="min-w-[100px]">
 							Ok
 						</LinkButton>
