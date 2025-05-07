@@ -32,14 +32,15 @@ export function SingleQuestionSessionHeader({
 
 	switch (session?.state) {
 		case SessionStateType.Draft: {
-			const canPublish = validateSessionGeneral(session) && validateSessionQuestions(session);
+			const { isValid, error } = validateSessionGeneral(session) && validateSessionQuestions(session);
 
 			return (
 				<>
 					<Button
 						{...buttonCommonProps}
 						layout="primary"
-						disabled={!canPublish || buttonCommonProps.disabled}
+						error={error}
+						disabled={!isValid || buttonCommonProps.disabled}
 						onClick={() => {
 							onUpdate('info', { state: SessionStateType.Published });
 						}}
@@ -53,6 +54,8 @@ export function SingleQuestionSessionHeader({
 			);
 		}
 		case SessionStateType.Published: {
+			const validParticipants = participantsNumber >= 2;
+
 			return (
 				<>
 					<Button
@@ -69,7 +72,8 @@ export function SingleQuestionSessionHeader({
 						onClick={() => {
 							onUpdate('info', { state: SessionStateType.Active });
 						}}
-						disabled={!participantsNumber || participantsNumber < 2}
+						disabled={!validParticipants}
+						error={!validParticipants ? 'At least 2 participants are required.' : undefined}
 					>
 						Start
 					</Button>
@@ -80,6 +84,8 @@ export function SingleQuestionSessionHeader({
 			);
 		}
 		case SessionStateType.Active: {
+			const validParticipants = participantsNumber >= 2;
+
 			return (
 				<>
 					<Button
@@ -88,7 +94,11 @@ export function SingleQuestionSessionHeader({
 						onClick={() => {
 							onUpdate('info', { state: SessionStateType.Locked });
 						}}
-						disabled={!participantsNumber || participantsNumber < 2}
+						disabled={!validParticipants}
+						errorProps={{
+							style: { right: 0 },
+						}}
+						error={!validParticipants ? 'At least 2 participants are required.' : undefined}
 					>
 						Lock
 					</Button>
@@ -109,7 +119,11 @@ export function SingleQuestionSessionHeader({
 					>
 						Unlock
 					</Button>
-					<SessionAdminQuestionAnswerModalButton session={session} buttonProps={buttonCommonProps} onSubmit={onRefetch} />
+					<SessionAdminQuestionAnswerModalButton
+						session={session}
+						buttonProps={buttonCommonProps}
+						onSubmit={onRefetch}
+					/>
 				</>
 			);
 		}

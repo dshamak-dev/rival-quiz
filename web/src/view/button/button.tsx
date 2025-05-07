@@ -7,11 +7,23 @@ export type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<any>> & {
 	size?: ButtonSizeType;
 	loading?: boolean;
 	faded?: boolean;
+	error?: string;
+	errorProps?: any;
 };
 
 export type ButtonSizeType = 'base' | 'small' | 'large';
 
-export function Button({ className, layout = 'outline', size = 'small', loading, children, faded = true, ...props }: ButtonProps) {
+export function Button({
+	className,
+	layout = 'outline',
+	size = 'small',
+	loading,
+	children,
+	faded = true,
+	error,
+	errorProps,
+	...props
+}: ButtonProps) {
 	const layoutClassName = useMemo(() => {
 		switch (layout) {
 			case 'custom':
@@ -40,34 +52,56 @@ export function Button({ className, layout = 'outline', size = 'small', loading,
 		}
 	}, [size]);
 
+	const errorText = useMemo(() => {
+		if (!error) {
+			return null;
+		}
+
+		return error ? (
+			<div
+				style={{ left: '-50%' }}
+				{...errorProps}
+				className="absolute -bottom-[1rem] text-red-500 text-xs text-nowrap"
+			>
+				{error}
+			</div>
+		) : null;
+	}, [errorProps, error]);
+
 	if (!layout || ['text', 'custom'].includes(layout)) {
-		return <div {...props}>{children}</div>;
+		return (
+			<div {...props} className={className}>
+				{children}
+			</div>
+		);
 	}
 
 	return (
-		<button
-			{...props}
-			className={classNames(
-				'flex gap-2 items-center justify-center shadow-md uppercase',
-				layoutClassName,
-				sizeClassName,
-				{
-					'opacity-50': props.disabled,
-					'opacity-80 hover:shadow-sm hover:opacity-100': !props.disabled && faded,
-				},
-				className
-			)}
-		>
-			{loading ? (
-				<Icon
-					name="ArrowClockwise"
-					size={18}
-					className={classNames({
-						'animate-spin': loading,
-					})}
-				/>
-			) : null}
-			{children}
+		<button {...props} className={classNames('relative', className)}>
+			<div
+				className={classNames(
+					'relative flex gap-2 items-center justify-center shadow-md uppercase',
+					layoutClassName,
+					sizeClassName,
+					{
+						'opacity-50': props.disabled,
+						'opacity-80 hover:shadow-sm hover:opacity-100': !props.disabled && faded,
+					},
+					className
+				)}
+			>
+				{loading ? (
+					<Icon
+						name="ArrowClockwise"
+						size={18}
+						className={classNames({
+							'animate-spin': loading,
+						})}
+					/>
+				) : null}
+				{children}
+			</div>
+			{errorText}
 		</button>
 	);
 }

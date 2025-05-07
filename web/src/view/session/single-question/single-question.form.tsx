@@ -7,6 +7,7 @@ import { Icon } from '@view/icon';
 import { QuestionForm } from '@view/question/question.form';
 import { Typography } from '@view/typography/typography';
 import classNames from 'classnames';
+import { validateQuestion, validateSessionQuestions } from 'src/session/helpers';
 
 export type SingleQuestionSessionFormProps = {
 	session?: SessionDTO;
@@ -21,7 +22,7 @@ export function SingleQuestionSessionForm({
 	loading,
 	onUpdate,
 	onAdd,
-	onDelete
+	onDelete,
 }: SingleQuestionSessionFormProps) {
 	if (!session) {
 		return null;
@@ -31,16 +32,22 @@ export function SingleQuestionSessionForm({
 	const nowTime = Date.now();
 
 	// const questionsNum = session.questions?.length || 0;
-	const canAddQuestion = true; //questionsNum === 0;
 	const canEditQuestion = [SessionStateType.Draft, SessionStateType.Published].includes(session.state);
 	const activeQuestion = sessionModel.getActiveQuestion() || null;
+
+	const showAddQuestionButton = [SessionStateType.Draft].includes(session?.state);
+
+	const isAllQuestionsValid = !session.questions?.length || validateSessionQuestions(session)?.isValid;
+	const canAddQuestion =
+		showAddQuestionButton && isAllQuestionsValid && [SessionStateType.Draft].includes(session?.state);
 
 	return (
 		<div className="flex flex-col gap-6 p-4">
 			{session.questions?.length ? (
 				session.questions.map((question, index) => {
 					const createdTime = new Date(question.createdAt).getTime();
-					const isOpenDefault = nowTime - createdTime <= 5000;
+					const { isValid } = validateQuestion(question);
+					const isOpenDefault = nowTime - createdTime <= 5000 || !isValid;
 					const isActive = activeQuestion?.id === question.id;
 					const isAnswerd = question.hasAnswer;
 
@@ -73,7 +80,11 @@ export function SingleQuestionSessionForm({
 								active={isActive}
 								initialValue={question}
 								disabled={loading || !canEditQuestion}
-								onSubmit={canEditQuestion ? (questionData) => onUpdate(`questions.${question.id}`, questionData) : undefined}
+								onSubmit={
+									canEditQuestion
+										? (questionData) => onUpdate(`questions.${question.id}`, questionData)
+										: undefined
+								}
 								onDelete={() => onDelete(question.id)}
 								minOptions={2}
 							/>
@@ -83,20 +94,26 @@ export function SingleQuestionSessionForm({
 			) : (
 				<Typography className="text-xs">No questions</Typography>
 			)}
-			{canEditQuestion && <div>
-				<Button
-					layout={canAddQuestion ? 'tertiary' : undefined}
-					size="small"
-					className="flex gap-2 items-center"
-					disabled={!canAddQuestion}
-					onClick={() => {
-						onAdd();
-					}}
-				>
-					<Icon name="PlusCircle" />
-					Add question
-				</Button>
-			</div>}
+			{showAddQuestionButton && (
+				<div>
+					<Button
+						layout={canAddQuestion ? 'tertiary' : undefined}
+						size="small"
+						className="flex gap-2 items-center"
+						disabled={!canAddQuestion}
+						errorProps={{
+							style: { left: 0 },
+						}}
+						error={isAllQuestionsValid ? undefined : 'Finish editing questions before adding a new one.'}
+						onClick={() => {
+							onAdd();
+						}}
+					>
+						<Icon name="PlusCircle" />
+						Add question
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 }
