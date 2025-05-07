@@ -2,6 +2,7 @@ import { isNullOrEmpty } from '@control/validate.utils';
 import { SessionAnswerPayload, SessionDTO } from '@model/session.model';
 import { SingleQuestionSession } from '@model/session/single-question';
 import { Select } from '@view/form/form.select';
+import { Typography } from '@view/typography/typography';
 import { useEffect, useMemo, useState } from 'react';
 
 export type SessionQuestionAnswerFormProps = {
@@ -67,7 +68,10 @@ export function SessionQuestionAnswerForm({ session, onSubmit, onChange }: Sessi
 	}, [payload]);
 
 	return (
-		<div className="flex justify-center">
+		<div className="flex flex-col gap-2">
+			<div >
+				<Typography className="font-bold">{question?.title}</Typography>
+			</div>
 			<Select
 				label="Answer"
 				options={answerOptions}

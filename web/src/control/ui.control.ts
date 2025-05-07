@@ -33,3 +33,19 @@ export function getDeviceTypeByWidth(width: number): DeviceType {
 
 	return DeviceType.Desktop;
 }
+
+export function reduceFullTree(from: HTMLElement, reducer: (acc: any, node: HTMLElement) => any, initialValue: any) {
+	try {
+		let acc = initialValue;
+		let el = from;
+
+		while (el) {
+			acc = reducer(acc, el);
+			el = el.parentNode as HTMLElement;
+		}
+
+		return acc;
+	} catch (err) {
+		return initialValue;
+	}
+}

@@ -1,19 +1,20 @@
 import { useAPI } from '@api/api.hook';
 import { createSession } from '@api/session.api';
-import { validateUserPermissions } from '@control/user.control';
-import { USER_ROLE_TYPE } from '@model/user.role';
 import { useNavigate } from '@remix-run/react';
-import { useAuth } from '@state/auth.hook';
 import { usePermissions } from '@state/permissions.hook';
-import { Button } from '@view/button/button';
+import { Button, ButtonProps } from '@view/button/button';
 import { Icon } from '@view/icon';
 import classNames from 'classnames';
 import { ReactNode } from 'react';
 import { PERMISSION_TYPE } from 'src/constants/permission.constants';
 
-type SessionCreateButtonProps = { className?: string; children?: ReactNode; onSubmit?: () => void };
+type SessionCreateButtonProps = ButtonProps & {
+	className?: string;
+	children?: ReactNode;
+	onSubmit?: () => void;
+};
 
-export function SessionCreateButton({ className, children, onSubmit }: SessionCreateButtonProps) {
+export function SessionCreateButton({ className, children, onSubmit, ...buttonProps }: SessionCreateButtonProps) {
 	const can = usePermissions();
 	const navigate = useNavigate();
 	const { loading, dispatch } = useAPI({ request: () => createSession({}) });
@@ -35,6 +36,7 @@ export function SessionCreateButton({ className, children, onSubmit }: SessionCr
 	return (
 		<Button
 			layout="primary"
+			{...buttonProps}
 			onClick={handleCreateSession}
 			disabled={loading}
 			className={classNames(className, 'flex justify-center')}

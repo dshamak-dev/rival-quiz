@@ -1,22 +1,19 @@
 import classNames from 'classnames';
 import {
 	ChangeEvent,
-	ComponentProps,
 	FocusEvent,
-	HTMLInputTypeAttribute,
-	PropsWithRef,
 	useCallback,
 	useMemo,
 } from 'react';
 import { FormLabel } from './form.label';
 import { getRandomId } from '@control/random';
 
-export type TextInputType = 'text' | 'email' | 'password' | 'number';
+export type TextInputType = 'text' | 'email' | 'password' | 'number' | 'textarea';
 
 export type TextInputSizeType = 'base' | 'small' | 'large';
 
 export type TextInputProps = {
-	onRef?: (el: HTMLInputElement) => void;
+	onRef?: (el: HTMLInputElement | HTMLTextAreaElement) => void;
 	label?: string | React.ReactNode;
 	postfix?: string | React.ReactNode;
 	type?: TextInputType;
@@ -28,10 +25,12 @@ export type TextInputProps = {
 	defaultValue?: string | number;
 	size?: TextInputSizeType;
 	disabled?: boolean;
-	onChange?: (e: ChangeEvent<HTMLInputElement>, value: any) => void;
+	onChange?: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, value: any) => void;
 	inputProps?: Record<string, any>;
-	onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
+	onBlur?: (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 	layout?: 'outline' | 'error';
+	style?: React.CSSProperties;
+	errors?: boolean | string[];
 };
 
 export function TextInput({
@@ -62,18 +61,19 @@ export function TextInput({
 
 	const layoutClassName = useMemo(() => {
 		switch (layout) {
-            case 'error':
-                return 'border border-red-500';
-            default:
-                return 'border-gray-300';
-        }
-    }, [layout]);
+			case 'error':
+				return 'border border-red-500';
+			default:
+				return 'border-gray-300';
+		}
+	}, [layout]);
 
 	const inputClassName = useMemo(() => {
 		return classNames(className, sizeClassName, layoutClassName, 'rounded border', {
 			'opacity-50': props.disabled,
+			'border border-red-500 text-red': props.errors
 		});
-	}, [sizeClassName, className, layoutClassName, props.disabled]);
+	}, [sizeClassName, className, layoutClassName, props.disabled, props.errors]);
 
 	const inputProps = useMemo(() => {
 		const { inputProps, ...other } = props;
@@ -96,7 +96,7 @@ export function TextInput({
 	}, [props, id]);
 
 	const handleChange = useCallback(
-		(e: ChangeEvent<HTMLInputElement>) => {
+		(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 			if (!onChange) {
 				return;
 			}
@@ -113,7 +113,21 @@ export function TextInput({
 					{props.label}
 				</FormLabel>
 			)}
-			<input ref={onRef} {...inputProps} className={inputClassName} onChange={handleChange} />
+			{type === 'textarea' ? (
+				<textarea
+					ref={(el) => onRef?.(el as HTMLTextAreaElement)}
+					{...inputProps}
+					className={inputClassName}
+					onChange={handleChange}
+				/>
+			) : (
+				<input
+					ref={(el) => onRef?.(el as HTMLInputElement)}
+					{...inputProps}
+					className={inputClassName}
+					onChange={handleChange}
+				/>
+			)}
 		</div>
 	);
 }

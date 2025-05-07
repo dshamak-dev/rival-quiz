@@ -45,7 +45,7 @@ const SESSION_UPDATE_CHECK_INTERVAL = 0.5 * MS_IN_MIN;
 export function SessionViewHeader() {
 	const { session, userProgress = 0, updateRequested, dispatch } = useSession();
 	const { user } = useAuth();
-	const { fetch } = useWallet();
+	const { fetch: fetchWallet } = useWallet();
 	const natigate = useNavigate();
 	const { loading, dispatch: fetchSession } = useAPI({
 		initialState: null,
@@ -74,19 +74,6 @@ export function SessionViewHeader() {
 			return;
 		}
 
-		// Prevent reload before user set vote
-		if (![ProgressStage.Question].includes(userProgress)) {
-			switch (session.state) {
-				case SessionStateType.Locked:
-				case SessionStateType.Canceled:
-				case SessionStateType.Archived:
-				case SessionStateType.Completed: {
-					fetch();
-					break;
-				}
-			}
-		}
-
 		const lastUpdatedAt = [session.questionData?.updatedAt, session.updatedAt].sort((a, b) => {
 			const aTime = a ? new Date(a as string).getTime() : 0;
 			const bTime = b ? new Date(b as string).getTime() : 0;
@@ -104,6 +91,20 @@ export function SessionViewHeader() {
 
 		return () => clearTimeout(timeout);
 	}, [session?.updatedAt, session?.questionData?.updatedAt, isCheckingUpdates]);
+
+	useEffect(() => {
+		if (
+			session?.state &&
+			[
+				SessionStateType.Locked,
+				SessionStateType.LockedForReview,
+				SessionStateType.Completed,
+				SessionStateType.Canceled,
+			].includes(session.state)
+		) {
+			fetchWallet();
+		}
+	}, [session?.state]);
 
 	useEffect(() => {
 		if (updateRequested && !isCheckingUpdates && session?.id) {

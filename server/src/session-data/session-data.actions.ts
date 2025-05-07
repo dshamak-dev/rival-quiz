@@ -5,7 +5,7 @@ import {
   calculateUserSummaryFromVotes,
   normalizeSessionData,
 } from "./session-data.utils";
-import { SessionDataStateTypes } from "./session-data.model";
+import { SessionDataDTO, SessionDataStateTypes } from "./session-data.model";
 import { getSessionById } from "../session/session.action";
 import { findSessionData } from "./session-data.api";
 import { findManyQuestionData } from "../services/question-data/actions";
@@ -60,6 +60,10 @@ export async function createSessionData(session) {
   };
 
   return sessionDataDBModel.create(data);
+}
+
+export async function updateSessionData(id, data) {
+  return sessionDataDBModel.findByIdAndUpdate(id, data, { new: true });
 }
 
 export async function findSessionDataAndComplete(query) {
@@ -123,6 +127,34 @@ export async function calculateSessionDataUserScores(sessionId) {
   );
 
   return { userScores, votesByQuestion };
+}
+
+export async function calculateSessionDataHistory(
+  sessionData: SessionDataDTO,
+  questionsData: QuestionDataDTO[]
+) {
+  const userSummaryByQuestion = sessionData.userScores?.byQuestion;
+
+  // Grouped by user_id -> question_id -> vote
+  const sessionDataHistory = questionsData?.reduce((accum, questionData) => {
+    questionData.votes.forEach((vote) => {
+      const userId = vote.userId;
+
+      if (!accum[userId]) {
+        accum[userId] = {};
+      }
+
+      const record = accum[userId];
+
+      const prize = userSummaryByQuestion?.[vote.questionId]?.[userId]?.value || 0;
+
+      record[vote.questionId] = { ...vote, prize };
+    });
+
+    return accum;
+  }, {} as any);
+
+  return sessionDataHistory;
 }
 
 export async function findSessionDataBySessionId(sessionId) {

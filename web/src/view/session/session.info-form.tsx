@@ -1,12 +1,12 @@
 import { compareObjects } from '@control/object.utils';
 import { SessionDTO, SessionStateType, SessionTypes } from '@model/session.model';
 import { Button } from '@view/button/button';
+import { ImageInput } from '@view/form/form.image-input';
 import { TextInput } from '@view/form/form.text-input';
 import { Icon } from '@view/icon';
 import { Typography } from '@view/typography/typography';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { sessionStateLabels } from 'src/constants/session.constant';
-import { debounce } from 'src/hooks/debounce.hook';
 
 export type SessionInfoFormProps = {
 	initialValue: SessionDTO;
@@ -17,7 +17,14 @@ export type SessionInfoFormProps = {
 	children?: React.ReactNode;
 };
 
-export function SessionInfoForm({ initialValue, onSubmit, disabled, preview, children, onCancel }: SessionInfoFormProps) {
+export function SessionInfoForm({
+	initialValue,
+	onSubmit,
+	disabled,
+	preview,
+	children,
+	onCancel,
+}: SessionInfoFormProps) {
 	const [formState, setFormState] = useState({ ...initialValue });
 
 	// const submitDebounced = useCallback(debounce(onSubmit, 2000), []);
@@ -88,46 +95,63 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled, preview, chi
 					<Typography className="text-black">{sessionStateLabels[formState.state]}</Typography>
 				</div>
 			</div>
-			<div className="flex gap-4">
-				<TextInput
-					id="title"
-					label="title"
-					disabled={!canEdit}
-					value={formState?.title}
-					defaultValue={initialValue?.title || ''}
-					onChange={(e, value) => handleChange(e.target.name, value)}
-					className="flex-grow"
-				/>
-				{isSponsored && (
-					<div>
+			<div className="grid grid-cols-[200px_1fr] gap-4">
+				<div className="w-full h-full">
+					<ImageInput
+						id="image"
+						initialValue={formState?.image || initialValue?.image || ''}
+						onChange={(value) => handleChange('image', value)}
+						disabled={!canEdit}
+						className="w-full h-full"
+					/>
+					{/* <TextInput
+						id="image"
+						label="Preview URL"
+						value={formState?.image || ''}
+						defaultValue={initialValue?.image || ''}
+						onChange={(e, value) => handleChange(e.target.name, value)}
+						disabled={!canEdit}
+					/> */}
+				</div>
+				<div className="flex flex-col gap-4 p-4">
+					<div className="flex gap-4">
 						<TextInput
-							id="pool"
-							label="Prize Pool"
+							id="title"
+							label="title"
 							disabled={!canEdit}
-							type="number"
-							value={String(formState?.settings?.pool ?? '')}
-							defaultValue={String(initialValue?.settings?.pool || '')}
-							onChange={(e, value) => handleChangeSettings(e.target.name, value)}
+							value={formState?.title}
+							defaultValue={initialValue?.title || ''}
+							onChange={(e, value) => handleChange(e.target.name, value)}
+							className="flex-grow"
 						/>
+						{isSponsored && (
+							<div>
+								<TextInput
+									id="pool"
+									label="Prize Pool"
+									disabled={!canEdit}
+									type="number"
+									value={String(formState?.settings?.pool ?? '')}
+									defaultValue={String(initialValue?.settings?.pool || '')}
+									onChange={(e, value) => handleChangeSettings(e.target.name, value)}
+								/>
+							</div>
+						)}
 					</div>
-				)}
+					<TextInput
+						id="description"
+						label="description"
+						type="textarea"
+						style={{
+							resize: 'none'
+						}}
+						disabled={!canEdit}
+						value={formState?.description}
+						defaultValue={initialValue?.description || ''}
+						onChange={(e, value) => handleChange(e.target.name, value)}
+					/>
+				</div>
 			</div>
-			<TextInput
-				id="description"
-				label="description"
-				disabled={!canEdit}
-				value={formState?.description}
-				defaultValue={initialValue?.description || ''}
-				onChange={(e, value) => handleChange(e.target.name, value)}
-			/>
-			<TextInput
-				id="image"
-				label="Preview URL"
-				value={formState?.image || ''}
-				defaultValue={initialValue?.image || ''}
-				onChange={(e, value) => handleChange(e.target.name, value)}
-				disabled={!canEdit}
-			/>
 			{/* <Select
 				id="bet-type"
 				label="Bet Type"
@@ -139,12 +163,7 @@ export function SessionInfoForm({ initialValue, onSubmit, disabled, preview, chi
 
 			{!preview && (
 				<div className="flex justify-end gap-4">
-					<Button
-						size="small"
-						className="min-w-[100px]"
-						disabled={disabled}
-						onClick={handleCancel}
-					>
+					<Button size="small" className="min-w-[100px]" disabled={disabled} onClick={handleCancel}>
 						Cancel
 					</Button>
 					<Button

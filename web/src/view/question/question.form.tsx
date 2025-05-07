@@ -3,9 +3,7 @@ import { Button } from '@view/button/button';
 import { TextInput } from '@view/form/form.text-input';
 import { useEffect, useMemo, useState } from 'react';
 import { QuestionOptionsForm } from './question.options-form';
-import { FormLabel } from '@view/form/form.label';
 import { ID } from '@model/api.model';
-import { requestQuestionSync } from '@api/question.api';
 
 export type QuestionFormProps = {
 	initialValue: QuestionDTO;
@@ -105,20 +103,23 @@ export function QuestionForm({ initialValue, disabled, minOptions = 2, onSubmit,
 			<div className="flex flex-col gap-4">
 				<TextInput
 					id="title"
-					label="title"
+					// label="title"
+					placeholder="Input question"
 					value={formState?.title}
 					defaultValue={initialValue?.title || ''}
 					onChange={(e, value) => handleChange(e.target.name, value)}
+					required
 					disabled={disabled}
+					errors={!formState?.title}
 				/>
-				<TextInput
+				{/* <TextInput
 					id="description"
 					label="description"
 					value={formState?.description || ''}
 					defaultValue={initialValue?.description || ''}
 					onChange={(e, value) => handleChange(e.target.name, value)}
 					disabled={disabled}
-				/>
+				/> */}
 			</div>
 			<div>
 				<QuestionOptionsForm

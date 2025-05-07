@@ -16,9 +16,18 @@ import { SingleQuestionSession } from '@model/session/single-question';
 import { Icon } from '@view/icon';
 import { LinkButton } from '@view/anchor/link.button';
 import { SessionBetInput } from 'src/session/view/session.bet-input';
-import classNames from 'classnames';
+import { SessionResultsTable } from './session.results-table';
 
 export type SessionViewPublishedProps = SessionViewProps;
+
+const loseTextMap = [
+	'Oof! The quiz gods weren’t on your side this time.',
+	'You’ve been outwitted by the quiz! It’s okay, even Einstein had bad days.',
+	'Alert: You’ve been outquizzed!',
+	'Close, but no trophy! Time to regroup and pretend this never happened.',
+	'You lost the game! It’s not over yet.',
+	'Your game is over! You’ve lost, but you’re still on the right track.',
+];
 
 export function SessionViewSingleQuestion() {
 	const { session, dispatch, join, leave } = useSession();
@@ -43,6 +52,18 @@ export function SessionViewSingleQuestion() {
 		request: (sessionId: ID) => fetchSessionUserActions(sessionId),
 	});
 	const userActions = userActionsData || session?.userActions;
+
+	const loseText = useMemo(() => {
+		if (!session?.id) {
+			return 'Good luck next time!';
+		}
+
+		const idNumber = session.id.split('').reduce((num: number, key: string) => {
+			return num + key.charCodeAt(0);
+		}, 0);
+
+		return loseTextMap[idNumber % loseTextMap.length];
+	}, [session?.id]);
 
 	const hasJoined = useMemo(() => {
 		if (!isLoggedIn || !user) {
@@ -88,24 +109,11 @@ export function SessionViewSingleQuestion() {
 	}, [session?.questions, userActions]);
 
 	const sessionData: any = useMemo(() => {
-		// const _data = {
-		// 	totalUsers: 0,
-		// 	votesByQuestion: {},
-		// };
-
-		// if (session?.data) {
-		// 	_data.totalUsers = session.data.totalUsers;
-
-		// 	_data.votesByQuestion = session.data.votesByQuestion;
-		// }
-
 		return session?.data;
 	}, [session?.data, userData]);
 
 	const questionData = useMemo(() => {
 		return session?.questionData;
-
-		// return sessionData.votesByQuestion[question.id] || null;
 	}, [question, sessionData]);
 
 	const getQuestionAnswer = (questionId?: string) => {
@@ -441,63 +449,10 @@ export function SessionViewSingleQuestion() {
 				);
 			}
 			case SessionStateType.LockedForReview: {
-				const lastQuestion = session.questions?.filter((it) => it.hasAnswer).slice(-1)[0];
-
-				if (!lastQuestion) {
-					return (
-						<div className="flex flex-col justify-center items-center">
-							<Icon size={48} name="PiggyBank" className="relative -top-6 animate-bounce" />
-							<Typography className="text-center relative -right-2">
-								Almost done. Calculating stage summary..
-							</Typography>
-						</div>
-					);
-				}
-
-				const userAnswer = userActions?.find((it) => it.questionId === lastQuestion.id)?.data?.value;
-				const isMatch = userAnswer === lastQuestion.answer;
-
-				return (
-					<div className="flex flex-col gap-4 justify-center items-center text-center">
-						<div>
-							<Typography size="large">{lastQuestion.title}</Typography>
-							{lastQuestion.description && (
-								<Typography size="small">{lastQuestion.description}</Typography>
-							)}
-						</div>
-						<div className="flex gap-4 justify-center items-center">
-							{userAnswer ? (
-								<div>
-									<div className="flex gap-2 justify-center items-center">
-										<Typography
-											size="large"
-											className={classNames('font-bold', {
-												'line-through text-red-400': !isMatch,
-											})}
-										>
-											{userAnswer}
-										</Typography>
-										{!isMatch ? (
-											<Typography size="large" className={classNames('font-bold')}>
-												({lastQuestion.answer})
-											</Typography>
-										) : null}
-									</div>
-									<Typography size="small">answer</Typography>
-								</div>
-							) : (
-								<div>
-									<Typography size="large" className="font-bold">
-										{lastQuestion.answer}
-									</Typography>
-									<Typography size="small">correct</Typography>
-								</div>
-							)}
-						</div>
-					</div>
-				);
+				return <SessionResultsTable session={session} />;
 			}
-			case SessionStateType.Completed: {
+			case SessionStateType.Completed:
+			case SessionStateType.Archived: {
 				const userPrize = user?.id
 					? Object.values(sessionData?.userScores?.byQuestion).reduce((summ: number, qSummByUser: any) => {
 							const userData = qSummByUser?.[user.id];
@@ -525,9 +480,12 @@ export function SessionViewSingleQuestion() {
 								<Typography size="small">The Prize was transferred to your account</Typography>
 							</div>
 						) : (
-							<Typography>Good luck next time!</Typography>
+							<div className="text-center">
+								<Typography size="large">Sorry, but you lost!</Typography>
+								<Typography size="small">{loseText}</Typography>
+							</div>
 						)}
-
+						<SessionResultsTable session={session} />
 						<LinkButton layout="primary" href="/explore" size="large" className="min-w-[100px]">
 							Ok
 						</LinkButton>

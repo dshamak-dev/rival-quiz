@@ -15,6 +15,7 @@ import { NavigationDrawer } from './navigation.drawer';
 import { LinkButton } from '@view/anchor/link.button';
 import { useLocation } from '@remix-run/react';
 import { NavigationRedirectLinks } from './navigation.redirect-links';
+import { SessionCreateButton } from '@view/session/session.create-button';
 
 export function NavigationDesktop() {
 	const location = useLocation();
@@ -28,9 +29,7 @@ export function NavigationDesktop() {
 	}, [location.pathname]);
 
 	const links = useMemo(() => {
-		const _items = [
-			{ link: '/explore', end: true, text: 'Explore' },
-		];
+		const _items = [{ link: '/explore', end: true, text: 'Explore' }];
 
 		_items.push({ link: '/about', end: true, text: 'about' });
 
@@ -77,6 +76,12 @@ export function NavigationDesktop() {
 				<div className="flex items-center justify-end gap-6">
 					{isLoggedIn ? (
 						<>
+							<SessionCreateButton
+								layout="text"
+								className="cursor-pointer bg-gray-100 rounded-lg px-2 hover:bg-black hover:text-white"
+							>
+								+ session
+							</SessionCreateButton>
 							<Badge visible>
 								<Icon name="Bell" size={16} className="animate-bounce" />
 							</Badge>

@@ -14,9 +14,10 @@ export function SessionAdminQuestionAnswerModalButton({
 	buttonProps?: ButtonProps;
 	onSubmit?: () => Promise<any>;
 }) {
-	const [{ payload, isValid }, setFormData] = useState<{
+	const [{ payload, isValid, error }, setFormData] = useState<{
 		isValid: boolean;
 		payload: SessionAnswerPayload | undefined;
+		error?: string;
 	}>({ isValid: false, payload: undefined });
 	const sessionId = session?.id;
 
