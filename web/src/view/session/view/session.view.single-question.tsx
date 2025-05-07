@@ -20,6 +20,15 @@ import { SessionResultsTable } from './session.results-table';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
+const loseTextMap = [
+	'Oof! The quiz gods weren’t on your side this time.',
+	'You’ve been outwitted by the quiz! It’s okay, even Einstein had bad days.',
+	'Alert: You’ve been outquizzed!',
+	'Close, but no trophy! Time to regroup and pretend this never happened.',
+	'You lost the game! It’s not over yet.',
+	'Your game is over! You’ve lost, but you’re still on the right track.',
+];
+
 export function SessionViewSingleQuestion() {
 	const { session, dispatch, join, leave } = useSession();
 
@@ -43,6 +52,18 @@ export function SessionViewSingleQuestion() {
 		request: (sessionId: ID) => fetchSessionUserActions(sessionId),
 	});
 	const userActions = userActionsData || session?.userActions;
+
+	const loseText = useMemo(() => {
+		if (!session?.id) {
+			return 'Good luck next time!';
+		}
+
+		const idNumber = session.id.split('').reduce((num: number, key: string) => {
+			return num + key.charCodeAt(0);
+		}, 0);
+
+		return loseTextMap[idNumber % loseTextMap.length];
+	}, [session?.id]);
 
 	const hasJoined = useMemo(() => {
 		if (!isLoggedIn || !user) {
@@ -88,24 +109,11 @@ export function SessionViewSingleQuestion() {
 	}, [session?.questions, userActions]);
 
 	const sessionData: any = useMemo(() => {
-		// const _data = {
-		// 	totalUsers: 0,
-		// 	votesByQuestion: {},
-		// };
-
-		// if (session?.data) {
-		// 	_data.totalUsers = session.data.totalUsers;
-
-		// 	_data.votesByQuestion = session.data.votesByQuestion;
-		// }
-
 		return session?.data;
 	}, [session?.data, userData]);
 
 	const questionData = useMemo(() => {
 		return session?.questionData;
-
-		// return sessionData.votesByQuestion[question.id] || null;
 	}, [question, sessionData]);
 
 	const getQuestionAnswer = (questionId?: string) => {
@@ -472,7 +480,10 @@ export function SessionViewSingleQuestion() {
 								<Typography size="small">The Prize was transferred to your account</Typography>
 							</div>
 						) : (
-							<Typography>Good luck next time!</Typography>
+							<div className="text-center">
+								<Typography size="large">Sorry, but you lost!</Typography>
+								<Typography size="small">{loseText}</Typography>
+							</div>
 						)}
 						<SessionResultsTable session={session} />
 						<LinkButton layout="primary" href="/explore" size="large" className="min-w-[100px]">
