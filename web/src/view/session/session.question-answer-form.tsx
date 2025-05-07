@@ -68,10 +68,9 @@ export function SessionQuestionAnswerForm({ session, onSubmit, onChange }: Sessi
 	}, [payload]);
 
 	return (
-		<div className="flex flex-col gap-4 items-center">
-			<div>
-				<Typography>{question?.title}</Typography>
-				<Typography size="small">Select the answer for the question:</Typography>
+		<div className="flex flex-col gap-2">
+			<div >
+				<Typography className="font-bold">{question?.title}</Typography>
 			</div>
 			<Select
 				label="Answer"
