@@ -170,15 +170,29 @@ export async function validateTransaction(transaction) {
     return Promise.reject("Transaction cannot be sent to yourself");
   }
 
-  const [ok, walletError] = await addWalletBalanceByUserId(
-    transaction.receiverId,
-    transaction.amount
-  )
-    .then((res) => [res != null, null])
-    .catch((error) => [null, error]);
+  const validation = { ok: true, error: null };
 
-  if (!ok || walletError != null) {
-    return Promise.reject(walletError || "Failed to add funds to wallet");
+  switch (transaction.receiverType) {
+    case 'session': {
+      // Accept all transaction to session.
+      // TODO: Add temp session wallet
+      break;
+    }
+    default: {
+      const [ok, walletError] = await addWalletBalanceByUserId(
+        transaction.receiverId,
+        transaction.amount
+      )
+        .then((res) => [res != null, null])
+        .catch((error) => [null, error]);
+    
+      if (!ok || walletError != null) {
+        return Promise.reject(walletError || "Failed to add funds to wallet");
+      }
+
+      validation.ok = ok;
+      validation.error = walletError;
+    }
   }
 
   return updateTransactionStatus(
