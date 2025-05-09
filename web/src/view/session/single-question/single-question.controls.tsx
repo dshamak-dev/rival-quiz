@@ -44,15 +44,19 @@ export function SingleQuestionSessionHeader({
 
 	switch (session?.state) {
 		case SessionStateType.Draft: {
-			const { isValid, error } = validateSessionGeneral(session) && validateSessionQuestions(session);
+			let validation = validateSessionGeneral(session);
+
+			if (validation.isValid) {
+				validation = validateSessionQuestions(session);
+			}
 
 			return (
 				<>
 					<Button
 						{...buttonCommonProps}
 						layout="primary"
-						error={error}
-						disabled={!isValid || buttonCommonProps.disabled}
+						error={validation.error}
+						disabled={!validation.isValid || buttonCommonProps.disabled}
 						onClick={() => {
 							onUpdate('info', { state: SessionStateType.Published });
 						}}

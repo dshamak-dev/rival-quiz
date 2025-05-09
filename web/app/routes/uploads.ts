@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import placeholderImage from '@assets/placeholders/p_01.png';
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import fs from 'fs';
+import fs, { promises } from 'fs';
 
 const root = process.cwd();
 const UPLOAD_DIR = join(root, 'uploads');
@@ -47,7 +47,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	// 1. Parse the form data
 	const formData = await request.formData();
-	const imageFile = formData.get('image') as File | null;
+	const imageFile = formData.get('file') as File | null;
 
 	// 2. Validate the file
 	if (!imageFile || typeof imageFile === 'string') {
@@ -61,10 +61,15 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	// 4. Read file buffer and save to disk
 	const fileBuffer = Buffer.from(await imageFile.arrayBuffer());
+
+	if (!fs.existsSync(UPLOAD_DIR)) {
+		await promises.mkdir(UPLOAD_DIR, { recursive: true });
+	}
 	writeFileSync(filePath, fileBuffer);
 
-	// 5. Return the public URL
+	const filtePath = `/uploads/${randomName}`;
+
 	return {
-		imageUrl: join(requestURL.origin, `/uploads/${randomName}.${fileExt}`),
+		imageUrl: `${requestURL.origin.replace(/\/$/, '')}/${filtePath.replace(/^\//, '')}`,
 	};
 }
