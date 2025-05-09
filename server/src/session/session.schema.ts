@@ -30,6 +30,7 @@ export const SessionSchema = new mongoose.Schema(
     },
     image: String,
     users: { type: [String], default: [] },
+    usersInfo: { type: Object, default: {} },
   },
   { timestamps: true }
 );

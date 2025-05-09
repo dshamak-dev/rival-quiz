@@ -4,6 +4,8 @@ import { SessionAdminQuestionAnswerModalButton } from '../admin/session.admin.qu
 import { SessionAdminResolveButton } from '../admin/session.admin.resolve-button';
 // import { SingleQuestionSession } from '@model/session/single-question';
 import { validateSessionGeneral, validateSessionQuestions } from 'src/session/helpers';
+import { useAPI } from '@api/api.hook';
+import { syncSessionData } from '@api/session.api';
 // import { requestQuestionSync } from '@api/question.api';
 
 export type SingleQuestionSessionHeaderProps = {
@@ -28,19 +30,33 @@ export function SingleQuestionSessionHeader({
 		disabled: loading,
 	};
 
+	const { loading: isSyncing, dispatch } = useAPI({
+		request: (sessionId: any) => syncSessionData(sessionId as SessionDTO['id']),
+	});
+
 	const participantsNumber = session?.users?.length || 0;
+
+	const handleSyncSessionData = () => {
+		if (session?.id){
+			dispatch(session.id);
+		}
+	};
 
 	switch (session?.state) {
 		case SessionStateType.Draft: {
-			const { isValid, error } = validateSessionGeneral(session) && validateSessionQuestions(session);
+			let validation = validateSessionGeneral(session);
+
+			if (validation.isValid) {
+				validation = validateSessionQuestions(session);
+			}
 
 			return (
 				<>
 					<Button
 						{...buttonCommonProps}
 						layout="primary"
-						error={error}
-						disabled={!isValid || buttonCommonProps.disabled}
+						error={validation.error}
+						disabled={!validation.isValid || buttonCommonProps.disabled}
 						onClick={() => {
 							onUpdate('info', { state: SessionStateType.Published });
 						}}
@@ -130,6 +146,9 @@ export function SingleQuestionSessionHeader({
 		case SessionStateType.LockedForReview: {
 			return (
 				<>
+					<Button {...buttonCommonProps} layout="secondary" loading={isSyncing} onClick={handleSyncSessionData}>
+						Sync Results
+					</Button>
 					<SessionAdminResolveButton session={session} buttonProps={buttonCommonProps} onSubmit={onRefetch} />
 				</>
 			);

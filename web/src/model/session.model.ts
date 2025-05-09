@@ -35,6 +35,7 @@ export type SessionDTO = {
 	hash: string;
 	metadata?: { ownerName: string; ownerAvatar: string; };
 	history?: QuestionDataDTO[];
+	usersInfo?: Record<ID, any>;
 };
 
 export type SessionData = Record<string, any>;

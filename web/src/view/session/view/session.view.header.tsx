@@ -12,6 +12,8 @@ import { fetchSessionUpdateState } from 'src/session/api';
 import { useWallet } from 'src/wallet/state';
 import { Image } from '@view/image/image';
 
+import sessionPlaceholderImage from '@assets/placeholders/p_01.png';
+
 // TODO: Implement actual progress tracking and state updates
 const progressBar = {
 	stages: [
@@ -184,7 +186,7 @@ export function SessionViewHeader() {
 		<div className="relative z-10 flex flex-col gap-2 w-full">
 			<div className="grid grid-cols-[1fr_auto] gap-4 items-center">
 				<div className="flex items-center gap-4">
-					{session.image !== null && <Image className="h-12 object-contain object-top" src={session.image} />}
+					{session.image !== null && <Image className="h-12 object-contain object-top" src={session.image || sessionPlaceholderImage} />}
 					<div>
 						<Typography className="text-lg" size="custom">
 							{session.title}

@@ -33,6 +33,7 @@ import { SessionDTO } from "@shared/session/model";
 import {
   calculateSessionDataHistory,
   findSessionDataBySessionId,
+  syncSessionData,
   updateSessionData,
 } from "@/session-data/session-data.actions";
 
@@ -233,6 +234,49 @@ _router.put("/:id", async (req: any, res: any) => {
   res.status(200).json(updatedSession);
 });
 
+_router.post("/:id/sync", async (req: any, res: any) => {
+  const sessionId = req.params.id;
+  const check = await validateSessionAccess(req, sessionId);
+
+  if (!check.valid) {
+    res.statusMessage = check.message;
+    return res.status(check.status).end();
+  }
+
+  const sessionData = await findSessionDataBySessionId(sessionId).catch(
+    () => null
+  );
+
+  const sessionDataId = sessionData?.id;
+
+  if (sessionDataId) {
+    const ok = await syncSessionData(sessionDataId).catch(() => null);
+
+    if (!ok) {
+      return res.status(500).end();
+    }
+
+    const history = await findManyQuestionData({
+      sessionId,
+      state: {
+        $in: [QuestionDataStatusTypes.Draft, QuestionDataStatusTypes.Completed],
+      },
+    })
+      .then((it) => {
+        return calculateSessionDataHistory(sessionData, it);
+      })
+      .catch(() => null);
+
+    const updates = await updateSessionData(sessionDataId, { history }).catch(
+      () => null
+    );
+
+    return res.status(200).json(updates);
+  }
+
+  res.status(404).end();
+});
+
 _router.post("/:id/answer", async (req: any, res: any) => {
   const sessionId = req.params.id;
   const check = await validateSessionAccess(req, sessionId);
@@ -281,6 +325,8 @@ _router.post("/:id/answer", async (req: any, res: any) => {
   const sessionDataId = sessionData?.id;
 
   if (sessionDataId) {
+    await syncSessionData(sessionDataId).catch(() => null);
+
     const history = await findManyQuestionData({
       sessionId,
       state: {
@@ -433,7 +479,9 @@ _router.post("/:id/users", async (req: any, res: any) => {
     return res.status(200).json(session);
   }
 
-  addSessionUser(sessionId, userId)
+  const userInfo = req.body;
+
+  addSessionUser(sessionId, userId, userInfo)
     .then(async (updated) => {
       const history = await addUserHistory(
         userId,

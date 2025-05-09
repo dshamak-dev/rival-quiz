@@ -17,6 +17,8 @@ import { Icon } from '@view/icon';
 import { LinkButton } from '@view/anchor/link.button';
 import { SessionBetInput } from 'src/session/view/session.bet-input';
 import { SessionResultsTable } from './session.results-table';
+import { TextInput } from '@view/form/form.text-input';
+import { ObjectForm } from '@view/form';
 
 export type SessionViewPublishedProps = SessionViewProps;
 
@@ -281,8 +283,8 @@ export function SessionViewSingleQuestion() {
 		return question?.id && selectedAnswer !== undefined && currentAnswer == null && isValidBet;
 	}, [currentAnswer, question, selectedAnswer, canBet, selectedBet]);
 
-	const handleJoinSession = () => {
-		join?.();
+	const handleJoinSession = (payload: { name: string }) => {
+		join?.(payload);
 	};
 	const handleLeaveSession = () => {
 		leave?.();
@@ -336,6 +338,14 @@ export function SessionViewSingleQuestion() {
 		});
 	};
 
+	const sessionUserName = useMemo(() => {
+		if (!session || !user) {
+			return null;
+		}
+
+		return session.usersInfo?.[user.id]?.name || user.name || null;
+	}, [session, user]);
+
 	const content = useMemo(() => {
 		if (session?.state == null) {
 			return null;
@@ -360,15 +370,31 @@ export function SessionViewSingleQuestion() {
 					return (
 						<div className="flex flex-col gap-2 items-center">
 							<Typography>You need to join the session to proceed</Typography>
-							<Button layout="primary" onClick={() => handleJoinSession()}>
-								Join session
-							</Button>
+							<ObjectForm
+								onSubmit={(fields: any) => {
+									console.log('Joining session', fields);
+									handleJoinSession({
+										name: fields?.name || user?.name || 'anonymous',
+									});
+								}}
+								className="flex flex-col gap-2 items-center"
+							>
+								<TextInput id="name" label="Name/Nickname" defaultValue={user?.name || 'anonymous'} />
+								<Button layout="primary" className="w-full">
+									Join session
+								</Button>
+							</ObjectForm>
 						</div>
 					);
 				}
 
 				return (
 					<div className="flex flex-col gap-2 items-center">
+						{sessionUserName != null && (
+							<Typography>
+								Joined as <b>{sessionUserName}</b>
+							</Typography>
+						)}
 						<Typography>Please wait, we will start shortly</Typography>
 						<Button layout="primary" onClick={() => handleLeaveSession()}>
 							Leave session
@@ -449,7 +475,16 @@ export function SessionViewSingleQuestion() {
 				);
 			}
 			case SessionStateType.LockedForReview: {
-				return <SessionResultsTable session={session} />;
+				return (
+					<div className="flex flex-col gap-2">
+						<Typography className="text-center">
+							{session.hasNextQuestion
+								? 'Please wait, the next question will start soon'
+								: 'Waiting for the session to end'}
+						</Typography>
+						<SessionResultsTable session={session} />
+					</div>
+				);
 			}
 			case SessionStateType.Completed:
 			case SessionStateType.Archived: {

@@ -106,6 +106,28 @@ export async function completeSessionData(id, session) {
     .then(normalizeSessionData);
 }
 
+export async function syncSessionData(id) {
+  const sessionData = await findSessionDataById(id);
+
+  if (!sessionData) {
+    throw new Error("Session data not found");
+  }
+
+  const sessionId = sessionData.sessionId;
+
+  const { userScores, votesByQuestion } = await calculateSessionDataUserScores(
+    sessionId
+  );
+
+  return sessionDataDBModel
+    .findByIdAndUpdate(
+      sessionData.id,
+      { userScores, votesByQuestion },
+      { new: true }
+    )
+    .then(normalizeSessionData);
+}
+
 export async function calculateSessionDataUserScores(sessionId) {
   const questionDataList = await findManyQuestionData({
     sessionId,

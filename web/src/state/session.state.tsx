@@ -6,7 +6,7 @@ interface IState {
 	session?: SessionDTO;
 	userProgress?: number;
 	dispatch?: (action: Action) => void;
-	join?: () => void;
+	join?: (payload?: { name: string }) => void;
 	leave?: () => void;
 	updateRequested?: any;
 }
@@ -22,9 +22,9 @@ export function SessionContextProvider({ value, children }: { value: SessionDTO;
 	const [state, dispatch] = useReducer(reducer, { session: value, userProgress: 0 });
 	const sessionId = state.session?.id;
 
-	const join = async () => {
+	const join = async (payload?: { name: string }) => {
 		if (sessionId) {
-			addSessionUser(sessionId).then((res) => dispatch({ type: 'SET_SESSION', payload: res }));
+			addSessionUser(sessionId, payload).then((res) => dispatch({ type: 'SET_SESSION', payload: res }));
 		}
 	};
 

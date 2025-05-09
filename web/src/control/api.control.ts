@@ -50,14 +50,21 @@ export class WEB_API {
 	static post<T>(path: string, params: Record<string, any>, includeHeaders = false): Promise<T> {
 		const url = this.joinUrl(path, params?.remix);
 
+		const headers = {
+			...(params?.headers || {}),
+		};
+
+		if (!params.defaultHeaders) {
+			headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+		}
+
 		return fetch(url, {
 			method: 'POST',
 			...params,
 			credentials: 'include',
 			headers: {
-				'Content-Type': 'application/json',
 				...this.getAuthHeaders(),
-				...params.headers,
+				...headers,
 			},
 		}).then((res) => {
 			if (includeHeaders) {
