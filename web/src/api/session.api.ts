@@ -92,6 +92,11 @@ export async function resolveSession(sessionId: SessionDTO['id']): Promise<Sessi
 	return WEB_API.post<SessionDTO>(`${rootPath}/${sessionId}/resolve`, {}).then((res) => normalizeSessionDTO(res));
 }
 
+
+export async function syncSessionData(sessionId: SessionDTO['id']): Promise<SessionDTO> {
+	return WEB_API.post<SessionDTO>(`${rootPath}/${sessionId}/sync`, {}).then((res) => normalizeSessionDTO(res));
+}
+
 export function normalizeSessionDTO(dto: SessionDTO): SessionDTO {
 	return {
 		...dto,
