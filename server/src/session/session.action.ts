@@ -77,11 +77,15 @@ export function getSessionsByOwner(ownerID) {
   return sessionDBModel.find({ ownerID }).then((res) => normalizeSession(res));
 }
 
-export function addSessionUser(sessionId, userId) {
+export function addSessionUser(
+  sessionId,
+  userId,
+  userInfo?: Record<string, any>
+) {
   return sessionDBModel
     .findOneAndUpdate(
       { _id: sessionId, users: { $ne: userId } },
-      { $push: { users: userId } },
+      { $push: { users: userId }, $set: { [`usersInfo.${userId}`]: userInfo } },
       { new: true }
     )
     .then((res) => normalizeSession(res));
@@ -91,7 +95,7 @@ export function removeSessionUser(sessionId, userId) {
   return sessionDBModel
     .findOneAndUpdate(
       { _id: sessionId },
-      { $pull: { users: userId } },
+      { $pull: { users: userId }, $unset: { [`usersInfo.${userId}`]: "" } },
       { new: true }
     )
     .then((res) => normalizeSession(res));

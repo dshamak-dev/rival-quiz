@@ -433,7 +433,9 @@ _router.post("/:id/users", async (req: any, res: any) => {
     return res.status(200).json(session);
   }
 
-  addSessionUser(sessionId, userId)
+  const userInfo = req.body;
+
+  addSessionUser(sessionId, userId, userInfo)
     .then(async (updated) => {
       const history = await addUserHistory(
         userId,

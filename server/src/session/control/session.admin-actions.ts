@@ -45,6 +45,7 @@ export async function lockSessionQuestion(
           data: { questionId, answer, value, sessionId },
           reference: sessionId,
         };
+
         return createTransaction(
           { type: "user", id: userId },
           { type: "session", id: sessionId },
@@ -55,7 +56,10 @@ export async function lockSessionQuestion(
         });
       }
     )
-  );
+  ).catch(err => {
+    console.log("Failed to create vote transactions: ", err);
+    return null;
+  });
   // TODO: Update question state to locked
 
   // Update session state to locked (deprecated, should not effect session state). Change to quistion locked.

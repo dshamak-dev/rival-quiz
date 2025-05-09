@@ -36,7 +36,7 @@ export function SessionResultsTable({ session }: Props) {
 
 		if (session.questions?.length) {
 			session.questions.forEach((question, index) => {
-				let title = `${question.title}`;
+				let title = question.hasAnswer ? question.title : '?';
 
 				if (question.hasAnswer) {
 					title += ` (${question.answer})`;
@@ -118,6 +118,15 @@ export function SessionResultsTable({ session }: Props) {
 
 		return cells;
 	}, []);
+
+	const getUserName = useCallback(
+		(userId: string, index: number) => {
+			const userName = session?.usersInfo?.[userId]?.name || null;
+
+			return userName || `User ${index + 1}`;
+		},
+		[session.data?.users]
+	);
 
 	const summary = useMemo(() => {
 		if (!session?.data?.history) {
@@ -223,7 +232,7 @@ export function SessionResultsTable({ session }: Props) {
 		}
 
 		return rows.map((it: any, index: number) => {
-			return { ...it, userName: `User ${index + 1}`, number: index + 1 };
+			return { ...it, userName: getUserName(it.userId, index), number: index + 1 };
 		});
 	}, [summary]);
 

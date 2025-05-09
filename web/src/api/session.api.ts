@@ -63,8 +63,13 @@ export async function deleteSessionQuestion(id: SessionDTO['id'], questionId: Qu
 	return WEB_API.delete<SessionDTO>(`${rootPath}/${id}/questions/${questionId}`, {});
 }
 
-export async function addSessionUser(sessionId: SessionDTO['id']): Promise<SessionDTO> {
-	return WEB_API.post<SessionDTO>(`${rootPath}/${sessionId}/users`, {}).then((res) => normalizeSessionDTO(res));
+export async function addSessionUser(sessionId: SessionDTO['id'], payload?: Record<string, any>): Promise<SessionDTO> {
+	return WEB_API.post<SessionDTO>(`${rootPath}/${sessionId}/users`, {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(payload || {}),
+	}).then((res) => normalizeSessionDTO(res));
 }
 
 export async function removeSessionUser(sessionId: SessionDTO['id']): Promise<SessionDTO> {

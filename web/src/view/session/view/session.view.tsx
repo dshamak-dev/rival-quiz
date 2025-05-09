@@ -81,7 +81,7 @@ export function SessionView({ session }: SessionViewProps) {
 				<SessionViewHeader />
 				<div
 					style={{ minWidth: 'min(50vw, 100%)', maxWidth: '100%' }}
-					className="relative z-10 w-fit mx-auto p-6 flex items-center justify-center"
+					className="relative z-10 w-fit mx-auto p-6 flex justify-center"
 				>
 					{sessionStateContent}
 				</div>
