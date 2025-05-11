@@ -80,7 +80,7 @@ export function NavigationDesktop() {
 								layout="text"
 								className="cursor-pointer bg-gray-100 rounded-lg px-2 hover:bg-black hover:text-white"
 							>
-								+ session
+								+ create session
 							</SessionCreateButton>
 							<Badge visible>
 								<Icon name="Bell" size={16} className="animate-bounce" />

@@ -60,6 +60,12 @@ export function SessionInfoForm({
 		});
 	};
 
+	const handleUploadImage = (url: string) => {
+		if (url) {
+			handleChange('image', url);
+		}
+	};
+
 	const handleChangeSettings = (name: string, value: any) => {
 		setFormState((state) => {
 			return { ...state, settings: { ...state.settings, [name]: value } };
@@ -76,6 +82,12 @@ export function SessionInfoForm({
 	useEffect(() => {
 		setFormState(initialValue);
 	}, [initialValue]);
+
+	useEffect(() => {
+		if (formState?.image && formState.image !== initialValue?.image) {
+			onSubmit?.(formState);
+		}
+	}, [formState?.image]);
 
 	// const handleSubmit = () => {
 	// 	if (!compareObjects(formState, initialValue)) {
@@ -100,7 +112,7 @@ export function SessionInfoForm({
 					<ImageInput
 						id="image"
 						initialValue={formState?.image || initialValue?.image || ''}
-						onChange={(value) => handleChange('image', value)}
+						onChange={(value) => handleUploadImage(value)}
 						disabled={!canEdit}
 						className="w-full h-full"
 					/>
@@ -143,7 +155,7 @@ export function SessionInfoForm({
 						label="description"
 						type="textarea"
 						style={{
-							resize: 'none'
+							resize: 'none',
 						}}
 						disabled={!canEdit}
 						value={formState?.description}

@@ -281,8 +281,10 @@ export default function ProfileSessionPage() {
 				<div className="border rounded-sm">
 					<SessionInfoForm
 						onSubmit={(values: any) =>
-							handleUpdate('info', values).then(() => {
-								setFormStage(FormStages.Questions);
+							handleUpdate('info', values).then((session) => {
+								if (session.title?.trim() !== '') {
+									setFormStage(FormStages.Questions);
+								}
 							})
 						}
 						onCancel={() => {

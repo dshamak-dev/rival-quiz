@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import placeholderImage from '@assets/placeholders/p_01.png';
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import fs, { promises } from 'fs';
+import fs from 'fs';
+import { v2 as cloudinary, UploadStream } from 'cloudinary';
+import { Readable } from 'stream';
 
 const root = process.cwd();
 const UPLOAD_DIR = join(root, 'uploads');
@@ -41,35 +42,68 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	return redirect(image);
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-	const requestURL = new URL(request.url);
-	console.log('From URL:', requestURL.origin);
+cloudinary.config({
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dfbe0k249',
+	api_key: process.env.CLOUDINARY_API_KEY || '868594447316816',
+	api_secret: process.env.CLOUDINARY_API_SECRET || 'm0XPfQ9W5dVGvL1ufugRWe_i7h0',
+});
 
-	// 1. Parse the form data
+async function uploadToCloudinary(file: File): Promise<any> {
+	const buffer = Buffer.from(await file.arrayBuffer());
+
+	if (!buffer) return Promise.reject('No file uploaded');
+
+	const uploadId = randomUUID();
+
+	const res = new Promise<UploadStream | any>((resolve, reject) => {
+		const uploadStream = cloudinary.uploader.upload_stream(
+			{ resource_type: 'auto', filename_override: uploadId },
+			(error, result) => {
+				if (error) return reject(error.message);
+
+				resolve(result);
+			}
+		);
+
+		// Convert buffer to stream and pipe it
+		Readable.from(buffer).pipe(uploadStream);
+	});
+
+	return res;
+}
+
+export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData();
 	const imageFile = formData.get('file') as File | null;
 
-	// 2. Validate the file
 	if (!imageFile || typeof imageFile === 'string') {
 		return new Response('Invalid file', { status: 400 });
 	}
 
-	// 3. Generate random filename
-	const fileExt = imageFile.name.split('.').pop();
-	const randomName = `${randomUUID()}.${fileExt}`;
-	const filePath = join(UPLOAD_DIR, randomName);
+	const uploadResult = await uploadToCloudinary(imageFile);
 
-	// 4. Read file buffer and save to disk
-	const fileBuffer = Buffer.from(await imageFile.arrayBuffer());
-
-	if (!fs.existsSync(UPLOAD_DIR)) {
-		await promises.mkdir(UPLOAD_DIR, { recursive: true });
+	if (!uploadResult) {
+		return new Response('Failed to upload', { status: 500 });
 	}
-	writeFileSync(filePath, fileBuffer);
-
-	const filtePath = `/uploads/${randomName}`;
 
 	return {
-		imageUrl: `${requestURL.origin.replace(/\/$/, '')}/${filtePath.replace(/^\//, '')}`,
+		...uploadResult,
+		imageUrl: uploadResult?.url,
 	};
 }
+
+/**
+cloudinary.uploader.destroy('your_file_public_id', { resource_type: 'image' })
+  .then(result => console.log('Deleted:', result))
+  .catch(err => console.error('Delete error:', err));
+
+* your_file_public_id: This is usually the file name without the extension or folder path if you organized it.
+* resource_type: Optional. Use 'image', 'video', or 'raw'. Default is 'image'.
+
+function getPublicIdFromUrl(url: string): string {
+  const parts = url.split('/');
+  const fileWithExt = parts[parts.length - 1];
+  const publicId = fileWithExt.split('.')[0]; // 'sample'
+  return publicId;
+}
+ */
